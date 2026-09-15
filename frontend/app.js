@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupEventListeners() {
   // Character counter
   rawTextInput.addEventListener('input', () => {
-    charCount.textContent = `${rawTextInput.value.length} chars`;
+    charCount.textContent = `${rawTextInput.value.length} / 5000`;
   });
 
   // Sample Chips
@@ -334,7 +334,7 @@ function setupEventListeners() {
   // Clear Form
   clearBtn.addEventListener('click', () => {
     rawTextInput.value = '';
-    charCount.textContent = '0 chars';
+    charCount.textContent = '0 / 5000';
     rawTextInput.focus();
     showToast('Input brief cleared', 'info');
   });
@@ -437,7 +437,7 @@ function loadSample(key) {
   if (!sample) return;
 
   rawTextInput.value = sample.raw_text;
-  charCount.textContent = `${sample.raw_text.length} chars`;
+  charCount.textContent = `${sample.raw_text.length} / 5000`;
   clientNameInput.value = sample.client;
   sourceSelect.value = sample.source;
 

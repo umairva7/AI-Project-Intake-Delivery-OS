@@ -200,6 +200,47 @@ class Checklist(BaseModel):
             }
         }
 
+class TeamRecommendation(BaseModel):
+    """LLM recommendation for team allocation"""
+    
+    team: str = Field(
+        ...,
+        description="Recommended team name, e.g. 'Web Development', 'Mobile Development', 'AI / ML'"
+    )
+    confidence: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Confidence score for team fit (0.0 to 1.0)"
+    )
+    reasoning: List[str] = Field(
+        default_factory=list,
+        description="List of reasons supporting this recommendation"
+    )
+    alternative_team: Optional[str] = Field(
+        default=None,
+        description="Alternative team option if confidence is low or requirements are cross-functional"
+    )
+    requires_human_review: bool = Field(
+        default=False,
+        description="Flag if confidence is below threshold or teams are ambiguous"
+    )
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "team": "Web Development",
+                "confidence": 0.91,
+                "reasoning": [
+                    "Primary deliverable is a web application",
+                    "Requirements include React frontend and Python backend"
+                ],
+                "alternative_team": None,
+                "requires_human_review": False
+            }
+        }
+
+
 class PendingIntake(BaseModel):
     """Extracted intake awaiting human review/approval"""
     

@@ -61,13 +61,14 @@
         <div class="form-group">
           <div class="form-group-header">
             <label for="rawTextInput">Unstructured Project Text</label>
-            <span class="char-count" id="charCount">0 chars</span>
+            <span class="char-count" id="charCount">0 / 5000</span>
           </div>
           <textarea 
             id="rawTextInput" 
             name="rawText" 
             rows="12" 
-            placeholder="Paste raw email, client Slack message, or meeting transcript here..."
+            placeholder="Paste raw email, client Slack message, or meeting transcript here (max 5000 characters)..."
+            maxlength="5000"
             required
           ></textarea>
         </div>
