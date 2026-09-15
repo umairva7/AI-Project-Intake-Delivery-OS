@@ -219,7 +219,7 @@ def test_checklist_ordering_and_dependencies():
 
     # 1. Clarification task is at index 0 and has no dependencies
     assert checklist.items[0].id == 1
-    assert "confirm with client" in checklist.items[0].task.lower()
+    assert "clarify with client" in checklist.items[0].task.lower()
     assert checklist.items[0].depends_on is None
 
     # 2. Architecture task depends on clarification task (id: 1)
