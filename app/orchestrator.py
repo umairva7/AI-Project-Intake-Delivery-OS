@@ -213,12 +213,17 @@ class IntakeOrchestrator:
 
         return pending
 
-    def approve_intake(self, feedback: UserFeedback) -> ApprovedIntake:
+    def approve_intake(
+        self, feedback: Union[UserFeedback, str]
+    ) -> Optional[Union[ApprovedIntake, PendingIntake]]:
         """
         User reviews and approves the pending intake or marks issues.
         On approval: stores record in approved_intakes and updates status.
         On mark_issues: flags issues in intakes table for corrections.
         """
+        if isinstance(feedback, str):
+            feedback = UserFeedback(intake_id=feedback, decision="approve")
+
         pending = self.get_intake(feedback.intake_id)
         if not pending:
             raise ValueError(f"Pending intake '{feedback.intake_id}' not found.")
@@ -260,6 +265,25 @@ class IntakeOrchestrator:
             self._update_request_status(pending.request_id, "rejected")
             logger.info("Intake rejected: %s", pending.id)
             return None
+
+    def mark_issues(
+        self,
+        intake_id: str,
+        issues: List[str],
+        notes: Optional[str] = None,
+    ) -> Optional[PendingIntake]:
+        """Convenience method to flag issues on a pending intake."""
+        feedback = UserFeedback(
+            intake_id=intake_id,
+            decision="mark_issues",
+            issues_detected=issues,
+            notes=notes,
+        )
+        return self.approve_intake(feedback)
+
+    def get_pending_intake_by_id(self, intake_id: str) -> Optional[PendingIntake]:
+        """Convenience alias for get_intake."""
+        return self.get_intake(intake_id)
 
     # ========================================================================
     # Database Storage & Query Methods

@@ -40,3 +40,21 @@ def test_approve_brief_transitions_status():
 def test_get_nonexistent_brief_returns_404():
     response = client.get("/briefs/doesnotexist")
     assert response.status_code == 404
+
+def test_mark_issues_flags_problems():
+    # Create
+    create_response = client.post(
+        "/briefs",
+        params={"brief_text": "We need a portal for tracking employee hours."}
+    )
+    brief_id = create_response.json()["id"]
+
+    # Mark issues
+    issues = ["Database technology not specified", "Timeline is unclear"]
+    flag_response = client.post(
+        f"/briefs/{brief_id}/mark-issues",
+        json=issues
+    )
+    assert flag_response.status_code == 200
+    assert flag_response.json()["status"] == "flagged"
+    assert flag_response.json()["id"] == brief_id
