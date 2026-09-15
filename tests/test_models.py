@@ -1,3 +1,4 @@
+from datetime import timezone
 import pytest
 from pydantic import ValidationError
 from app.models import (
@@ -36,21 +37,50 @@ def test_raw_brief_max_length_boundary():
     assert len(brief.brief_text) == 5000
 
 
+def test_request_timezone_utc():
+    req = Request(raw_text="Test brief text here", source="web_form")
+    assert req.created_at.tzinfo == timezone.utc
+
+
 def test_requirement_validation():
     req = Requirement(description="Build auth API", priority="high")
     assert req.priority == "high"
     assert req.confirmed is True
 
 
-def test_project_extraction():
+def test_project_extraction_empty_requirements_fails():
+    with pytest.raises(ValidationError):
+        ProjectExtraction(
+            project_name="Auth Portal",
+            summary="A secure authentication portal for internal employees.",
+            requirements=[],  # min_length=1 should reject empty list
+            confidence=0.95,
+        )
+
+
+def test_project_extraction_mutable_defaults_isolated():
     req = Requirement(description="Build auth API", priority="high")
-    extraction = ProjectExtraction(
-        project_name="Auth Portal",
-        summary="A secure authentication portal for internal employees.",
+    e1 = ProjectExtraction(
+        project_name="Project One",
+        summary="A secure portal description long enough.",
         requirements=[req],
-        confidence=0.95,
+        confidence=0.9,
     )
-    assert extraction.confidence == 0.95
+    e2 = ProjectExtraction(
+        project_name="Project Two",
+        summary="Another secure portal description long enough.",
+        requirements=[req],
+        confidence=0.9,
+    )
+    e1.missing_information.append("Item 1")
+    assert "Item 1" not in e2.missing_information
+
+
+def test_checklist_item_with_id_and_dependencies():
+    task1 = ChecklistItem(id=1, task="Design DB Schema", priority="high")
+    task2 = ChecklistItem(id=2, task="Implement Migrations", priority="high", depends_on=[1])
+    assert task1.id == 1
+    assert task2.depends_on == [1]
 
 
 def test_team_recommendation():
@@ -72,7 +102,7 @@ def test_pending_intake():
         confidence=0.95,
     )
     rec = TeamRecommendation(team="Web Development", confidence=0.88)
-    chk = Checklist(items=[ChecklistItem(task="Setup DB", priority="high")], total_tasks=1)
+    chk = Checklist(items=[ChecklistItem(id=1, task="Setup DB", priority="high")], total_tasks=1)
     pending = PendingIntake(
         request_id="REQ-12345",
         extracted=extraction,
@@ -80,3 +110,4 @@ def test_pending_intake():
         checklist=chk,
     )
     assert pending.status == "pending_review"
+    assert pending.created_at.tzinfo == timezone.utc
