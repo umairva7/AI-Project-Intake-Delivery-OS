@@ -170,6 +170,69 @@ class ProjectExtraction(BaseModel):
     )
 
 
+class ExtractionResult(BaseModel):
+    """Result of LLM extraction process, including validation and review metadata"""
+
+    valid: bool = Field(
+        default=True, description="Whether extraction was valid and parsed"
+    )
+    extraction: Optional[ProjectExtraction] = Field(
+        default=None, description="Structured project extraction if valid"
+    )
+    error: Optional[str] = Field(
+        default=None, description="Internal error message if extraction failed"
+    )
+    user_message: Optional[str] = Field(
+        default=None, description="User-friendly message explaining status"
+    )
+    requires_manual_review: bool = Field(
+        default=False, description="Whether human review is required"
+    )
+    review_notes: Optional[str] = Field(
+        default=None, description="Notes on why manual review is needed"
+    )
+    raw_response: Optional[str] = Field(
+        default=None, description="Raw LLM response string"
+    )
+    retry_count: int = Field(
+        default=0, description="Number of retries attempted"
+    )
+
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+    )
+
+    def __bool__(self) -> bool:
+        return self.valid
+
+    @property
+    def project_name(self) -> str:
+        return self.extraction.project_name if self.extraction else ""
+
+    @property
+    def summary(self) -> str:
+        return self.extraction.summary if self.extraction else ""
+
+    @property
+    def requirements(self) -> List[Requirement]:
+        return self.extraction.requirements if self.extraction else []
+
+    @property
+    def missing_information(self) -> List[str]:
+        return self.extraction.missing_information if self.extraction else []
+
+    @property
+    def scope_constraints(self) -> List[str]:
+        return self.extraction.scope_constraints if self.extraction else []
+
+    @property
+    def confidence(self) -> float:
+        return self.extraction.confidence if self.extraction else 0.0
+
+    def to_project_extraction(self) -> Optional[ProjectExtraction]:
+        return self.extraction
+
+
 class ChecklistItem(BaseModel):
     """Single item in the delivery checklist"""
 
