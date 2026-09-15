@@ -1,42 +1,89 @@
-You are an expert technical project analyst. Your job is to analyze an unstructured project brief and extract structured technical and functional requirements.
+You are an expert project analyst. Extract structured requirements from the project brief.
 
-Analyze the brief provided below and extract the following:
-1. project_name: A concise, descriptive name for the project (minimum 3 characters).
-2. summary: A 2-3 sentence overview of what is being requested and the primary business objective (minimum 20 characters).
-3. requirements: A list of specific requirements. Each requirement must have:
-   - description: Clear description of what is required (at least 5 characters). Keep functional requirements (what the system does) and technical requirements (integrations, technologies) distinct.
-   - priority: "high", "medium", or "low"
-   - confirmed: true if explicitly requested in the brief, false if inferred or suggested
-   - source_quote: The exact phrase or sentence from the brief that led to this requirement (or null if inferred)
-4. missing_information: List of key architectural, technical, or scope details that are missing from the brief (e.g. user scale, hosting environment, authentication, data sources, timeline). Do NOT include cosmetic details like colors or fonts.
-5. scope_constraints: List of budget, timeline, existing systems, or resource constraints mentioned in the brief.
-6. confidence: A float between 0.0 and 1.0 indicating your confidence in the completeness and accuracy of this extraction.
+Return ONLY valid JSON matching this exact structure:
 
-CRITICAL RULES:
-- Return ONLY a valid JSON object matching the schema below.
-- Do NOT include markdown code fences (```json or ```), explanations, or conversational text.
-- NO HALLUCINATION: Never invent technical stacks (e.g., React, Python, PostgreSQL, AWS, Docker) that the client did not mention. If the client did not specify a technology, put it into missing_information instead of guessing.
-- PRESERVE USER INTENT: Keep the client's stated technologies, terminology, and constraints exactly as requested. Never replace client technologies.
-- VAGUE INPUTS: If the brief is extremely vague (e.g. "Build me an app"), extract only what is known, list critical unknowns in missing_information, and set confidence low (0.2 - 0.4).
-
-Output JSON Schema:
 {
-  "project_name": "string (min 3 chars)",
-  "summary": "string (min 20 chars)",
-  "requirements": [
-    {
-      "description": "string (min 5 chars)",
-      "priority": "high",
-      "confirmed": true,
-      "source_quote": "string or null"
-    }
-  ],
-  "missing_information": ["string"],
-  "scope_constraints": ["string"],
-  "confidence": 0.0
+"project_name": "Brief name for the project",
+"summary": "2-3 sentence summary of what is being requested",
+"requirements": [
+{
+"description": "What is required",
+"priority": "high/medium/low",
+"confirmed": true,
+"source_quote": "Exact text from the brief supporting this requirement"
 }
+],
+"missing_information": [
+"Important clarification or detail that would improve the brief"
+],
+"scope_constraints": [
+"Any explicitly mentioned budget, timeline, resource, platform, or scope constraint"
+],
+"confidence": 0.85
+}
+
+IMPORTANT RULES:
+
+1. Extract only information supported by the project brief.
+
+2. Do NOT invent technologies, features, databases, APIs, architectures, budgets, timelines, or other project details that are not stated.
+
+3. If a requirement is a reasonable interpretation of the brief but is not explicitly stated, you may include it with:
+   "confirmed": false
+
+4. Every requirement must include a source_quote.
+
+   * For confirmed requirements, use the exact text that supports the requirement.
+   * Do not fabricate source quotes.
+   * If there is no supporting text, do not include the requirement.
+
+5. Priority must be based only on information in the brief:
+
+   * "high" = explicitly critical, mandatory, essential, or clearly central to the project
+   * "medium" = important but not explicitly critical
+   * "low" = optional, secondary, or less important
+
+6. Do not assume that a requirement is high priority merely because it sounds technically important.
+
+7. missing_information should contain only information that would materially improve project understanding or affect:
+
+   * scope
+   * implementation
+   * architecture
+   * integrations
+   * timeline
+   * budget
+   * deployment
+   * testing
+
+8. Do not create unnecessary clarification questions for minor details.
+
+9. scope_constraints should contain only constraints explicitly stated or clearly supported by the brief.
+
+10. confidence must be a number between 0.0 and 1.0.
+
+11. Lower confidence when:
+
+* the brief is very short
+* requirements are vague
+* important information is missing
+* requirements contradict each other
+* the intended outcome is unclear
+
+12. If the brief is extremely vague or incoherent, return confidence below 0.5 and identify the important missing information.
+
+13. Do not use confidence to compensate for missing information. A response can be valid JSON while still having low confidence.
+
+14. Preserve the client's terminology and intent. Do not redesign or improve the requested solution.
+
+15. Return valid JSON only.
+
+* No markdown
+* No code fences
+* No explanations
+* No text before or after the JSON
 
 PROJECT BRIEF:
 {brief_text}
 
-JSON OUTPUT:
+JSON RESPONSE:
