@@ -1,7 +1,20 @@
 from datetime import datetime, timezone
 from typing import Optional, List, Literal, Dict, Any
 from uuid import uuid4
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, model_validator
+
+
+VALID_REQUEST_TRANSITIONS: Dict[str, List[str]] = {
+    "processing": ["pending_review", "rejected"],
+    "pending_review": ["approved", "rejected"],
+    "approved": [],  # Terminal state
+    "rejected": [],  # Terminal state
+}
+
+VALID_INTAKE_TRANSITIONS: Dict[str, List[str]] = {
+    "draft": ["pending_review"],
+    "pending_review": [],  # Terminal state awaiting final approval
+}
 
 
 class RawBrief(BaseModel):
@@ -45,6 +58,21 @@ class Request(BaseModel):
             description="processing | pending_review | approved | rejected",
         )
     )
+
+    def transition_to(
+        self,
+        target_status: Literal[
+            "processing", "pending_review", "approved", "rejected"
+        ],
+    ) -> None:
+        """Transitions request to a new status following valid lifecycle workflow."""
+        allowed = VALID_REQUEST_TRANSITIONS.get(self.status, [])
+        if target_status not in allowed:
+            raise ValueError(
+                f"Invalid state transition: cannot transition Request from '{self.status}' to '{target_status}'. "
+                f"Allowed transitions from '{self.status}': {allowed or 'None (terminal state)'}"
+            )
+        self.status = target_status
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -255,6 +283,28 @@ class PendingIntake(BaseModel):
         default=None, description="Why is manual review required?"
     )
 
+    @model_validator(mode="after")
+    def validate_manual_review_relationship(self) -> "PendingIntake":
+        """Ensures that if manual review is required, explanation notes are provided."""
+        if self.requires_manual_review:
+            if not self.review_notes or not self.review_notes.strip():
+                raise ValueError(
+                    "review_notes are required when requires_manual_review is True"
+                )
+        return self
+
+    def transition_to(
+        self, target_status: Literal["draft", "pending_review"]
+    ) -> None:
+        """Transitions pending intake following valid lifecycle workflow."""
+        allowed = VALID_INTAKE_TRANSITIONS.get(self.status, [])
+        if target_status not in allowed:
+            raise ValueError(
+                f"Invalid state transition: cannot transition PendingIntake from '{self.status}' to '{target_status}'. "
+                f"Allowed transitions from '{self.status}': {allowed or 'None (terminal state)'}"
+            )
+        self.status = target_status
+
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
@@ -268,6 +318,10 @@ class PendingIntake(BaseModel):
             }
         }
     )
+
+
+# Alias for semantic clarity across documentation
+ReviewedBrief = PendingIntake
 
 
 class UserFeedback(BaseModel):
@@ -284,6 +338,15 @@ class UserFeedback(BaseModel):
     notes: Optional[str] = Field(
         default=None, description="Additional feedback from user"
     )
+
+    @model_validator(mode="after")
+    def validate_feedback_relationship(self) -> "UserFeedback":
+        """Ensures that issues are documented when decision is 'mark_issues'."""
+        if self.decision == "mark_issues" and not self.issues_detected:
+            raise ValueError(
+                "issues_detected list cannot be empty or None when decision is 'mark_issues'"
+            )
+        return self
 
     model_config = ConfigDict(
         json_schema_extra={
