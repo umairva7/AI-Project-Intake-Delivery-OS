@@ -4,26 +4,28 @@ Analyze the brief provided below and extract the following:
 1. project_name: A concise, descriptive name for the project (minimum 3 characters).
 2. summary: A 2-3 sentence overview of what is being requested and the primary business objective (minimum 20 characters).
 3. requirements: A list of specific requirements. Each requirement must have:
-   - description: Clear description of the requirement (at least 5 characters)
+   - description: Clear description of what is required (at least 5 characters). Keep functional requirements (what the system does) and technical requirements (integrations, technologies) distinct.
    - priority: "high", "medium", or "low"
    - confirmed: true if explicitly requested in the brief, false if inferred or suggested
-   - source_quote: The exact phrase or sentence from the brief, if available
-4. missing_information: List of key details that are missing from the brief (e.g. user scale, hosting preferences, authentication, edge cases).
-5. scope_constraints: List of budget, timeline, or resource constraints mentioned in the brief.
+   - source_quote: The exact phrase or sentence from the brief that led to this requirement (or null if inferred)
+4. missing_information: List of key architectural, technical, or scope details that are missing from the brief (e.g. user scale, hosting environment, authentication, data sources, timeline). Do NOT include cosmetic details like colors or fonts.
+5. scope_constraints: List of budget, timeline, existing systems, or resource constraints mentioned in the brief.
 6. confidence: A float between 0.0 and 1.0 indicating your confidence in the completeness and accuracy of this extraction.
 
-CRITICAL:
-- You must output ONLY a valid JSON object matching the schema below.
-- Do NOT include any markdown code fences (```json or ```), explanations, or additional text before or after the JSON.
-- Never hallucinate requirements that contradict the brief. Mark inferred items with confirmed: false.
+CRITICAL RULES:
+- Return ONLY a valid JSON object matching the schema below.
+- Do NOT include markdown code fences (```json or ```), explanations, or conversational text.
+- NO HALLUCINATION: Never invent technical stacks (e.g., React, Python, PostgreSQL, AWS, Docker) that the client did not mention. If the client did not specify a technology, put it into missing_information instead of guessing.
+- PRESERVE USER INTENT: Keep the client's stated technologies, terminology, and constraints exactly as requested. Never replace client technologies.
+- VAGUE INPUTS: If the brief is extremely vague (e.g. "Build me an app"), extract only what is known, list critical unknowns in missing_information, and set confidence low (0.2 - 0.4).
 
 Output JSON Schema:
 {
-  "project_name": "string",
-  "summary": "string",
+  "project_name": "string (min 3 chars)",
+  "summary": "string (min 20 chars)",
   "requirements": [
     {
-      "description": "string",
+      "description": "string (min 5 chars)",
       "priority": "high",
       "confirmed": true,
       "source_quote": "string or null"
@@ -36,3 +38,5 @@ Output JSON Schema:
 
 PROJECT BRIEF:
 {brief_text}
+
+JSON OUTPUT:

@@ -18,6 +18,7 @@ from app.models import (
     UserFeedback,
 )
 from app.providers.ollama import OllamaProvider
+from app.services.extraction import ExtractionService
 from app.services.recommendation import recommend_team
 from app.services.checklist import generate_checklist
 from app.storage.db import get_db_connection, init_db
@@ -42,6 +43,7 @@ class IntakeOrchestrator:
         Defaults to OllamaProvider. Ensures database tables are initialized.
         """
         self.llm = provider or OllamaProvider()
+        self.extractor = ExtractionService(provider=self.llm)
         init_db()
 
     def process_brief(self, brief: Union[RawBrief, str]) -> PendingIntake:
@@ -72,7 +74,7 @@ class IntakeOrchestrator:
 
         # 2. Call LLM for requirement extraction
         logger.info("LLM extraction started: %s", request.id)
-        extraction_result = self.llm.extract_requirements(brief.brief_text)
+        extraction_result = self.extractor.extract(brief.brief_text)
 
         # Handle extraction failure or invalid LLM response
         if not extraction_result.valid or not extraction_result.extraction:
