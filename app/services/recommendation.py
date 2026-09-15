@@ -1,138 +1,267 @@
 # app/services/recommendation.py
 import logging
 import re
-from typing import List, Optional, Union, Dict
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 from app.config import settings
 from app.models import ProjectExtraction, Requirement, TeamRecommendation
 
 logger = logging.getLogger(__name__)
 
-# Keyword taxonomy for team allocation
-TEAM_KEYWORDS: Dict[str, List[str]] = {
-    "Web Development": [
-        "web", "react", "vue", "angular", "frontend", "backend", "fullstack",
-        "django", "fastapi", "flask", "node", "express", "html", "css",
-        "javascript", "typescript", "dashboard", "portal", "website", "api", "rest"
-    ],
-    "Mobile Development": [
-        "mobile", "ios", "android", "swift", "kotlin", "flutter",
-        "react native", "iphone", "ipad", "app store", "play store"
-    ],
-    "AI / ML": [
-        "ai", "llm", "chatbot", "chat bot", "machine learning", "nlp",
-        "deep learning", "computer vision", "model", "rag", "embeddings",
-        "vector", "agent", "generative ai", "neural", "ollama", "openai"
-    ],
-    "Data Engineering": [
-        "data pipeline", "etl", "data warehouse", "snowflake", "bigquery",
-        "spark", "kafka", "airflow", "dbt", "databricks", "sql", "analytics"
-    ],
-    "DevOps / Infrastructure": [
-        "devops", "infrastructure", "kubernetes", "k8s", "docker", "aws",
-        "gcp", "azure", "terraform", "ci/cd", "deployment", "hosting", "cloud"
-    ],
-}
+
+def _match_signal(signal: str, text: str) -> bool:
+    """
+    Check if a signal matches within text using word boundaries.
+    Ensures 'ai' does not match 'email' or 'chair', and 'react' does not match 'reactionary'.
+    """
+    pattern = r"\b" + re.escape(signal.lower()) + r"\b"
+    return bool(re.search(pattern, text.lower()))
 
 
 def recommend_team(
-    extraction: Union[ProjectExtraction, List[Requirement], str],
+    extraction: Union[ProjectExtraction, List[Requirement], str, None],
+    team_signals: Optional[Dict[str, Dict[str, int]]] = None,
 ) -> TeamRecommendation:
     """
-    Recommend the most appropriate delivery team based on project requirements and tech stack.
+    Recommend delivery team(s) using config-driven weighted scoring over extracted requirements.
+
+    Advisory only — recommends teams for human review, does NOT perform automatic assignment.
 
     Args:
-        extraction: ProjectExtraction instance, list of Requirements, or text string.
+        extraction: Validated ProjectExtraction, list of Requirements, brief text, or None.
+        team_signals: Optional dictionary of team definitions and signal weights.
+                      Defaults to settings.TEAM_SIGNALS.
 
     Returns:
-        TeamRecommendation instance with team name, confidence, reasoning, and review flags.
+        Validated TeamRecommendation model with primary team, supporting teams,
+        heuristic confidence (0.0–1.0), transparent reasoning, and review flag.
     """
-    # 1. Aggregate text content to analyze
-    text_chunks: List[str] = []
+    signals_config = team_signals or settings.TEAM_SIGNALS
 
-    if isinstance(extraction, ProjectExtraction):
-        text_chunks.append(extraction.project_name)
-        text_chunks.append(extraction.summary)
-        for req in extraction.requirements:
-            text_chunks.append(req.description)
-        for constraint in extraction.scope_constraints:
-            text_chunks.append(constraint)
-    elif isinstance(extraction, list):
-        for item in extraction:
-            if isinstance(item, Requirement):
-                text_chunks.append(item.description)
-            elif isinstance(item, str):
-                text_chunks.append(item)
-    elif isinstance(extraction, str):
-        text_chunks.append(extraction)
-
-    corpus = " ".join(text_chunks).lower()
-
-    # 2. Score each team against keyword matches
-    scores: Dict[str, int] = {}
-    match_evidence: Dict[str, List[str]] = {}
-
-    for team, keywords in TEAM_KEYWORDS.items():
-        matched = []
-        for kw in keywords:
-            # Word boundary regex to avoid partial false positives
-            pattern = r"\b" + re.escape(kw) + r"\b"
-            if re.search(pattern, corpus):
-                matched.append(kw)
-        if matched:
-            scores[team] = len(matched)
-            match_evidence[team] = matched
-
-    # 3. Determine best matching team and runner-up
-    if not scores:
-        # Default fallback when brief is very vague or non-technical
-        logger.info("No explicit domain keywords matched; defaulting to Web Development")
+    # 1. Handle empty / None extraction edge case
+    if extraction is None:
+        logger.warning("Empty or None extraction provided to recommendation service")
         return TeamRecommendation(
-            team="Web Development",
-            confidence=0.50,
-            reasoning=["Default assignment: project brief did not specify distinct technical domain requirements."],
-            alternative_team="Mixed / Cross-functional",
+            team=None,
+            recommended_team=None,
+            supporting_teams=[],
+            confidence=0.0,
+            reasoning=["No extraction or requirements provided; cannot determine team allocation."],
+            alternative_team=None,
             requires_human_review=True,
         )
 
-    # Sort teams by score descending
-    sorted_teams = sorted(scores.items(), key=lambda item: item[1], reverse=True)
-    best_team, best_score = sorted_teams[0]
-    runner_up_team = sorted_teams[1][0] if len(sorted_teams) > 1 else None
-    runner_up_score = sorted_teams[1][1] if len(sorted_teams) > 1 else 0
+    # 2. Extract requirement descriptions and overall context
+    req_descriptions: List[str] = []
+    context_chunks: List[str] = []
 
-    # 4. Calculate confidence
-    # Score of 1 match: 0.70 confidence; 2 matches: 0.85; 3+ matches: 0.92-0.95
-    if best_score >= 3:
-        raw_confidence = 0.92
-    elif best_score == 2:
-        raw_confidence = 0.85
-    else:
-        raw_confidence = 0.70
+    if isinstance(extraction, ProjectExtraction):
+        context_chunks.append(extraction.project_name)
+        context_chunks.append(extraction.summary)
+        for req in extraction.requirements:
+            req_descriptions.append(req.description)
+        for constraint in extraction.scope_constraints:
+            context_chunks.append(constraint)
+    elif isinstance(extraction, list):
+        for item in extraction:
+            if isinstance(item, Requirement):
+                req_descriptions.append(item.description)
+            elif isinstance(item, str):
+                req_descriptions.append(item)
+    elif isinstance(extraction, str):
+        if not extraction.strip():
+            logger.warning("Empty text string provided to recommendation service")
+            return TeamRecommendation(
+                team=None,
+                recommended_team=None,
+                supporting_teams=[],
+                confidence=0.0,
+                reasoning=["Empty requirements provided; cannot determine team allocation."],
+                alternative_team=None,
+                requires_human_review=True,
+            )
+        context_chunks.append(extraction)
 
-    # Reduce confidence if runner-up is very close (competing cross-functional scope)
-    if runner_up_team and (best_score - runner_up_score) <= 0:
-        raw_confidence = max(0.60, raw_confidence - 0.20)
-    elif runner_up_team and (best_score - runner_up_score) == 1:
-        raw_confidence = max(0.65, raw_confidence - 0.10)
+    total_requirements = len(req_descriptions)
+    full_corpus = " ".join(context_chunks + req_descriptions)
 
-    confidence = round(min(1.0, raw_confidence), 2)
-    requires_human_review = confidence < settings.CONFIDENCE_THRESHOLD
-
-    # 5. Build explanatory reasoning
-    evidence_str = ", ".join(match_evidence[best_team][:4])
-    reasoning = [
-        f"Primary deliverable aligns with {best_team} based on detected requirements: {evidence_str}."
-    ]
-    if runner_up_team and runner_up_score > 0:
-        reasoning.append(
-            f"Secondary technical domain detected ({runner_up_team}); consider cross-functional support."
+    # Edge case: No content to evaluate
+    if not full_corpus.strip():
+        logger.warning("No text content found in extraction requirements")
+        return TeamRecommendation(
+            team=None,
+            recommended_team=None,
+            supporting_teams=[],
+            confidence=0.0,
+            reasoning=["Empty requirements provided; cannot determine team allocation."],
+            alternative_team=None,
+            requires_human_review=True,
         )
 
+    # 3. Calculate weighted scores and track matched signals per team
+    team_scores: Dict[str, int] = {}
+    team_matched_signals: Dict[str, Dict[str, int]] = {}
+    team_req_matches: Dict[str, Set[int]] = {}
+
+    for team_name, signals in signals_config.items():
+        matched: Dict[str, int] = {}
+        matched_req_indices: Set[int] = set()
+
+        for signal, weight in signals.items():
+            # Check if signal matches anywhere in the corpus
+            if _match_signal(signal, full_corpus):
+                matched[signal] = weight
+
+                # Track which requirements contained this signal for coverage calculation
+                for idx, req_text in enumerate(req_descriptions):
+                    if _match_signal(signal, req_text):
+                        matched_req_indices.add(idx)
+
+        total_score = sum(matched.values())
+        if total_score > 0:
+            team_scores[team_name] = total_score
+            team_matched_signals[team_name] = matched
+            team_req_matches[team_name] = matched_req_indices
+
+    # 4. Handle edge case: No configured team matches
+    if not team_scores:
+        logger.info("No configured team signals matched project requirements")
+        return TeamRecommendation(
+            team=None,
+            recommended_team=None,
+            supporting_teams=[],
+            confidence=0.0,
+            reasoning=["No configured team signals matched project requirements. Human triage required."],
+            alternative_team=None,
+            requires_human_review=True,
+        )
+
+    # 5. Rank teams descending by weighted score
+    ranked: List[Tuple[str, int]] = sorted(
+        team_scores.items(), key=lambda item: item[1], reverse=True
+    )
+    primary_team, primary_score = ranked[0]
+    second_team, second_score = ranked[1] if len(ranked) > 1 else (None, 0)
+    score_margin = primary_score - second_score
+
+    # 6. Multi-team identification: materially relevant secondary teams
+    supporting_teams: List[str] = []
+    if len(ranked) > 1:
+        for other_team, other_score in ranked[1:]:
+            # Material relevance: score at least 3 points and at least 40% of primary score
+            if other_score >= 3 and (other_score / primary_score) >= 0.40:
+                supporting_teams.append(other_team)
+
+    # 7. Heuristic Confidence Calculation (0.0 to 1.0)
+    # Component A: Winning score strength
+    if primary_score >= 12:
+        strength_score = 0.85
+    elif primary_score >= 8:
+        strength_score = 0.75
+    elif primary_score >= 5:
+        strength_score = 0.65
+    elif primary_score >= 3:
+        strength_score = 0.50
+    else:
+        strength_score = 0.35
+
+    # Component B: Score margin / separation from runner-up
+    if second_score == 0:
+        margin_adj = 0.10  # Clear, undisputed single-team focus
+    elif score_margin == 0:
+        margin_adj = -0.20  # Ambiguous tie between competing teams
+    elif score_margin <= 2 or (primary_score > 0 and (second_score / primary_score) >= 0.70):
+        margin_adj = -0.15  # Close competition / strongly contested lead
+    elif len(supporting_teams) > 0:
+        margin_adj = -0.10  # Cross-functional split across multiple domains
+    elif score_margin >= 6:
+        margin_adj = 0.05  # Decisive lead
+    else:
+        margin_adj = 0.00
+
+    # Component C: Requirement coverage
+    coverage_adj = 0.00
+    if total_requirements > 0:
+        covered_count = len(team_req_matches.get(primary_team, set()))
+        coverage_ratio = covered_count / total_requirements
+        if coverage_ratio >= 0.67:
+            coverage_adj = 0.05
+        elif coverage_ratio <= 0.33:
+            coverage_adj = -0.05
+
+    # Clamp confidence strictly to [0.0, 1.0]
+    raw_confidence = strength_score + margin_adj + coverage_adj
+    confidence = round(max(0.0, min(1.0, raw_confidence)), 2)
+
+    # 8. Determine Human Review Flag
+    # Flag when confidence < threshold, close competing scores, or multi-team cross-functional complexity
+    is_close_competition = (second_score >= 3) and (score_margin <= 2)
+    is_cross_functional = len(supporting_teams) > 0
+    below_threshold = confidence < settings.CONFIDENCE_THRESHOLD
+
+    requires_human_review = bool(
+        below_threshold or is_close_competition or is_cross_functional
+    )
+
+    # 9. Build Explainable, Human-Readable Reasoning
+    reasoning: List[str] = []
+
+    # Sort matched signals by weight descending for display
+    primary_signals = sorted(
+        team_matched_signals[primary_team].items(),
+        key=lambda item: item[1],
+        reverse=True,
+    )
+    signals_summary = ", ".join(f"'{sig}' (+{wt})" for sig, wt in primary_signals[:5])
+    reasoning.append(
+        f"Primary recommendation: {primary_team} (score: {primary_score}). "
+        f"Matched signals: {signals_summary}."
+    )
+
+    # Multi-team and supporting team reasoning
+    if supporting_teams:
+        sup_details = []
+        for st in supporting_teams:
+            st_signals = sorted(
+                team_matched_signals[st].items(),
+                key=lambda item: item[1],
+                reverse=True,
+            )
+            st_sig_str = ", ".join(f"'{s}' (+{w})" for s, w in st_signals[:3])
+            sup_details.append(f"{st} (score: {team_scores[st]}, matched: {st_sig_str})")
+        reasoning.append(
+            f"Cross-functional scope detected; supporting teams: {'; '.join(sup_details)}."
+        )
+
+    # Ambiguity / close competition reasoning
+    if score_margin == 0 and second_team:
+        reasoning.append(
+            f"Tie score with {second_team} ({primary_score} pts each); human review required to decide lead."
+        )
+    elif is_close_competition and second_team:
+        reasoning.append(
+            f"Close margin ({score_margin} pt difference) with {second_team}; manual verification recommended."
+        )
+
+    if below_threshold:
+        reasoning.append(
+            f"Confidence score ({confidence:.2f}) is below threshold ({settings.CONFIDENCE_THRESHOLD:.2f})."
+        )
+
+    logger.info(
+        "Team recommendation completed: %s (confidence=%.2f, supporting=%s, human_review=%s)",
+        primary_team,
+        confidence,
+        supporting_teams,
+        requires_human_review,
+    )
+
     return TeamRecommendation(
-        team=best_team,
+        team=primary_team,
+        recommended_team=primary_team,
+        supporting_teams=supporting_teams,
         confidence=confidence,
         reasoning=reasoning,
-        alternative_team=runner_up_team,
+        alternative_team=supporting_teams[0] if supporting_teams else None,
         requires_human_review=requires_human_review,
     )

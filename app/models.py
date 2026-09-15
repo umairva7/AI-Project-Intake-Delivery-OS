@@ -286,11 +286,19 @@ class Checklist(BaseModel):
 
 
 class TeamRecommendation(BaseModel):
-    """LLM recommendation for team allocation"""
+    """Recommendation for team allocation"""
 
-    team: str = Field(
-        ...,
-        description="Recommended team name, e.g. 'Web Development', 'Mobile Development', 'AI / ML'",
+    team: Optional[str] = Field(
+        default=None,
+        description="Recommended primary team name, e.g. 'Web Development', 'Mobile Development', 'AI / ML'",
+    )
+    recommended_team: Optional[str] = Field(
+        default=None,
+        description="Alias for recommended primary team name",
+    )
+    supporting_teams: List[str] = Field(
+        default_factory=list,
+        description="Secondary or supporting teams for cross-functional projects",
     )
     confidence: float = Field(
         ...,
@@ -311,10 +319,29 @@ class TeamRecommendation(BaseModel):
         description="Flag if confidence is below threshold or teams are ambiguous",
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def sync_team_and_supporting(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            # Sync team and recommended_team
+            if "recommended_team" in data and not data.get("team"):
+                data["team"] = data["recommended_team"]
+            elif "team" in data and not data.get("recommended_team"):
+                data["recommended_team"] = data["team"]
+
+            # Sync alternative_team and supporting_teams
+            if "supporting_teams" in data and data["supporting_teams"] and not data.get("alternative_team"):
+                data["alternative_team"] = data["supporting_teams"][0]
+            elif "alternative_team" in data and data["alternative_team"] and not data.get("supporting_teams"):
+                data["supporting_teams"] = [data["alternative_team"]]
+        return data
+
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "team": "Web Development",
+                "recommended_team": "Web Development",
+                "supporting_teams": [],
                 "confidence": 0.91,
                 "reasoning": [
                     "Primary deliverable is a web application",

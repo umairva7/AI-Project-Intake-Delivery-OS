@@ -208,7 +208,84 @@ def test_process_brief_llm_failure_returns_fallback_pending_intake():
 
 
 # ============================================================================
-# 4. Approval Workflow: approve_intake
+# 4. Partial Failures During Assembly (Fault Isolation & Fallbacks)
+# ============================================================================
+
+
+def test_process_brief_checklist_failure_executes_fallback(mock_provider):
+    """
+    Simulates partial failure: extraction and team recommendation succeed,
+    but checklist generation raises an exception halfway.
+    Verifies that:
+    1. Orchestrator catches the error without rolling back or crashing.
+    2. Fallback triage checklist is created.
+    3. requires_manual_review is set to True with explanatory notes.
+    4. Successful extraction and team recommendation are preserved and stored.
+    """
+    orchestrator = IntakeOrchestrator(provider=mock_provider)
+    brief = RawBrief(
+        brief_text="We need a React frontend with Python backend for an employee dashboard."
+    )
+
+    with patch(
+        "app.orchestrator.generate_checklist",
+        side_effect=RuntimeError("Checklist service timeout or syntax error"),
+    ):
+        pending = orchestrator.process_brief(brief)
+
+        # 1. Pipeline did NOT crash and returned a valid PendingIntake
+        assert isinstance(pending, PendingIntake)
+        assert pending.id.startswith("INT-")
+        assert pending.status == "pending_review"
+
+        # 2. Upstream successes are PRESERVED (not rolled back or discarded)
+        assert pending.extracted.project_name == "Employee Dashboard"
+        assert pending.team_recommendation.team == "Web Development"
+
+        # 3. Fallback checklist was generated
+        assert pending.checklist.total_tasks == 1
+        assert (
+            pending.checklist.items[0].task
+            == "Manually review requirements and compile delivery checklist"
+        )
+
+        # 4. Flagged for manual review with specific error notes
+        assert pending.requires_manual_review is True
+        assert "Checklist generation failed" in pending.review_notes
+        assert "Manual task entry required" in pending.review_notes
+
+        # 5. Successfully persisted in database
+        db_intake = orchestrator.get_intake(pending.id)
+        assert db_intake is not None
+        assert db_intake.requires_manual_review is True
+        assert db_intake.extracted.project_name == "Employee Dashboard"
+
+
+def test_process_brief_team_recommendation_failure_executes_fallback(mock_provider):
+    """
+    Simulates partial failure where team recommendation service raises an exception.
+    Verifies that fallback team recommendation ('Pending Triage') is assigned and flagged for review.
+    """
+    orchestrator = IntakeOrchestrator(provider=mock_provider)
+    brief = RawBrief(
+        brief_text="We need a React frontend with Python backend for an employee dashboard."
+    )
+
+    with patch(
+        "app.orchestrator.recommend_team",
+        side_effect=ValueError("Team taxonomy classification failure"),
+    ):
+        pending = orchestrator.process_brief(brief)
+
+        assert isinstance(pending, PendingIntake)
+        assert pending.team_recommendation.team == "Pending Triage"
+        assert pending.requires_manual_review is True
+        assert "Team recommendation failed" in pending.review_notes
+        assert pending.checklist.total_tasks > 0
+
+
+# ============================================================================
+# 5. Approval Workflow: approve_intake
 # ============================================================================
 
 

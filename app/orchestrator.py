@@ -12,6 +12,7 @@ from app.models import (
     Requirement,
     TeamRecommendation,
     Checklist,
+    ChecklistItem,
     PendingIntake,
     ApprovedIntake,
     UserFeedback,
@@ -124,15 +125,27 @@ class IntakeOrchestrator:
                     project_extraction.confidence,
                 )
 
-        # 3. Generate team recommendation
+        # 3. Generate team recommendation (with stage-level fault isolation)
         logger.info("Generating team recommendation: %s", request.id)
-        team_rec = recommend_team(project_extraction)
-        logger.info(
-            "Team recommendation generated: %s -> %s (confidence=%.2f)",
-            request.id,
-            team_rec.team,
-            team_rec.confidence,
-        )
+        try:
+            team_rec = recommend_team(project_extraction)
+            logger.info(
+                "Team recommendation generated: %s -> %s (confidence=%.2f)",
+                request.id,
+                team_rec.team,
+                team_rec.confidence,
+            )
+        except Exception as team_err:
+            logger.error("Team recommendation failed for %s: %s", request.id, team_err)
+            requires_manual_review = True
+            team_fail_note = f"Team recommendation failed: {team_err}. Manual team assignment required."
+            review_notes = f"{review_notes} {team_fail_note}".strip() if review_notes else team_fail_note
+            team_rec = TeamRecommendation(
+                team="Pending Triage",
+                confidence=0.0,
+                reasoning=["Automated team recommendation encountered an error."],
+                requires_human_review=True,
+            )
 
         if team_rec.requires_human_review:
             requires_manual_review = True
@@ -142,18 +155,36 @@ class IntakeOrchestrator:
             )
             review_notes = f"{review_notes} {rec_note}".strip() if review_notes else rec_note
 
-        # 4. Generate checklist
+        # 4. Generate checklist (with stage-level fault isolation)
         logger.info("Generating checklist: %s", request.id)
-        checklist = generate_checklist(
-            requirements=project_extraction.requirements,
-            team=team_rec.team,
-            missing_information=project_extraction.missing_information,
-        )
-        logger.info(
-            "Checklist generated: %s (%d items)",
-            request.id,
-            checklist.total_tasks,
-        )
+        try:
+            checklist = generate_checklist(
+                requirements=project_extraction.requirements,
+                team=team_rec.team,
+                missing_information=project_extraction.missing_information,
+                supporting_teams=team_rec.supporting_teams,
+            )
+            logger.info(
+                "Checklist generated: %s (%d items)",
+                request.id,
+                checklist.total_tasks,
+            )
+        except Exception as check_err:
+            logger.error("Checklist generation failed for %s: %s", request.id, check_err)
+            requires_manual_review = True
+            check_fail_note = f"Checklist generation failed: {check_err}. Manual task entry required."
+            review_notes = f"{review_notes} {check_fail_note}".strip() if review_notes else check_fail_note
+            checklist = Checklist(
+                items=[
+                    ChecklistItem(
+                        id=1,
+                        task="Manually review requirements and compile delivery checklist",
+                        priority="high",
+                        estimated_effort="1-2 hours",
+                    )
+                ],
+                total_tasks=1,
+            )
 
         # 5. Assemble PendingIntake
         pending = PendingIntake(
