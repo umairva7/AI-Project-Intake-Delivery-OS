@@ -599,90 +599,102 @@ function loadSample(key) {
   showToast(`Loaded preset: ${sample.title}`, 'info');
 }
 
-// Simulated Pipeline Stepper & API Bridge
-function runExtractionPipeline() {
+// Pipeline Processing with Real API Bridge & Loading Stepper
+async function runExtractionPipeline() {
+  const briefText = rawTextInput.value.trim();
+  if (!briefText) {
+    showToast('Please enter or paste a project brief first', 'warning');
+    return;
+  }
+  if (briefText.length < 10) {
+    showToast('Project brief must be at least 10 characters long', 'warning');
+    return;
+  }
+
   // Button loading state
   processBtn.disabled = true;
   btnSpinner.style.display = 'inline-block';
   processBtnText.textContent = 'Processing Pipeline...';
   processingOverlay.style.display = 'flex';
 
-  // Determine matching sample or fallback
-  const enteredText = rawTextInput.value.toLowerCase();
-  let matchedSampleKey = 'property';
-  if (enteredText.includes('fitness') || enteredText.includes('ios') || enteredText.includes('android')) {
-    matchedSampleKey = 'mobile';
-  } else if (enteredText.includes('employee') || enteredText.includes('dashboard') || enteredText.includes('hours')) {
-    matchedSampleKey = 'dashboard';
-  } else if (enteredText.includes('commerce') || enteredText.includes('stripe') || enteredText.includes('store')) {
-    matchedSampleKey = 'ambiguous';
-  }
-
-  const baseSample = SAMPLE_BRIEFS[matchedSampleKey];
-  const newRequestId = `REQ-000${intakeHistory.length + 1}`;
-
-  // Reset steps
-  pipelineSteps.forEach(step => {
-    step.className = 'pipeline-step';
+  // Reset stepper UI
+  pipelineSteps.forEach((step, idx) => {
+    step.className = idx === 0 ? 'pipeline-step active' : 'pipeline-step';
   });
 
-  // Step 1: Parse
-  pipelineSteps[0].classList.add('active');
+  let currentStep = 0;
+  const stepInterval = setInterval(() => {
+    if (currentStep < pipelineSteps.length - 1) {
+      pipelineSteps[currentStep].classList.remove('active');
+      pipelineSteps[currentStep].classList.add('completed');
+      currentStep++;
+      pipelineSteps[currentStep].classList.add('active');
+    }
+  }, 650);
 
-  setTimeout(() => {
-    pipelineSteps[0].classList.remove('active');
-    pipelineSteps[0].classList.add('completed');
-    pipelineSteps[1].classList.add('active'); // Extract
-  }, 400);
+  try {
+    const response = await fetch(`${API_BASE_URL}/briefs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        brief_text: briefText,
+        source: sourceSelect ? sourceSelect.value : 'web_form'
+      })
+    });
 
-  setTimeout(() => {
-    pipelineSteps[1].classList.remove('active');
-    pipelineSteps[1].classList.add('completed');
-    pipelineSteps[2].classList.add('active'); // Validate
-  }, 800);
+    clearInterval(stepInterval);
 
-  setTimeout(() => {
-    pipelineSteps[2].classList.remove('active');
-    pipelineSteps[2].classList.add('completed');
-    pipelineSteps[3].classList.add('active'); // Recommend
-  }, 1200);
+    if (!response.ok) {
+      let errMsg = `Server returned status ${response.status}`;
+      try {
+        const errJson = await response.json();
+        if (typeof errJson.detail === 'string') {
+          errMsg = errJson.detail;
+        } else if (Array.isArray(errJson.detail)) {
+          errMsg = errJson.detail.map(d => `${d.loc ? d.loc.slice(-1) + ': ' : ''}${d.msg}`).join(', ');
+        }
+      } catch (_) {}
+      throw new Error(errMsg);
+    }
 
-  setTimeout(() => {
-    pipelineSteps[3].classList.remove('active');
-    pipelineSteps[3].classList.add('completed');
-    pipelineSteps[4].classList.add('active'); // Checklist
-  }, 1600);
+    const apiData = await response.json();
 
-  setTimeout(() => {
-    pipelineSteps[4].classList.remove('active');
-    pipelineSteps[4].classList.add('completed');
+    // Complete all stepper visual stages
+    pipelineSteps.forEach(step => {
+      step.classList.remove('active');
+      step.classList.add('completed');
+    });
 
-    // Finish processing
-    currentIntake = JSON.parse(JSON.stringify(baseSample.extracted));
-    currentIntake.request_id = newRequestId;
-    currentIntake.source = sourceSelect.value;
-    currentIntake.status = 'pending_review';
+    // Normalize backend response into UI structure
+    currentIntake = normalizeIntakeResponse(apiData);
 
-    // Add to history
+    // Prepend to history list
     intakeHistory.unshift({
-      id: newRequestId,
+      id: currentIntake.id,
+      request_id: currentIntake.request_id,
       name: currentIntake.project.name,
       team: currentIntake.team_recommendation.team,
-      status: 'pending_review',
+      status: currentIntake.status,
       data: JSON.parse(JSON.stringify(currentIntake))
     });
 
     renderHistory();
     renderIntakeView();
 
-    // Hide overlay
+    showToast(`Pipeline completed! Structured intake generated for "${currentIntake.project.name}"`, 'success');
+  } catch (err) {
+    clearInterval(stepInterval);
+    console.error('API Pipeline Error:', err);
+    showToast(`Extraction failed: ${err.message}`, 'error');
+  } finally {
     processingOverlay.style.display = 'none';
     processBtn.disabled = false;
     btnSpinner.style.display = 'none';
     processBtnText.textContent = 'Run Extraction Pipeline';
-
-    showToast(`Pipeline completed! Structured intake generated for ${currentIntake.project.name}`, 'success');
-  }, 2000);
+  }
 }
 
 // Render the right panel with intake data
@@ -691,8 +703,12 @@ function renderIntakeView() {
   const t = currentIntake.team_recommendation;
 
   // Metadata
-  displayRequestId.textContent = currentIntake.request_id || 'REQ-0001';
-  displayTimestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  displayRequestId.textContent = currentIntake.id
+    ? `${currentIntake.id} (${currentIntake.request_id || ''})`
+    : (currentIntake.request_id || 'REQ-0001');
+  displayTimestamp.textContent = currentIntake.created_at
+    ? new Date(currentIntake.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   displaySource.textContent = formatSource(sourceSelect.value || currentIntake.source);
 
   // Status
@@ -701,12 +717,18 @@ function renderIntakeView() {
   // Overview
   displayProjectName.textContent = p.name || 'Untitled Project';
   displaySummary.textContent = p.summary || 'No summary available';
-  displayObjective.textContent = p.business_objective || 'No business objective specified';
+  displayObjective.textContent = p.business_objective || 'Scope defined in project brief';
 
   // Recommendation
-  displayRecommendedTeam.textContent = t.team;
-  displayConfidenceText.textContent = t.confidence_text || `${Math.round(t.confidence * 100)}% Confidence`;
-  teamOverrideSelect.value = t.team;
+  displayRecommendedTeam.textContent = t.team || 'Web Development';
+  displayConfidenceText.textContent = t.confidence_text || `${Math.round((t.confidence || 0) * 100)}% Confidence`;
+  teamOverrideSelect.value = t.team || 'Web Development';
+
+  const confidencePct = Math.round((t.confidence || 0) * 100);
+  const confidenceMeter = document.querySelector('.confidence-meter');
+  if (confidenceMeter) {
+    confidenceMeter.style.width = `${Math.min(100, Math.max(0, confidencePct))}%`;
+  }
 
   // Reasoning list
   displayReasoningList.innerHTML = '';
@@ -731,7 +753,10 @@ function renderIntakeView() {
 
   // Technical Specs
   displayTechStack.innerHTML = '';
-  (p.technical_requirements || []).forEach(tech => {
+  const techStack = (p.technical_requirements && p.technical_requirements.length > 0)
+    ? p.technical_requirements
+    : (t.team ? [`Team: ${t.team}`] : ['Web/API Stack']);
+  techStack.forEach(tech => {
     const span = document.createElement('span');
     span.className = 'tech-tag';
     span.textContent = tech;
@@ -749,7 +774,11 @@ function renderIntakeView() {
 
   // Missing Information
   displayMissingList.innerHTML = '';
-  (p.missing_information || []).forEach(item => {
+  const missingItems = [...(p.missing_information || [])];
+  if (currentIntake.requires_manual_review && currentIntake.review_notes) {
+    missingItems.unshift(`[Review Notes] ${currentIntake.review_notes}`);
+  }
+  missingItems.forEach(item => {
     const li = document.createElement('li');
     li.textContent = item;
     displayMissingList.appendChild(li);
@@ -819,7 +848,7 @@ function updateStatusUI(status) {
   if (status === 'approved') {
     displayStatus.classList.add('status-approved');
     statusLabel.textContent = 'Approved & Finalized';
-  } else if (status === 'rejected') {
+  } else if (status === 'flagged' || status === 'rejected') {
     displayStatus.classList.add('status-rejected');
     statusLabel.textContent = 'Revision Requested';
   } else {
@@ -834,14 +863,15 @@ function renderHistory() {
 
   intakeHistory.forEach((item, index) => {
     const div = document.createElement('div');
-    div.className = `history-item ${item.id === currentIntake.request_id ? 'active' : ''}`;
+    const isActive = (item.id === currentIntake.id || item.request_id === currentIntake.request_id);
+    div.className = `history-item ${isActive ? 'active' : ''}`;
     div.innerHTML = `
       <div class="history-item-meta">
-        <span class="history-id">${item.id}</span>
+        <span class="history-id">${escapeHtml(item.id || item.request_id)}</span>
         <span class="history-name">${escapeHtml(item.name)}</span>
       </div>
-      <span class="badge ${item.status === 'approved' ? 'badge-primary' : 'badge-subtle'}">
-        ${item.team}
+      <span class="badge ${item.status === 'approved' ? 'badge-primary' : (item.status === 'flagged' || item.status === 'rejected' ? 'badge-danger' : 'badge-subtle')}">
+        ${escapeHtml(item.team)}
       </span>
     `;
 
@@ -851,7 +881,7 @@ function renderHistory() {
       if (item.data) {
         currentIntake = JSON.parse(JSON.stringify(item.data));
         renderIntakeView();
-        showToast(`Loaded history: ${item.id}`, 'info');
+        showToast(`Loaded history: ${item.id || item.request_id}`, 'info');
       }
     });
 
@@ -860,9 +890,12 @@ function renderHistory() {
 }
 
 function updateHistoryStatus(id, newStatus) {
-  const historyEntry = intakeHistory.find(h => h.id === id);
+  const historyEntry = intakeHistory.find(h => h.id === id || h.request_id === id);
   if (historyEntry) {
     historyEntry.status = newStatus;
+    if (historyEntry.data) {
+      historyEntry.data.status = newStatus;
+    }
     renderHistory();
   }
 }
