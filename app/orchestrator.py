@@ -16,11 +16,12 @@ from app.models import (
     PendingIntake,
     ApprovedIntake,
     UserFeedback,
+    extraction_is_usable,
 )
 from app.providers.ollama import OllamaProvider
 from app.services.extraction import ExtractionService
 from app.services.recommendation import recommend_team
-from app.services.checklist import generate_checklist
+from app.services.checklist import generate_checklist, generate_clarification_checklist
 from app.storage.db import get_db_connection, init_db
 
 logger = logging.getLogger(__name__)
@@ -119,6 +120,7 @@ class IntakeOrchestrator:
                 missing_information=fallback_missing,
                 scope_constraints=[],
                 confidence=0.0,
+                extraction_status="failed",
             )
             requires_manual_review = True
             review_notes = f"Manual review required: {fallback_notes}"
@@ -140,27 +142,71 @@ class IntakeOrchestrator:
                     project_extraction.confidence,
                 )
 
-        # 3. Generate team recommendation (with stage-level fault isolation)
-        logger.info("Step 3: Team Recommendation - Deriving delivery team recommendation for request %s", request.id)
-        try:
-            team_rec = recommend_team(project_extraction)
+        # Step 2b: Authoritative Extraction Gate
+        is_usable = extraction_is_usable(project_extraction)
+        if is_usable:
             logger.info(
-                "Step 3: Team Recommendation - Recommendation generated: %s -> %s (confidence=%.2f)",
-                request.id,
-                team_rec.team,
-                team_rec.confidence,
+                "Step 2b: Extraction Gate: VALIDATED (status=%s, confidence=%.2f)",
+                project_extraction.extraction_status,
+                project_extraction.confidence,
             )
-        except Exception as team_err:
-            logger.error("Step 3: Team Recommendation - Generation failed for %s: %s", request.id, team_err)
+        else:
+            logger.warning(
+                "Step 2b: Extraction Gate: FAILED (status=%s, confidence=%.2f) - "
+                "Implementation checklist generation blocked; Clarification checklist generated; Human review required",
+                getattr(project_extraction, "extraction_status", "failed"),
+                getattr(project_extraction, "confidence", 0.0),
+            )
             requires_manual_review = True
-            team_fail_note = f"Team recommendation failed: {team_err}. Manual team assignment required."
-            review_notes = f"{review_notes} {team_fail_note}".strip() if review_notes else team_fail_note
-            team_rec = TeamRecommendation(
-                team="Pending Triage",
-                confidence=0.0,
-                reasoning=["Automated team recommendation encountered an error."],
-                requires_human_review=True,
-            )
+
+        # 3. Generate team recommendation (with stage-level fault isolation & failure gating)
+        if not is_usable:
+            logger.info("Step 3: Team Recommendation - Deriving tentative recommendation strictly from original brief")
+            try:
+                # Use ONLY the client's original brief text - strictly prevent error contamination
+                raw_rec = recommend_team(brief.brief_text)
+                adj_confidence = min(raw_rec.confidence, 0.35) if raw_rec.team else 0.0
+                team_name = raw_rec.team if (raw_rec.team and adj_confidence >= 0.20) else None
+                team_rec = TeamRecommendation(
+                    team=team_name,
+                    recommended_team=team_name,
+                    supporting_teams=raw_rec.supporting_teams if team_name else [],
+                    confidence=adj_confidence,
+                    reasoning=[
+                        "Requirement extraction failed or confidence is 0; team recommendation is tentative based solely on raw brief keywords.",
+                        *(raw_rec.reasoning or []),
+                    ],
+                    requires_human_review=True,
+                )
+            except Exception as rec_err:
+                logger.warning("Step 3: Team Recommendation - Could not evaluate raw brief: %s", rec_err)
+                team_rec = TeamRecommendation(
+                    team=None,
+                    confidence=0.0,
+                    reasoning=["Extraction failed and raw brief could not be evaluated."],
+                    requires_human_review=True,
+                )
+        else:
+            logger.info("Step 3: Team Recommendation - Deriving delivery team recommendation for request %s", request.id)
+            try:
+                team_rec = recommend_team(project_extraction)
+                logger.info(
+                    "Step 3: Team Recommendation - Recommendation generated: %s -> %s (confidence=%.2f)",
+                    request.id,
+                    team_rec.team,
+                    team_rec.confidence,
+                )
+            except Exception as team_err:
+                logger.error("Step 3: Team Recommendation - Generation failed for %s: %s", request.id, team_err)
+                requires_manual_review = True
+                team_fail_note = f"Team recommendation failed: {team_err}. Manual team assignment required."
+                review_notes = f"{review_notes} {team_fail_note}".strip() if review_notes else team_fail_note
+                team_rec = TeamRecommendation(
+                    team="Pending Triage",
+                    confidence=0.0,
+                    reasoning=["Automated team recommendation encountered an error."],
+                    requires_human_review=True,
+                )
 
         if team_rec.requires_human_review:
             requires_manual_review = True
@@ -170,41 +216,57 @@ class IntakeOrchestrator:
             )
             review_notes = f"{review_notes} {rec_note}".strip() if review_notes else rec_note
 
-        # 4. Generate checklist (with stage-level fault isolation)
-        logger.info("Step 4: Checklist Generation - Generating delivery checklist for request %s", request.id)
-        try:
-            checklist = generate_checklist(
-                requirements=project_extraction.requirements,
-                team=team_rec.team,
+        # 4. Generate checklist (with extraction failure gating)
+        if not is_usable:
+            logger.info("Step 4: Checklist Generation - Extraction unusable; generating clarification checklist")
+            checklist = generate_clarification_checklist(
+                brief_text=brief.brief_text,
                 missing_information=project_extraction.missing_information,
-                supporting_teams=team_rec.supporting_teams,
             )
             logger.info(
-                "Step 4: Checklist Generation - Checklist generated: %s (%d items)",
+                "Step 4: Checklist Generation - Clarification checklist generated: %s (%d items)",
                 request.id,
                 checklist.total_tasks,
             )
-        except Exception as check_err:
-            logger.error("Step 4: Checklist Generation - Generation failed for %s: %s", request.id, check_err)
-            requires_manual_review = True
-            check_fail_note = f"Checklist generation failed: {check_err}. Manual task entry required."
-            review_notes = f"{review_notes} {check_fail_note}".strip() if review_notes else check_fail_note
-            checklist = Checklist(
-                items=[
-                    ChecklistItem(
-                        id=1,
-                        task="Manually review requirements and compile delivery checklist",
-                        priority="high",
-                        estimated_effort="1-2 hours",
-                    )
-                ],
-                total_tasks=1,
-            )
+        else:
+            logger.info("Step 4: Checklist Generation - Generating delivery checklist for request %s", request.id)
+            try:
+                checklist = generate_checklist(
+                    requirements=project_extraction.requirements,
+                    team=team_rec.team,
+                    missing_information=project_extraction.missing_information,
+                    supporting_teams=team_rec.supporting_teams,
+                )
+                logger.info(
+                    "Step 4: Checklist Generation - Implementation checklist generated: %s (%d items)",
+                    request.id,
+                    checklist.total_tasks,
+                )
+            except Exception as check_err:
+                logger.error("Step 4: Checklist Generation - Generation failed for %s: %s", request.id, check_err)
+                requires_manual_review = True
+                check_fail_note = f"Checklist generation failed: {check_err}. Manual task entry required."
+                review_notes = f"{review_notes} {check_fail_note}".strip() if review_notes else check_fail_note
+                checklist = Checklist(
+                    checklist_type="clarification",
+                    type="clarification",
+                    items=[
+                        ChecklistItem(
+                            id=1,
+                            task="Manually review requirements and compile delivery checklist",
+                            priority="high",
+                            estimated_effort="1-2 hours",
+                        )
+                    ],
+                    total_tasks=1,
+                )
 
         # 5. Assemble PendingIntake
         logger.info("Step 5: Intake Assembly - Assembling PendingIntake for request %s", request.id)
         pending = PendingIntake(
             request_id=request.id,
+            raw_brief=brief.brief_text,
+            original_brief=brief.brief_text,
             extracted=project_extraction,
             team_recommendation=team_rec,
             checklist=checklist,

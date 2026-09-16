@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Optional, List, Literal, Dict, Any
+from typing import Optional, List, Literal, Dict, Any, Union
 from uuid import uuid4
 from pydantic import BaseModel, Field, ConfigDict, model_validator
 
@@ -302,6 +302,7 @@ class ChecklistItem(BaseModel):
         default=None, description="Sequential task ID for dependency tracking"
     )
     task: str = Field(..., description="What needs to be done?")
+    title: Optional[str] = Field(default=None, description="Alias for task")
     priority: Literal["high", "medium", "low"] = Field(default="medium")
     estimated_effort: Optional[str] = Field(
         default=None, description="e.g., '2 hours', '1 day', 'TBD'"
@@ -310,11 +311,26 @@ class ChecklistItem(BaseModel):
         default=None, description="Task IDs this depends on (if any)"
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def sync_task_and_title(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "task" in data and not data.get("title"):
+                data["title"] = data["task"]
+            elif "title" in data and not data.get("task"):
+                data["task"] = data["title"]
+        return data
+
+    @property
+    def item_title(self) -> str:
+        return self.title or self.task
+
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "id": 1,
                 "task": "Confirm user base size with client",
+                "title": "Confirm user base size with client",
                 "priority": "high",
                 "estimated_effort": "30 minutes",
                 "depends_on": None,
@@ -326,6 +342,14 @@ class ChecklistItem(BaseModel):
 class Checklist(BaseModel):
     """Generated delivery checklist"""
 
+    checklist_type: Literal["implementation", "clarification"] = Field(
+        default="implementation",
+        description="Type of checklist: 'implementation' for validated extraction, 'clarification' for failed/unusable extraction",
+    )
+    type: Optional[str] = Field(
+        default="implementation",
+        description="Alias for checklist_type ('implementation' | 'clarification')",
+    )
     items: List[ChecklistItem] = Field(
         ..., description="Ordered list of immediate next steps"
     )
@@ -334,11 +358,23 @@ class Checklist(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc)
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def sync_checklist_types(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "checklist_type" in data and "type" not in data:
+                data["type"] = data["checklist_type"]
+            elif "type" in data and "checklist_type" not in data:
+                data["checklist_type"] = data["type"]
+        return data
+
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
+                "checklist_type": "implementation",
+                "type": "implementation",
                 "items": [
-                    {"id": 1, "task": "Confirm user base size", "priority": "high"}
+                    {"id": 1, "task": "Confirm user base size", "title": "Confirm user base size", "priority": "high"}
                 ],
                 "total_tasks": 1,
                 "generated_at": "2026-09-14T12:00:00Z",
@@ -421,6 +457,12 @@ class PendingIntake(BaseModel):
 
     id: str = Field(default_factory=lambda: f"INT-{uuid4().hex[:8]}")
     request_id: str = Field(description="Links back to original request")
+    raw_brief: Optional[str] = Field(
+        default=None, description="Original unparsed client brief text"
+    )
+    original_brief: Optional[str] = Field(
+        default=None, description="Alias for raw_brief"
+    )
     extracted: ProjectExtraction
     team_recommendation: TeamRecommendation
     checklist: Checklist
@@ -434,6 +476,16 @@ class PendingIntake(BaseModel):
     review_notes: Optional[str] = Field(
         default=None, description="Why is manual review required?"
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def sync_brief_fields(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "raw_brief" in data and not data.get("original_brief"):
+                data["original_brief"] = data["raw_brief"]
+            elif "original_brief" in data and not data.get("raw_brief"):
+                data["raw_brief"] = data["original_brief"]
+        return data
 
     @model_validator(mode="after")
     def validate_manual_review_relationship(self) -> "PendingIntake":

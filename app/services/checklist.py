@@ -11,6 +11,7 @@ from app.models import (
     ProjectExtraction,
     Requirement,
     TeamRecommendation,
+    extraction_is_usable,
 )
 
 logger = logging.getLogger(__name__)
@@ -103,6 +104,105 @@ def _format_requirement_task(desc: str) -> str:
     return clean[0].upper() + clean[1:]
 
 
+DEFAULT_CLARIFICATION_CHECKLIST: List[str] = [
+    "Clarify the specific operational problem to be solved",
+    "Identify the available data and its format",
+    "Define the expected AI capability or use case",
+    "Define success metrics and expected cost/time savings",
+    "Identify required integrations and deployment environment",
+]
+
+# Terms that indicate provider errors or technical failures and must NEVER contaminate checklists
+ERROR_CONTAMINATION_TERMS: Set[str] = {
+    "connection refused", "offline", "http", "traceback", "exception",
+    "timed out", "timeout", "error", "failed", "couldn't extract", "ollama",
+    "groq", "status code", "internal server error", "stack trace", "errno",
+    "500", "404", "400", "pydantic", "validation failed", "bad gateway",
+}
+
+
+def generate_clarification_checklist(
+    brief_text: Optional[str] = None,
+    missing_information: Optional[List[str]] = None,
+) -> Checklist:
+    """
+    Generate a safe, non-invented clarification checklist when requirement extraction fails or is unusable.
+    Strictly avoids any implementation, technical, architecture, framework, model, or database assumptions.
+    Derives clarification questions strictly from original brief and known missing information.
+    """
+    items: List[ChecklistItem] = []
+    seen_tasks: List[str] = []
+    task_id = 1
+
+    # 1. Add clarification tasks from known missing information (filtered of error contamination)
+    if missing_information:
+        for missing in missing_information:
+            clean = missing.strip().rstrip(".")
+            clean_lower = clean.lower()
+            # Strict error contamination barrier: skip any item mentioning provider errors
+            if any(term in clean_lower for term in ERROR_CONTAMINATION_TERMS):
+                continue
+            # Skip internal fallback phrases
+            if any(phrase in clean_lower for phrase in ["automated extraction", "manual triage", "manual verification", "extraction failure"]):
+                continue
+
+            if clean_lower.startswith("clarify "):
+                task_text = clean
+            elif clean_lower.startswith("confirm "):
+                task_text = f"Clarify with client: {clean[8:]}"
+            else:
+                task_text = f"Clarify with client: {clean}"
+
+            if not _is_duplicate_task(task_text, seen_tasks):
+                items.append(
+                    ChecklistItem(
+                        id=task_id,
+                        task=task_text,
+                        title=task_text,
+                        priority="high",
+                        estimated_effort="1-2 hours",
+                        depends_on=None,
+                    )
+                )
+                seen_tasks.append(task_text)
+                task_id += 1
+
+    # 2. Add standard clarification tasks based on original user brief
+    brief_lower = (brief_text or "").lower()
+    for default_task in DEFAULT_CLARIFICATION_CHECKLIST:
+        task_text = default_task
+        # If the brief has zero AI/ML/data keywords and is clearly a standard non-AI app, adapt item 3 gracefully
+        if "ai capability" in default_task.lower() and not any(k in brief_lower for k in ["ai", "ml", "model", "algorithm", "intelligence", "operations", "data"]):
+            task_text = "Define the expected system capability or core use cases"
+
+        if not _is_duplicate_task(task_text, seen_tasks):
+            items.append(
+                ChecklistItem(
+                    id=task_id,
+                    task=task_text,
+                    title=task_text,
+                    priority="high" if task_id <= 2 else "medium",
+                    estimated_effort="2-4 hours",
+                    depends_on=None,
+                )
+            )
+            seen_tasks.append(task_text)
+            task_id += 1
+
+    logger.info(
+        "Clarification checklist generated: %d tasks (checklist_type=clarification)",
+        len(items),
+    )
+
+    return Checklist(
+        checklist_type="clarification",
+        type="clarification",
+        items=items,
+        total_tasks=len(items),
+        generated_at=datetime.now(timezone.utc),
+    )
+
+
 def generate_checklist(
     requirements: Union[List[Requirement], ProjectExtraction, None],
     team: Union[str, TeamRecommendation, None] = "Web Development",
@@ -116,6 +216,7 @@ def generate_checklist(
     Advisory planning tool — does NOT execute work or automatically assign ownership.
 
     Enforces:
+    - Extraction gating: unusable or failed extractions are strictly routed to clarification checklist
     - Team-specific delivery lifecycle (Clarification -> Architecture -> Setup -> Implementation -> Integration -> QA -> Deployment)
     - Controlled task count: minimum 5, maximum 12 tasks
     - Selective clarification for critical missing info only
@@ -133,6 +234,20 @@ def generate_checklist(
     Returns:
         Validated Checklist Pydantic model.
     """
+    # 0. Authoritative Extraction Gate check: block implementation checklist if extraction failed or confidence 0
+    if isinstance(requirements, ProjectExtraction):
+        if not extraction_is_usable(requirements):
+            logger.warning(
+                "generate_checklist: Unusable extraction passed (status=%s, confidence=%.2f); "
+                "blocking implementation checklist and generating clarification checklist",
+                getattr(requirements, "extraction_status", "failed"),
+                getattr(requirements, "confidence", 0.0),
+            )
+            return generate_clarification_checklist(
+                brief_text=requirements.project_name if not requirements.project_name.startswith("Brief:") else None,
+                missing_information=requirements.missing_information,
+            )
+
     templates = team_templates or settings.TEAM_CHECKLIST_TEMPLATES
 
     # 1. Unpack input arguments
@@ -149,6 +264,25 @@ def generate_checklist(
         req_list = []
         missing_info_list = missing_information or []
 
+    # Safe validation check: empty requirements
+    if not req_list:
+        logger.warning("generate_checklist called with empty requirements")
+        raise ValueError("Cannot generate delivery checklist without project requirements")
+
+    # Gate check: if requirements are purely fallback triage items, block implementation checklist
+    if all(
+        "review and manually extract requirements" in req.description.lower()
+        or "manual triage" in req.description.lower()
+        for req in req_list
+    ):
+        logger.warning(
+            "generate_checklist: Fallback triage requirements detected; "
+            "blocking implementation checklist and generating clarification checklist"
+        )
+        return generate_clarification_checklist(
+            missing_information=missing_info_list,
+        )
+
     # Unpack team name and supporting teams
     if isinstance(team, TeamRecommendation):
         primary_team = team.team or "Web Development"
@@ -156,11 +290,6 @@ def generate_checklist(
     else:
         primary_team = team or "Web Development"
         secondary_teams = supporting_teams or []
-
-    # Safe validation check: empty requirements
-    if not req_list:
-        logger.warning("generate_checklist called with empty requirements")
-        raise ValueError("Cannot generate delivery checklist without project requirements")
 
     # Retrieve team template (or fallback to Web Development defaults)
     team_tpl = templates.get(primary_team, templates.get("Web Development", {}))
@@ -399,6 +528,8 @@ def generate_checklist(
     )
 
     return Checklist(
+        checklist_type="implementation",
+        type="implementation",
         items=items,
         total_tasks=len(items),
         generated_at=datetime.now(timezone.utc),
