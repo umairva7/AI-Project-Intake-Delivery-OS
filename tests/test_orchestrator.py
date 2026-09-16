@@ -348,3 +348,24 @@ def test_mark_issues_workflow(mock_provider):
     assert row["issues_marked"] is not None
     issues_list = json.loads(row["issues_marked"])
     assert "Database type is missing" in issues_list
+
+
+def test_logging_emitted_for_every_major_step(mock_provider, caplog):
+    """Verifies that clear, structured log messages are emitted for every major pipeline step."""
+    import logging
+    orchestrator = IntakeOrchestrator(provider=mock_provider)
+    brief = RawBrief(
+        brief_text="We need a React frontend with Python backend for an employee dashboard."
+    )
+
+    with caplog.at_level(logging.INFO):
+        orchestrator.process_brief(brief)
+
+    log_output = caplog.text
+    assert "Step 1: Request Ingestion" in log_output
+    assert "Step 2: LLM Extraction" in log_output
+    assert "Step 3: Team Recommendation" in log_output
+    assert "Step 4: Checklist Generation" in log_output
+    assert "Step 5: Intake Assembly" in log_output
+    assert "Step 6: Intake Persistence" in log_output
+    assert "Step 7: Human Review Ready" in log_output

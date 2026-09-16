@@ -144,7 +144,7 @@ class OllamaProvider:
             )
 
         logger.info(
-            "LLM extraction started: attempt %d of %d (length=%d chars)",
+            "Ollama Step 1: Model Invocation - Extraction attempt %d of %d (length=%d chars)",
             retry_count + 1,
             self.max_retries + 1,
             len(brief_text),
@@ -158,6 +158,7 @@ class OllamaProvider:
 
         # 2. Call Ollama API (handles timeouts and connection refused)
         try:
+            logger.info("Ollama Step 1: Model Invocation - Dispatching POST request to %s/api/generate", self.base_url)
             response_text = self._call_ollama(
                 prompt=prompt,
                 timeout=self.timeout,
@@ -166,7 +167,7 @@ class OllamaProvider:
         except requests.exceptions.Timeout:
             # Scenario 4: Timeout (no response in 30 seconds)
             logger.error(
-                "LLM extraction failed: Ollama timed out after %s seconds on attempt %d",
+                "Ollama Step 1: Model Invocation - Ollama timed out after %s seconds on attempt %d",
                 self.timeout,
                 retry_count + 1,
             )
@@ -181,20 +182,20 @@ class OllamaProvider:
         except requests.exceptions.ConnectionError:
             # Scenario 5: Ollama offline (connection refused)
             logger.error(
-                "LLM extraction failed: Ollama connection refused at %s",
+                "Ollama Step 1: Model Invocation - Ollama connection refused at %s (service offline)",
                 self.base_url,
             )
             return ExtractionResult(
                 valid=False,
                 error="Ollama connection refused",
-                user_message="AI system unavailable. Please ensure Ollama is running.",
+                user_message="AI system unavailable. Please ensure Ollama is running on http://localhost:11434",
                 requires_manual_review=True,
-                review_notes=f"Ollama service unavailable at {self.base_url}.",
+                review_notes="AI system unavailable. Please ensure Ollama is running on http://localhost:11434",
                 retry_count=retry_count,
             )
         except requests.exceptions.RequestException as exc:
             logger.error(
-                "LLM extraction failed: HTTP request exception: %s", exc
+                "Ollama Step 1: Model Invocation - HTTP request exception: %s", exc
             )
             return ExtractionResult(
                 valid=False,
@@ -206,12 +207,13 @@ class OllamaProvider:
             )
 
         # 3. Parse JSON (Scenario 1: Invalid JSON)
+        logger.info("Ollama Step 2: Response Parsing - Parsing and sanitizing JSON output")
         try:
             extracted_json = clean_and_parse_json(response_text)
         except (json.JSONDecodeError, ValueError) as json_err:
             if retry_count < self.max_retries:
                 logger.warning(
-                    "Invalid JSON received from LLM, retrying (attempt %d of %d): %s",
+                    "Ollama Step 2: Response Parsing - Invalid JSON received, retrying (attempt %d of %d): %s",
                     retry_count + 1,
                     self.max_retries,
                     json_err,
@@ -223,21 +225,28 @@ class OllamaProvider:
                 )
             else:
                 logger.error(
-                    "LLM extraction failed: LLM returned invalid JSON after %d retries: %s",
+                    "Ollama Step 2: Response Parsing - Invalid JSON after %d retries: %s",
                     retry_count,
                     json_err,
                 )
                 return ExtractionResult(
                     valid=False,
                     error=f"LLM returned invalid JSON after retries: {str(json_err)}",
-                    user_message="AI output format was invalid. The request has been flagged for manual review.",
+                    user_message=(
+                        "We couldn't confidently extract requirements from this brief. \n"
+                        "Could you add more details about: Technology preferences, Timeline, Budget"
+                    ),
                     requires_manual_review=True,
-                    review_notes="LLM output could not be parsed as valid JSON after retries.",
+                    review_notes=(
+                        "We couldn't confidently extract requirements from this brief. \n"
+                        "Could you add more details about: Technology preferences, Timeline, Budget"
+                    ),
                     raw_response=response_text,
                     retry_count=retry_count,
                 )
 
         # 4. Validate with Pydantic (Scenario 2: Missing required fields)
+        logger.info("Ollama Step 3: Schema Validation - Validating schema with Pydantic")
         try:
             extraction = ProjectExtraction.model_validate(extracted_json)
         except ValidationError as val_err:
@@ -249,7 +258,7 @@ class OllamaProvider:
             )
             if retry_count < self.max_retries:
                 logger.warning(
-                    "Pydantic validation failed, retrying (attempt %d of %d): %s",
+                    "Ollama Step 3: Schema Validation - Pydantic validation failed, retrying (attempt %d of %d): %s",
                     retry_count + 1,
                     self.max_retries,
                     err_details,
@@ -261,21 +270,28 @@ class OllamaProvider:
                 )
             else:
                 logger.error(
-                    "LLM extraction failed: Validation failed after %d retries: %s",
+                    "Ollama Step 3: Schema Validation - Validation failed after %d retries: %s",
                     retry_count,
                     err_details,
                 )
                 return ExtractionResult(
                     valid=False,
                     error=f"Missing or invalid fields: {err_details}",
-                    user_message="Extracted requirements were incomplete or missing required fields. Flagged for manual review.",
+                    user_message=(
+                        "We couldn't confidently extract requirements from this brief. \n"
+                        "Could you add more details about: Technology preferences, Timeline, Budget"
+                    ),
                     requires_manual_review=True,
-                    review_notes=f"Missing required fields: {err_details}",
+                    review_notes=(
+                        "We couldn't confidently extract requirements from this brief. \n"
+                        "Could you add more details about: Technology preferences, Timeline, Budget"
+                    ),
                     raw_response=response_text,
                     retry_count=retry_count,
                 )
 
         # 5. Hallucination & Low Confidence Detection (Scenario 3)
+        logger.info("Ollama Step 4: Confidence & Hallucination Audit - Assessing confidence threshold and confirmed flags")
         requires_manual_review = False
         review_notes_parts = []
         user_message = None
@@ -288,7 +304,7 @@ class OllamaProvider:
             )
             user_message = "Confidence below threshold. Flagged for human review."
             logger.warning(
-                "Low confidence extraction: %s, confidence=%.2f",
+                "Ollama Step 4: Confidence & Hallucination Audit - Low confidence extraction: %s, confidence=%.2f",
                 extraction.project_name,
                 extraction.confidence,
             )

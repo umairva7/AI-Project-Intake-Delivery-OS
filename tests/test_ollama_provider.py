@@ -184,7 +184,7 @@ def test_scenario_1_invalid_json_exhausts_retries(provider, sample_valid_brief):
         assert bool(result) is False
         assert result.requires_manual_review is True
         assert "LLM returned invalid JSON after retries" in result.error
-        assert "AI output format was invalid" in result.user_message
+        assert "We couldn't confidently extract requirements" in result.user_message
         assert mock_post.call_count == 2
 
 
@@ -237,7 +237,7 @@ def test_scenario_2_missing_fields_exhausts_retries(provider, sample_valid_brief
         assert result.requires_manual_review is True
         assert "Missing or invalid fields" in result.error
         assert "requirements" in result.error
-        assert "incomplete or missing required fields" in result.user_message
+        assert "We couldn't confidently extract requirements" in result.user_message
         assert mock_post.call_count == 2
 
 
@@ -310,7 +310,7 @@ def test_scenario_5_ollama_offline_connection_refused(provider, sample_valid_bri
         assert result.requires_manual_review is True
         assert (
             result.user_message
-            == "AI system unavailable. Please ensure Ollama is running."
+            == "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
         )
         assert "Ollama connection refused" in result.error
 

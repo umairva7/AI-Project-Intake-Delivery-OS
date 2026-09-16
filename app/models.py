@@ -145,6 +145,14 @@ class ProjectExtraction(BaseModel):
         le=1.0,
         description="How confident is the LLM in this extraction? (0.0 to 1.0)",
     )
+    extraction_status: Literal["validated", "failed"] = Field(
+        default="validated",
+        description="Explicit extraction status ('validated' or 'failed')",
+    )
+
+    @property
+    def extraction_confidence(self) -> float:
+        return self.confidence
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -165,6 +173,7 @@ class ProjectExtraction(BaseModel):
                 ],
                 "scope_constraints": ["6 weeks timeline", "$50,000 budget"],
                 "confidence": 0.92,
+                "extraction_status": "validated",
             }
         }
     )
@@ -175,6 +184,9 @@ class ExtractionResult(BaseModel):
 
     valid: bool = Field(
         default=True, description="Whether extraction was valid and parsed"
+    )
+    extraction_status: Optional[Literal["validated", "failed"]] = Field(
+        default=None, description="Explicit extraction status ('validated' or 'failed')"
     )
     extraction: Optional[ProjectExtraction] = Field(
         default=None, description="Structured project extraction if valid"
@@ -197,6 +209,17 @@ class ExtractionResult(BaseModel):
     retry_count: int = Field(
         default=0, description="Number of retries attempted"
     )
+
+    @model_validator(mode="after")
+    def sync_extraction_status(self) -> "ExtractionResult":
+        if self.extraction_status is None:
+            self.extraction_status = (
+                "validated" if (self.valid and self.extraction is not None) else "failed"
+            )
+        if self.extraction is not None:
+            if not hasattr(self.extraction, "extraction_status") or self.extraction.extraction_status != self.extraction_status:
+                self.extraction.extraction_status = self.extraction_status
+        return self
 
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -229,8 +252,47 @@ class ExtractionResult(BaseModel):
     def confidence(self) -> float:
         return self.extraction.confidence if self.extraction else 0.0
 
+    @property
+    def extraction_confidence(self) -> float:
+        return self.confidence
+
     def to_project_extraction(self) -> Optional[ProjectExtraction]:
         return self.extraction
+
+
+def extraction_is_usable(
+    extraction: Optional[Union[ProjectExtraction, ExtractionResult, Any]]
+) -> bool:
+    """
+    Authoritative Extraction Gate.
+    Determines whether an extraction is valid and confident enough to be used
+    for downstream implementation-specific team recommendation and checklist generation.
+
+    Invariants:
+      - extraction must not be None
+      - extraction_status must be 'validated' (not 'failed')
+      - extraction_confidence / confidence must be > 0.0
+    """
+    if extraction is None:
+        return False
+
+    if isinstance(extraction, ExtractionResult):
+        if not extraction.valid or extraction.extraction is None:
+            return False
+        extraction = extraction.extraction
+
+    status = getattr(extraction, "extraction_status", "validated")
+    if status == "failed":
+        return False
+
+    conf = getattr(extraction, "confidence", None)
+    if conf is None:
+        conf = getattr(extraction, "extraction_confidence", 0.0)
+
+    if conf is None or conf <= 0.0:
+        return False
+
+    return status == "validated"
 
 
 class ChecklistItem(BaseModel):

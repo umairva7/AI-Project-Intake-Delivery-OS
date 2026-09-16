@@ -495,17 +495,36 @@ JSON OUTPUT:
             return ExtractionResult(
                 valid=False,
                 error=f"Validation failed: {val_err}",
-                user_message="Extracted requirements were incomplete or missing required fields. Flagged for manual review.",
+                user_message=(
+                    "We couldn't confidently extract requirements from this brief. \n"
+                    "Could you add more details about: Technology preferences, Timeline, Budget"
+                ),
                 requires_manual_review=True,
-                review_notes=f"Missing required fields or schema validation error: {val_err}",
+                review_notes=(
+                    "We couldn't confidently extract requirements from this brief. \n"
+                    "Could you add more details about: Technology preferences, Timeline, Budget"
+                ),
             )
         except (ExtractionError, ValueError, Exception) as err:
+            err_str = str(err).lower()
+            if "connection refused" in err_str or "offline" in err_str or "11434" in err_str:
+                user_msg = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
+                rev_note = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
+            else:
+                user_msg = (
+                    "We couldn't confidently extract requirements from this brief. \n"
+                    "Could you add more details about: Technology preferences, Timeline, Budget"
+                )
+                rev_note = (
+                    "We couldn't confidently extract requirements from this brief. \n"
+                    "Could you add more details about: Technology preferences, Timeline, Budget"
+                )
             return ExtractionResult(
                 valid=False,
                 error=str(err),
-                user_message="AI system was unable to extract valid requirements. Flagged for manual review.",
+                user_message=user_msg,
                 requires_manual_review=True,
-                review_notes=f"Extraction failure: {err}",
+                review_notes=rev_note,
             )
 
 

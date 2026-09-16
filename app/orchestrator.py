@@ -62,7 +62,7 @@ class IntakeOrchestrator:
             brief = RawBrief(brief_text=brief, source="web_form")
 
         logger.info(
-            "Starting intake processing for brief (source=%s, length=%d)",
+            "Step 1: Request Ingestion - Starting intake processing for brief (source=%s, length=%d)",
             brief.source,
             len(brief.brief_text),
         )
@@ -70,29 +70,44 @@ class IntakeOrchestrator:
         # 1. Create and persist raw Request record (status: processing)
         request = Request(raw_text=brief.brief_text, source=brief.source)
         self._store_request(request)
-        logger.info("Request created: %s", request.id)
+        logger.info("Step 1: Request Ingestion - Request persisted with ID %s (status=%s)", request.id, request.status)
 
         # 2. Call LLM for requirement extraction
-        logger.info("LLM extraction started: %s", request.id)
+        logger.info("Step 2: LLM Extraction - Invoking model requirement extraction for request %s", request.id)
         extraction_result = self.extractor.extract(brief.brief_text)
 
         # Handle extraction failure or invalid LLM response
         if not extraction_result.valid or not extraction_result.extraction:
             logger.warning(
-                "LLM extraction failed for request %s: %s",
+                "Step 2: LLM Extraction - Extraction failed for request %s: %s",
                 request.id,
                 extraction_result.error,
             )
-            # Create a safe fallback extraction for human review
+            # Differentiate Ollama offline vs extraction failure
+            err_text = f"{extraction_result.error or ''} {extraction_result.review_notes or ''} {extraction_result.user_message or ''}".lower()
+            is_offline = "connection refused" in err_text or "offline" in err_text or "11434" in err_text
+
+            if is_offline:
+                fallback_summary = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
+                fallback_notes = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
+                fallback_missing = ["Technology preferences", "Timeline", "Budget"]
+            else:
+                fallback_summary = (
+                    "We couldn't confidently extract requirements from this brief. \n"
+                    "Could you add more details about: Technology preferences, Timeline, Budget"
+                )
+                fallback_notes = (
+                    "We couldn't confidently extract requirements from this brief. \n"
+                    "Could you add more details about: Technology preferences, Timeline, Budget"
+                )
+                fallback_missing = ["Technology preferences", "Timeline", "Budget"]
+
             first_line = brief.brief_text.strip().split("\n")[0][:50].strip()
             fallback_title = f"Brief: {first_line}" if len(first_line) >= 3 else "Unstructured Request"
 
             project_extraction = ProjectExtraction(
                 project_name=fallback_title,
-                summary=(
-                    f"Automated extraction could not be completed ({extraction_result.error or 'Extraction failed'}). "
-                    "Raw brief preserved for human triage."
-                ),
+                summary=fallback_summary,
                 requirements=[
                     Requirement(
                         description="Review and manually extract requirements from raw brief",
@@ -101,44 +116,42 @@ class IntakeOrchestrator:
                         source_quote=brief.brief_text[:200],
                     )
                 ],
-                missing_information=[
-                    "Automated extraction failed; all technical details require manual verification."
-                ],
+                missing_information=fallback_missing,
                 scope_constraints=[],
                 confidence=0.0,
             )
             requires_manual_review = True
-            note_content = extraction_result.review_notes or extraction_result.error or "LLM extraction failed"
-            review_notes = f"Manual review required: {note_content}"
+            review_notes = f"Manual review required: {fallback_notes}"
         else:
             project_extraction = extraction_result.to_project_extraction()
             requires_manual_review = extraction_result.requires_manual_review
             review_notes = extraction_result.review_notes
 
             logger.info(
-                "LLM extraction completed: %s, confidence=%.2f",
+                "Step 2: LLM Extraction - Extraction completed: %s, confidence=%.2f, manual_review=%s",
                 request.id,
                 project_extraction.confidence,
+                requires_manual_review,
             )
             if project_extraction.confidence < settings.CONFIDENCE_THRESHOLD:
                 logger.warning(
-                    "Low confidence extraction: %s, confidence=%.2f",
+                    "Step 2: LLM Extraction - Low confidence extraction: %s, confidence=%.2f",
                     request.id,
                     project_extraction.confidence,
                 )
 
         # 3. Generate team recommendation (with stage-level fault isolation)
-        logger.info("Generating team recommendation: %s", request.id)
+        logger.info("Step 3: Team Recommendation - Deriving delivery team recommendation for request %s", request.id)
         try:
             team_rec = recommend_team(project_extraction)
             logger.info(
-                "Team recommendation generated: %s -> %s (confidence=%.2f)",
+                "Step 3: Team Recommendation - Recommendation generated: %s -> %s (confidence=%.2f)",
                 request.id,
                 team_rec.team,
                 team_rec.confidence,
             )
         except Exception as team_err:
-            logger.error("Team recommendation failed for %s: %s", request.id, team_err)
+            logger.error("Step 3: Team Recommendation - Generation failed for %s: %s", request.id, team_err)
             requires_manual_review = True
             team_fail_note = f"Team recommendation failed: {team_err}. Manual team assignment required."
             review_notes = f"{review_notes} {team_fail_note}".strip() if review_notes else team_fail_note
@@ -158,7 +171,7 @@ class IntakeOrchestrator:
             review_notes = f"{review_notes} {rec_note}".strip() if review_notes else rec_note
 
         # 4. Generate checklist (with stage-level fault isolation)
-        logger.info("Generating checklist: %s", request.id)
+        logger.info("Step 4: Checklist Generation - Generating delivery checklist for request %s", request.id)
         try:
             checklist = generate_checklist(
                 requirements=project_extraction.requirements,
@@ -167,12 +180,12 @@ class IntakeOrchestrator:
                 supporting_teams=team_rec.supporting_teams,
             )
             logger.info(
-                "Checklist generated: %s (%d items)",
+                "Step 4: Checklist Generation - Checklist generated: %s (%d items)",
                 request.id,
                 checklist.total_tasks,
             )
         except Exception as check_err:
-            logger.error("Checklist generation failed for %s: %s", request.id, check_err)
+            logger.error("Step 4: Checklist Generation - Generation failed for %s: %s", request.id, check_err)
             requires_manual_review = True
             check_fail_note = f"Checklist generation failed: {check_err}. Manual task entry required."
             review_notes = f"{review_notes} {check_fail_note}".strip() if review_notes else check_fail_note
@@ -189,6 +202,7 @@ class IntakeOrchestrator:
             )
 
         # 5. Assemble PendingIntake
+        logger.info("Step 5: Intake Assembly - Assembling PendingIntake for request %s", request.id)
         pending = PendingIntake(
             request_id=request.id,
             extracted=project_extraction,
@@ -200,12 +214,14 @@ class IntakeOrchestrator:
         )
 
         # 6. Persist pending intake and update request status
+        logger.info("Step 6: Intake Persistence - Storing PendingIntake %s to database", pending.id)
         self._store_intake(pending)
         request.transition_to("pending_review")
         self._update_request_status(request.id, "pending_review")
 
+        # 7. Ready for Human Review
         logger.info(
-            "Intake ready for review: %s (request_id=%s, manual_review=%s)",
+            "Step 7: Human Review Ready - Intake ready for review: %s (request_id=%s, manual_review=%s)",
             pending.id,
             request.id,
             pending.requires_manual_review,
