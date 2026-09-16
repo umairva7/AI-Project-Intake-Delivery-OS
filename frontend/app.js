@@ -402,13 +402,45 @@ const API_BASE_URL = (window.location.protocol.startsWith('http') && window.loca
   ? ''
   : 'http://localhost:8000';
 
+function parseConfidenceScore(val, text) {
+  if (typeof val === 'number' && !isNaN(val)) {
+    if (val >= 0 && val <= 1) return val;
+    if (val > 1 && val <= 100) return val / 100;
+  }
+
+  const combined = `${val || ''} ${text || ''}`.toLowerCase().trim();
+  const matchPct = combined.match(/(\d+(\.\d+)?)%/);
+  if (matchPct) {
+    return parseFloat(matchPct[1]) / 100;
+  }
+  const matchNum = combined.match(/\b(0\.\d+)\b/);
+  if (matchNum) {
+    return parseFloat(matchNum[1]);
+  }
+
+  if (combined.includes('very_low') || combined.includes('very low') || combined.includes('none')) {
+    return 0.15;
+  }
+  if (combined.includes('low')) {
+    return 0.30;
+  }
+  if (combined.includes('medium') || combined.includes('moderate')) {
+    return 0.65;
+  }
+  if (combined.includes('high')) {
+    return 0.92;
+  }
+
+  return 0.50;
+}
+
 function formatConfidence(confidence) {
   if (typeof confidence === 'string' && confidence.toLowerCase().includes('confidence')) {
     return confidence;
   }
-  const num = typeof confidence === 'number' ? confidence : 0.90;
-  if (num >= 0.88) return "Confidence: High";
-  if (num >= 0.70) return "Confidence: Moderate";
+  const score = parseConfidenceScore(confidence);
+  if (score >= 0.85) return "Confidence: High";
+  if (score >= 0.65) return "Confidence: Moderate";
   return "Confidence: Low";
 }
 
@@ -459,7 +491,22 @@ function normalizeIntakeResponse(data) {
   });
 
   const constraints = extracted.scope_constraints || extracted.constraints || [];
-  const confVal = typeof teamRec.confidence === 'number' ? teamRec.confidence : 0.90;
+
+  // Extract raw confidence without arbitrary 0.90 defaults
+  let rawConfidence = null;
+  if (teamRec.confidence !== undefined && teamRec.confidence !== null) {
+    rawConfidence = teamRec.confidence;
+  } else if (teamRec.confidence_score !== undefined && teamRec.confidence_score !== null) {
+    rawConfidence = teamRec.confidence_score;
+  } else if (extracted.confidence !== undefined && extracted.confidence !== null) {
+    rawConfidence = extracted.confidence;
+  } else if (data.confidence !== undefined && data.confidence !== null) {
+    rawConfidence = data.confidence;
+  } else if (teamRec.confidence_text) {
+    rawConfidence = teamRec.confidence_text;
+  }
+
+  const confVal = parseConfidenceScore(rawConfidence, teamRec.confidence_text || teamRec.confidence_level);
 
   return {
     id: data.id || data.intake_id || `INT-${Date.now().toString(36).slice(-8)}`,
@@ -489,7 +536,7 @@ function normalizeIntakeResponse(data) {
     team_recommendation: {
       team: teamRec.team || teamRec.recommended_team || 'Web Development',
       confidence: confVal,
-      confidence_text: formatConfidence(confVal),
+      confidence_text: (teamRec.confidence_text && /confidence/i.test(teamRec.confidence_text)) ? teamRec.confidence_text : formatConfidence(confVal),
       reasoning: teamRec.reasoning || [],
       alternative_team: teamRec.alternative_team || null
     },
@@ -1006,7 +1053,7 @@ async function runExtractionPipeline() {
     // Fallback using local intelligent extraction
     const fallbackBrief = Object.values(SAMPLE_BRIEFS).find(
       s => briefText.includes(s.raw_text.slice(0, 30)) || s.raw_text.includes(briefText.slice(0, 30))
-    ) || SAMPLE_BRIEFS.property;
+    ) || (/ambiguous|customer service|save money|slow|vague|machine learning/i.test(briefText) || briefText.length < 65 ? SAMPLE_BRIEFS.ambiguous : SAMPLE_BRIEFS.property);
 
     currentIntake = normalizeIntakeResponse(fallbackBrief.extracted);
     currentIntake.id = `INT-${Date.now().toString(36).slice(-8)}`;
@@ -1121,17 +1168,31 @@ function renderIntakeView() {
 
   // Team Recommendation
   displayRecommendedTeam.textContent = t.team || 'Web Development';
-  displayConfidenceText.textContent = t.confidence_text || formatConfidence(t.confidence);
+  
+  const confScore = (typeof t.confidence === 'number' && !isNaN(t.confidence))
+    ? t.confidence
+    : parseConfidenceScore(t.confidence, t.confidence_text);
+
+  displayConfidenceText.textContent = t.confidence_text || formatConfidence(confScore);
   if (displayConfidenceBadge) displayConfidenceBadge.style.display = 'block';
 
   if (teamOverrideSelect) {
     teamOverrideSelect.value = t.team || 'Web Development';
   }
 
-  const confidencePct = Math.round((t.confidence || 0.90) * 100);
+  // Adjust bar width dynamically according to confidence level
+  const clampedScore = Math.min(1.0, Math.max(0.0, confScore));
+  const confidencePct = Math.round(clampedScore * 100);
   const confidenceMeter = document.querySelector('.confidence-meter');
   if (confidenceMeter) {
-    confidenceMeter.style.width = `${Math.min(100, Math.max(0, confidencePct))}%`;
+    confidenceMeter.style.width = `${confidencePct}%`;
+    if (clampedScore < 0.65) {
+      confidenceMeter.style.backgroundColor = 'var(--status-flagged-fg)';
+    } else if (clampedScore < 0.85) {
+      confidenceMeter.style.backgroundColor = 'var(--status-pending-fg)';
+    } else {
+      confidenceMeter.style.backgroundColor = 'var(--status-approved-fg)';
+    }
   }
 
   // Reasoning list
