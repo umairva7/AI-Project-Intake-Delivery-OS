@@ -237,9 +237,15 @@ def calculate_extraction_confidence(
     words = text_clean.split()
     word_count = len(words)
 
+    # If extraction explicitly marked as failed, confidence is strictly 0.0
+    if getattr(extraction, "extraction_status", None) == "failed":
+        return 0.0
+
     # If extraction already has a confidence score from LLM / mock provider
     existing_conf = getattr(extraction, "confidence", None)
-    if existing_conf is not None and isinstance(existing_conf, (int, float)) and existing_conf > 0.0:
+    if existing_conf is not None and isinstance(existing_conf, (int, float)):
+        if existing_conf <= 0.0:
+            return 0.0
         raw_conf = float(existing_conf)
         # Penalize vague or brief inputs regardless of LLM self-report
         if word_count < 8:
