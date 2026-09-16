@@ -1,9 +1,9 @@
 /**
- * AI Project Intake — Frontend Application Logic
- * Clean, Minimal, Operations-focused B2B Interface
+ * Project Intake — Frontend Application Logic
+ * Clean, Non-Technical, Human-Friendly B2B Operations UI
  */
 
-// Sample Data with Evidence Audit Trail
+// Sample Data with Human-Friendly Evidence
 const SAMPLE_BRIEFS = {
   property: {
     title: "Property Platform",
@@ -16,7 +16,7 @@ const SAMPLE_BRIEFS = {
       status: "pending_review",
       project: {
         name: "Property Listing Platform",
-        summary: "Web platform for browsing and managing property listings with customer search and agent contact flows.",
+        summary: "Web platform for browsing and managing property listings with search, filter, and agent contact workflows.",
         business_objective: "Enable customers to discover properties and contact agents while allowing internal staff to manage listings via an admin dashboard.",
         requirements: [
           { description: "Browse property listings", priority: "high", confirmed: true, source_quote: "Users should be able to browse houses" },
@@ -29,26 +29,26 @@ const SAMPLE_BRIEFS = {
           "Python backend API"
         ],
         constraints: [
-          "MVP target of approximately 6 weeks"
+          "MVP target in ~6 weeks"
         ],
         existing_resources: [
           "UI Designer already available"
         ],
         missing_information: [
-          "Authentication and authorization requirements (visitor vs staff)",
-          "Hosting and cloud deployment requirements",
+          "Authentication and user permissions (public visitor vs staff access)",
+          "Hosting and cloud deployment preferences",
           "Expected listing volume and concurrent search traffic",
-          "Exact MVP acceptance criteria"
+          "MVP acceptance and launch criteria"
         ]
       },
       team_recommendation: {
         team: "Web Development",
         confidence: 0.95,
-        confidence_text: "95% confidence",
+        confidence_text: "Confidence: High",
         reasoning: [
-          "Primary deliverable is a web application with consumer and admin portals",
+          "Web application requiring customer portal and admin dashboard",
           "Frontend (React) and backend API (Python) match web team stack",
-          "Scope fits standard 6-week web delivery team capacity"
+          "Scope fits 6-week web delivery team capacity"
         ],
         alternative_team: null
       },
@@ -58,7 +58,7 @@ const SAMPLE_BRIEFS = {
           task: "Implement React frontend property browsing",
           priority: "high",
           task_type: "implementation",
-          evidence: { type: "requirement", source_quote: "We need a web platform for a property company. Users should be able to browse houses" },
+          evidence: { type: "requirement", source_quote: "Users should be able to browse houses" },
           done: false
         },
         {
@@ -87,7 +87,7 @@ const SAMPLE_BRIEFS = {
         },
         {
           id: 5,
-          task: "Clarify authentication and access control requirements",
+          task: "Clarify user authentication and role permissions",
           priority: "high",
           task_type: "clarification",
           evidence: { type: "missing_information", source_quote: "Authentication requirements omitted from brief" },
@@ -103,7 +103,7 @@ const SAMPLE_BRIEFS = {
         },
         {
           id: 7,
-          task: "Validate 6-week delivery roadmap with UI designer",
+          task: "Coordinate 6-week delivery roadmap with UI designer",
           priority: "medium",
           task_type: "implementation",
           evidence: { type: "requirement", source_quote: "We already have a designer but need development... MVP in around 6 weeks" },
@@ -135,7 +135,7 @@ const SAMPLE_BRIEFS = {
         technical_requirements: [
           "React frontend",
           "Python API",
-          "PostgreSQL"
+          "PostgreSQL database"
         ],
         constraints: [
           "6 weeks timeline",
@@ -145,7 +145,7 @@ const SAMPLE_BRIEFS = {
           "Existing PostgreSQL database"
         ],
         missing_information: [
-          "Authentication and role authorization (SSO vs custom)",
+          "Authentication and SSO protocol (Google, LDAP, or custom)",
           "Hosting and deployment environment preference",
           "Concurrency and reporting volume expectations"
         ]
@@ -153,11 +153,11 @@ const SAMPLE_BRIEFS = {
       team_recommendation: {
         team: "Web Development",
         confidence: 0.94,
-        confidence_text: "94% confidence",
+        confidence_text: "Confidence: High",
         reasoning: [
           "Direct match for React frontend and Python API stack",
-          "Standard internal enterprise CRUD and reporting dashboard",
-          "Timeline and budget match web development sprint profile"
+          "Standard internal enterprise reporting dashboard",
+          "Timeline and budget fit web delivery team sprint structure"
         ],
         alternative_team: "Data Engineering"
       },
@@ -188,10 +188,10 @@ const SAMPLE_BRIEFS = {
         },
         {
           id: 4,
-          task: "Clarify authentication and authorization protocol",
+          task: "Clarify SSO / Authentication integration requirements",
           priority: "high",
           task_type: "clarification",
-          evidence: { type: "missing_information", source_quote: "Authentication requirements omitted from brief" },
+          evidence: { type: "missing_information", source_quote: "Authentication protocol omitted from brief" },
           done: false
         },
         {
@@ -243,14 +243,14 @@ const SAMPLE_BRIEFS = {
         missing_information: [
           "Backend API and cloud synchronization architecture",
           "Health platform integrations (Apple HealthKit / Google Fit)",
-          "Offline mode and sync conflict resolution",
+          "Offline storage and sync conflict resolution",
           "App Store and Google Play publishing accounts"
         ]
       },
       team_recommendation: {
         team: "Mobile Development",
         confidence: 0.91,
-        confidence_text: "91% confidence",
+        confidence_text: "Confidence: High",
         reasoning: [
           "Explicit requirement for native iOS and Android applications",
           "Mobile-specific device capabilities: notifications, local logging",
@@ -342,8 +342,8 @@ const SAMPLE_BRIEFS = {
       },
       team_recommendation: {
         team: "Web Development",
-        confidence: 0.85,
-        confidence_text: "85% confidence",
+        confidence: 0.82,
+        confidence_text: "Confidence: Moderate",
         reasoning: [
           "E-commerce requirements span custom web frontend and payments integration",
           "Requires architectural evaluation: custom build vs headless commerce platform",
@@ -402,6 +402,16 @@ const API_BASE_URL = (window.location.protocol.startsWith('http') && window.loca
   ? ''
   : 'http://localhost:8000';
 
+function formatConfidence(confidence) {
+  if (typeof confidence === 'string' && confidence.toLowerCase().includes('confidence')) {
+    return confidence;
+  }
+  const num = typeof confidence === 'number' ? confidence : 0.90;
+  if (num >= 0.88) return "Confidence: High";
+  if (num >= 0.70) return "Confidence: Moderate";
+  return "Confidence: Low";
+}
+
 /**
  * Normalizes a PendingIntake API response from the backend into the shape
  * expected by the UI rendering layer.
@@ -449,6 +459,7 @@ function normalizeIntakeResponse(data) {
   });
 
   const constraints = extracted.scope_constraints || extracted.constraints || [];
+  const confVal = typeof teamRec.confidence === 'number' ? teamRec.confidence : 0.90;
 
   return {
     id: data.id || data.intake_id || `INT-${Date.now().toString(36).slice(-8)}`,
@@ -477,8 +488,8 @@ function normalizeIntakeResponse(data) {
     },
     team_recommendation: {
       team: teamRec.team || teamRec.recommended_team || 'Web Development',
-      confidence: typeof teamRec.confidence === 'number' ? teamRec.confidence : 0.90,
-      confidence_text: teamRec.confidence_text || `${Math.round((teamRec.confidence || 0.90) * 100)}% confidence`,
+      confidence: confVal,
+      confidence_text: formatConfidence(confVal),
       reasoning: teamRec.reasoning || [],
       alternative_team: teamRec.alternative_team || null
     },
@@ -488,6 +499,7 @@ function normalizeIntakeResponse(data) {
 }
 
 // Application State
+let hasProcessedIntake = false; // Start in intentional placeholder state
 let currentIntake = normalizeIntakeResponse(SAMPLE_BRIEFS.property.extracted);
 let intakeHistory = [
   {
@@ -501,12 +513,18 @@ let intakeHistory = [
 ];
 let isEditing = false;
 
-// DOM Elements
+// DOM Elements: View Switcher & Workspace
 const workspaceContainer = document.getElementById('workspaceContainer');
-const navTabIntake = document.getElementById('navTabIntake');
-const navTabReview = document.getElementById('navTabReview');
 const navTabSplit = document.getElementById('navTabSplit');
+const navTabBrief = document.getElementById('navTabBrief');
+const navTabResults = document.getElementById('navTabResults');
+const returnToSplitBtnBrief = document.getElementById('returnToSplitBtnBrief');
+const returnToSplitBtnResults = document.getElementById('returnToSplitBtnResults');
+const returnFromBriefBar = document.getElementById('returnFromBriefBar');
+const returnFromResultsBar = document.getElementById('returnFromResultsBar');
+const themeToggleBtn = document.getElementById('themeToggleBtn');
 
+// Brief Form Elements
 const rawTextInput = document.getElementById('rawTextInput');
 const charCount = document.getElementById('charCount');
 const clientNameInput = document.getElementById('clientNameInput');
@@ -532,6 +550,7 @@ const statusLabel = document.getElementById('statusLabel');
 const displayProjectName = document.getElementById('displayProjectName');
 const displaySummary = document.getElementById('displaySummary');
 const displayObjective = document.getElementById('displayObjective');
+const objectiveBlock = document.getElementById('objectiveBlock');
 
 const displayRecommendedTeam = document.getElementById('displayRecommendedTeam');
 const displayConfidenceBadge = document.getElementById('displayConfidenceBadge');
@@ -541,16 +560,25 @@ const displayReasoningList = document.getElementById('displayReasoningList');
 const displayRequirementsList = document.getElementById('displayRequirementsList');
 const reqCount = document.getElementById('reqCount');
 const displayTechStack = document.getElementById('displayTechStack');
+const techStackBlock = document.getElementById('techStackBlock');
 const displayConstraints = document.getElementById('displayConstraints');
 const displayResources = document.getElementById('displayResources');
+const constraintsGrid = document.getElementById('constraintsGrid');
+
 const displayMissingList = document.getElementById('displayMissingList');
+const missingBadge = document.getElementById('missingBadge');
+const missingIntroContainer = document.getElementById('missingIntroContainer');
 
 const displayChecklist = document.getElementById('displayChecklist');
 const checklistProgress = document.getElementById('checklistProgress');
 const newTaskInput = document.getElementById('newTaskInput');
 const addTaskBtn = document.getElementById('addTaskBtn');
+const addTaskRow = document.getElementById('addTaskRow');
 
 // Review / HITL Controls
+const reviewSection = document.getElementById('reviewSection');
+const reviewNote = document.getElementById('reviewNote');
+const reviewControlsWrap = document.getElementById('reviewControlsWrap');
 const teamOverrideSelect = document.getElementById('teamOverrideSelect');
 const reviewerNameInput = document.getElementById('reviewerNameInput');
 const reviewNotes = document.getElementById('reviewNotes');
@@ -569,12 +597,67 @@ const pipelineSteps = [
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   checkApiHealth();
-  loadSample('property');
+  // Pre-fill the brief textarea so the user can immediately test "Process brief"
+  loadSample('property', false);
   renderHistory();
-  renderIntakeView();
+  renderIntakeView(); // Renders intentional placeholder state
   setupEventListeners();
 });
+
+// Theme Management (Light / Dark)
+function initTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+  updateThemeButtonUI(currentTheme);
+
+  // Listen for OS scheme changes if user hasn't set an explicit preference
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme')) {
+      const newSystemTheme = e.matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newSystemTheme);
+      updateThemeButtonUI(newSystemTheme);
+    }
+  });
+}
+
+function updateThemeButtonUI(theme) {
+  if (!themeToggleBtn) return;
+  const isDark = (theme === 'dark');
+  themeToggleBtn.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+  themeToggleBtn.title = isDark ? 'Switch to light theme' : 'Switch to dark theme';
+}
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  updateThemeButtonUI(newTheme);
+}
+
+// View Switcher logic (Split / Brief / Results)
+function switchView(viewName) {
+  if (!workspaceContainer) return;
+  workspaceContainer.setAttribute('data-active-view', viewName);
+
+  [navTabSplit, navTabBrief, navTabResults].forEach(tab => {
+    if (!tab) return;
+    if (tab.getAttribute('data-view') === viewName) {
+      tab.classList.add('active');
+    } else {
+      tab.classList.remove('active');
+    }
+  });
+
+  // Toggle return-to-split bars
+  if (returnFromBriefBar) {
+    returnFromBriefBar.style.display = (viewName === 'brief') ? 'block' : 'none';
+  }
+  if (returnFromResultsBar) {
+    returnFromResultsBar.style.display = (viewName === 'results') ? 'block' : 'none';
+  }
+}
 
 // Check API Connectivity
 async function checkApiHealth() {
@@ -584,41 +667,31 @@ async function checkApiHealth() {
     const resp = await fetch(`${API_BASE_URL}/openapi.json`, { method: 'GET' });
     if (resp.ok) {
       if (statusIndicator) {
-        statusIndicator.className = 'api-status-pill connected';
+        statusIndicator.className = 'api-status-pill';
         statusIndicator.title = `Connected to API at ${API_BASE_URL || window.location.origin}`;
       }
-      if (statusText) statusText.textContent = 'API Connected';
+      if (statusText) statusText.textContent = 'Ready';
     } else {
       throw new Error();
     }
   } catch (_) {
     if (statusIndicator) {
       statusIndicator.className = 'api-status-pill offline';
-      statusIndicator.title = `API offline at ${API_BASE_URL}. Using local engine.`;
+      statusIndicator.title = `API offline at ${API_BASE_URL}. Using local mode.`;
     }
     if (statusText) statusText.textContent = 'Local Mode';
   }
 }
 
-function switchView(viewName) {
-  if (!workspaceContainer) return;
-  workspaceContainer.setAttribute('data-active-view', viewName);
-
-  [navTabIntake, navTabReview, navTabSplit].forEach(tab => {
-    if (!tab) return;
-    if (tab.getAttribute('data-view') === viewName) {
-      tab.classList.add('active');
-    } else {
-      tab.classList.remove('active');
-    }
-  });
-}
-
 function setupEventListeners() {
-  // Navigation Tabs
-  if (navTabIntake) navTabIntake.addEventListener('click', () => switchView('intake'));
-  if (navTabReview) navTabReview.addEventListener('click', () => switchView('review'));
+  // View switcher buttons
   if (navTabSplit) navTabSplit.addEventListener('click', () => switchView('split'));
+  if (navTabBrief) navTabBrief.addEventListener('click', () => switchView('brief'));
+  if (navTabResults) navTabResults.addEventListener('click', () => switchView('results'));
+
+  // Return to split view triggers
+  if (returnToSplitBtnBrief) returnToSplitBtnBrief.addEventListener('click', () => switchView('split'));
+  if (returnToSplitBtnResults) returnToSplitBtnResults.addEventListener('click', () => switchView('split'));
 
   // Character counter
   rawTextInput.addEventListener('input', () => {
@@ -631,7 +704,7 @@ function setupEventListeners() {
       presetChips.forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       const sampleKey = chip.dataset.sample;
-      loadSample(sampleKey);
+      loadSample(sampleKey, false); // Resets results to placeholder until processed
     });
   });
 
@@ -640,14 +713,16 @@ function setupEventListeners() {
     rawTextInput.value = '';
     charCount.textContent = '0 / 5000';
     rawTextInput.focus();
-    showToast('Input brief cleared', 'info');
+    hasProcessedIntake = false;
+    renderIntakeView();
+    showToast('Project brief cleared', 'info');
   });
 
   // Form Submit / Process Request
   intakeForm.addEventListener('submit', (e) => {
     e.preventDefault();
     if (!rawTextInput.value.trim()) {
-      showToast('Please enter or paste a project brief first', 'warning');
+      showToast('Please paste or write a project brief first', 'warning');
       return;
     }
     runExtractionPipeline();
@@ -704,7 +779,6 @@ function setupEventListeners() {
       showToast(`Intake ${currentIntake.id} approved and finalized`, 'success');
     } catch (err) {
       console.warn('Approve fallback/local save:', err);
-      // Even if offline, update local model state gracefully
       const reviewer = reviewerNameInput.value.trim() || 'Lead PM';
       currentIntake.status = 'approved';
       currentIntake.review = {
@@ -724,7 +798,7 @@ function setupEventListeners() {
     }
   });
 
-  // Human Review: Mark Issues / Flag
+  // Human Review: Needs clarification / Mark Issues
   rejectIntakeBtn.addEventListener('click', async () => {
     if (!currentIntake || !currentIntake.id) {
       showToast('No active intake loaded to flag', 'warning');
@@ -767,7 +841,7 @@ function setupEventListeners() {
 
       updateStatusUI('flagged');
       updateHistoryStatus(currentIntake.id, 'flagged');
-      showToast(`Intake ${currentIntake.id} marked with issue`, 'warning');
+      showToast(`Intake marked as Needs Clarification`, 'warning');
     } catch (err) {
       console.warn('Mark issues fallback/local save:', err);
       currentIntake.status = 'flagged';
@@ -779,7 +853,7 @@ function setupEventListeners() {
       };
       updateStatusUI('flagged');
       updateHistoryStatus(currentIntake.id, 'flagged');
-      showToast(`Intake ${currentIntake.id} marked as Issue Flagged`, 'warning');
+      showToast(`Intake marked as Needs Clarification`, 'warning');
     } finally {
       rejectIntakeBtn.disabled = false;
     }
@@ -821,7 +895,7 @@ function setupEventListeners() {
   });
 }
 
-function loadSample(key) {
+function loadSample(key, setProcessed = false) {
   const sample = SAMPLE_BRIEFS[key];
   if (!sample) return;
 
@@ -830,8 +904,8 @@ function loadSample(key) {
   clientNameInput.value = sample.client;
   sourceSelect.value = sample.source;
 
-  // Pre-load normalized representation into active review state
   currentIntake = normalizeIntakeResponse(sample.extracted);
+  hasProcessedIntake = setProcessed;
   renderIntakeView();
 }
 
@@ -839,7 +913,7 @@ function loadSample(key) {
 async function runExtractionPipeline() {
   const briefText = rawTextInput.value.trim();
   if (!briefText) {
-    showToast('Please enter or paste a project brief first', 'warning');
+    showToast('Please paste or write a project brief first', 'warning');
     return;
   }
   if (briefText.length < 10) {
@@ -847,10 +921,10 @@ async function runExtractionPipeline() {
     return;
   }
 
-  // Understated button state
+  // Non-technical button loading state
   processBtn.disabled = true;
   btnSpinner.style.display = 'inline-block';
-  processBtnText.textContent = 'Processing intake...';
+  processBtnText.textContent = 'Processing brief...';
   processingOverlay.style.display = 'flex';
 
   // Stepper UI reset
@@ -866,7 +940,7 @@ async function runExtractionPipeline() {
       currentStep++;
       pipelineSteps[currentStep].classList.add('active');
     }
-  }, 500);
+  }, 450);
 
   try {
     const response = await fetch(`${API_BASE_URL}/briefs`, {
@@ -898,13 +972,13 @@ async function runExtractionPipeline() {
 
     const apiData = await response.json();
 
-    // Mark steps completed
     pipelineSteps.forEach(step => {
       step.classList.remove('active');
       step.classList.add('completed');
     });
 
     currentIntake = normalizeIntakeResponse(apiData);
+    hasProcessedIntake = true;
 
     // Prepend to history
     intakeHistory.unshift({
@@ -919,24 +993,19 @@ async function runExtractionPipeline() {
     renderHistory();
     renderIntakeView();
 
-    // Automatically navigate to Review view on completion if in single view mode
-    const currentMode = workspaceContainer.getAttribute('data-active-view');
-    if (currentMode !== 'split') {
-      switchView('review');
-    }
-
-    showToast(`Intake created: ${currentIntake.project.name}`, 'success');
+    showToast(`Brief processed: ${currentIntake.project.name}`, 'success');
   } catch (err) {
     clearInterval(stepInterval);
     console.warn('API Error or Fallback:', err);
 
-    // If backend is unavailable, gracefully fall back using local intelligent extraction
+    // Fallback using local intelligent extraction
     const fallbackBrief = Object.values(SAMPLE_BRIEFS).find(
       s => briefText.includes(s.raw_text.slice(0, 30)) || s.raw_text.includes(briefText.slice(0, 30))
     ) || SAMPLE_BRIEFS.property;
 
     currentIntake = normalizeIntakeResponse(fallbackBrief.extracted);
     currentIntake.id = `INT-${Date.now().toString(36).slice(-8)}`;
+    hasProcessedIntake = true;
 
     intakeHistory.unshift({
       id: currentIntake.id,
@@ -950,22 +1019,76 @@ async function runExtractionPipeline() {
     renderHistory();
     renderIntakeView();
 
-    const currentMode = workspaceContainer.getAttribute('data-active-view');
-    if (currentMode !== 'split') {
-      switchView('review');
-    }
-
-    showToast(`Intake processed: ${currentIntake.project.name}`, 'info');
+    showToast(`Brief processed: ${currentIntake.project.name}`, 'info');
   } finally {
     processingOverlay.style.display = 'none';
     processBtn.disabled = false;
     btnSpinner.style.display = 'none';
-    processBtnText.textContent = 'Process intake';
+    processBtnText.textContent = 'Process brief';
   }
 }
 
-// Render Review Screen Content
+// Render Results Panel: Supports Intentional Placeholder States before execution
 function renderIntakeView() {
+  if (!hasProcessedIntake) {
+    // -------------------------------------------------------------
+    // INTENTIONAL PLACEHOLDER STATE (Requirement 3)
+    // -------------------------------------------------------------
+    displayRequestId.textContent = 'INT-READY';
+    displayTimestamp.textContent = 'Not processed yet';
+    displaySource.textContent = formatSource(sourceSelect.value || 'web_form');
+
+    displayStatus.className = 'status-pill status-neutral';
+    statusLabel.textContent = 'Awaiting brief';
+
+    displayProjectName.textContent = 'Intake results will appear here';
+
+    displaySummary.className = 'summary-body placeholder-state';
+    displaySummary.textContent = 'Your project summary will appear here after the brief is processed.';
+    if (objectiveBlock) objectiveBlock.style.display = 'none';
+
+    reqCount.textContent = '0 items';
+    displayRequirementsList.innerHTML = `
+      <li class="placeholder-state">
+        Requirements identified from the brief will appear here.
+      </li>
+    `;
+    if (techStackBlock) techStackBlock.style.display = 'none';
+    if (constraintsGrid) constraintsGrid.style.display = 'none';
+
+    if (missingBadge) missingBadge.style.display = 'none';
+    if (missingIntroContainer) missingIntroContainer.style.display = 'none';
+    displayMissingList.innerHTML = `
+      <li class="placeholder-state">
+        Any information that needs clarification will appear here.
+      </li>
+    `;
+
+    displayRecommendedTeam.textContent = 'Pending processing';
+    displayConfidenceText.textContent = '';
+    if (displayConfidenceBadge) displayConfidenceBadge.style.display = 'none';
+    displayReasoningList.innerHTML = `
+      <li class="placeholder-state">The recommended team will appear here after processing.</li>
+    `;
+
+    checklistProgress.textContent = '0 complete';
+    displayChecklist.innerHTML = `
+      <div class="placeholder-state">
+        Your delivery checklist will appear here after processing.
+      </div>
+    `;
+    if (addTaskRow) addTaskRow.style.display = 'none';
+
+    if (reviewNote) {
+      reviewNote.textContent = 'Review options and approval will become available once the brief is processed.';
+    }
+    if (reviewControlsWrap) reviewControlsWrap.style.display = 'none';
+    return;
+  }
+
+  // -------------------------------------------------------------
+  // POPULATED RESULTS STATE (Post-processing)
+  // -------------------------------------------------------------
   const p = currentIntake.project;
   const t = currentIntake.team_recommendation;
 
@@ -979,14 +1102,23 @@ function renderIntakeView() {
   // Status
   updateStatusUI(currentIntake.status);
 
-  // Overview
-  displayProjectName.textContent = p.name || 'Untitled Project';
+  // Summary
+  displayProjectName.textContent = p.name || 'Project Intake';
+  displaySummary.className = 'summary-body';
   displaySummary.textContent = p.summary || 'No summary available';
-  displayObjective.textContent = p.business_objective || 'Scope defined in project brief';
+
+  if (p.business_objective) {
+    if (objectiveBlock) objectiveBlock.style.display = 'flex';
+    displayObjective.textContent = p.business_objective;
+  } else {
+    if (objectiveBlock) objectiveBlock.style.display = 'none';
+  }
 
   // Team Recommendation
   displayRecommendedTeam.textContent = t.team || 'Web Development';
-  displayConfidenceText.textContent = t.confidence_text || `${Math.round((t.confidence || 0.90) * 100)}% confidence`;
+  displayConfidenceText.textContent = t.confidence_text || formatConfidence(t.confidence);
+  if (displayConfidenceBadge) displayConfidenceBadge.style.display = 'block';
+
   if (teamOverrideSelect) {
     teamOverrideSelect.value = t.team || 'Web Development';
   }
@@ -1005,9 +1137,9 @@ function renderIntakeView() {
     displayReasoningList.appendChild(li);
   });
 
-  // Confirmed Requirements List with subtle audit evidence
+  // Requirements List with evidence
   displayRequirementsList.innerHTML = '';
-  reqCount.textContent = `${(p.requirements || []).length} confirmed`;
+  reqCount.textContent = `${(p.requirements || []).length} items`;
   (p.requirements || []).forEach(req => {
     const li = document.createElement('li');
     const quoteHtml = req.source_quote
@@ -1027,11 +1159,13 @@ function renderIntakeView() {
     displayRequirementsList.appendChild(li);
   });
 
-  // Technical Stack Identified
+  // Technical Stack
   displayTechStack.innerHTML = '';
   const techStack = (p.technical_requirements && p.technical_requirements.length > 0)
     ? p.technical_requirements
-    : (t.team ? [`Team: ${t.team}`] : ['Web/API Stack']);
+    : (t.team ? [`Team: ${t.team}`] : ['Standard Web Stack']);
+  
+  if (techStackBlock) techStackBlock.style.display = 'flex';
   techStack.forEach(tech => {
     const span = document.createElement('span');
     span.className = 'tech-tag';
@@ -1040,28 +1174,45 @@ function renderIntakeView() {
   });
 
   // Constraints & Resources
+  if (constraintsGrid) constraintsGrid.style.display = 'grid';
   displayConstraints.textContent = (p.constraints && p.constraints.length > 0)
     ? p.constraints.join(', ')
     : 'None explicitly stated';
 
   displayResources.textContent = (p.existing_resources && p.existing_resources.length > 0)
     ? p.existing_resources.join(', ')
-    : 'None explicitly stated';
+    : 'None mentioned';
 
-  // Missing Information (Clarification needed)
+  // Information Needed (Missing details)
   displayMissingList.innerHTML = '';
   const missingItems = [...(p.missing_information || [])];
   if (currentIntake.requires_manual_review && currentIntake.review_notes) {
     missingItems.unshift(`Review note: ${currentIntake.review_notes}`);
   }
-  missingItems.forEach(item => {
-    const li = document.createElement('li');
-    li.textContent = item;
-    displayMissingList.appendChild(li);
-  });
 
-  // Implementation Checklist
+  if (missingItems.length > 0) {
+    if (missingBadge) missingBadge.style.display = 'inline-block';
+    if (missingIntroContainer) missingIntroContainer.style.display = 'block';
+    missingItems.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      displayMissingList.appendChild(li);
+    });
+  } else {
+    if (missingBadge) missingBadge.style.display = 'none';
+    if (missingIntroContainer) missingIntroContainer.style.display = 'none';
+    displayMissingList.innerHTML = `<li>All essential project details provided in brief.</li>`;
+  }
+
+  // Delivery Checklist
+  if (addTaskRow) addTaskRow.style.display = 'flex';
   renderChecklist();
+
+  // Review Section
+  if (reviewNote) {
+    reviewNote.textContent = 'Validate requirements and sign off before team assignment.';
+  }
+  if (reviewControlsWrap) reviewControlsWrap.style.display = 'block';
 }
 
 function renderChecklist() {
@@ -1078,7 +1229,8 @@ function renderChecklist() {
 
     let evidenceHtml = '';
     if (item.evidence && item.evidence.source_quote) {
-      const typeLabel = item.evidence.type === 'missing_information' ? 'Missing information' : 'Requirement';
+      // Human-friendly label (Requirement 7)
+      const typeLabel = item.evidence.type === 'missing_information' ? 'Information needed' : 'Requirement';
       evidenceHtml = `
         <div class="item-evidence">
           <span class="evidence-quote">"${escapeHtml(item.evidence.source_quote)}"</span>
@@ -1148,7 +1300,7 @@ function updateStatusUI(status) {
     statusLabel.textContent = 'Approved';
   } else if (status === 'flagged' || status === 'rejected') {
     displayStatus.classList.add('status-rejected');
-    statusLabel.textContent = 'Issue flagged';
+    statusLabel.textContent = 'Needs clarification';
   } else {
     displayStatus.classList.add('status-pending');
     statusLabel.textContent = 'Pending review';
@@ -1178,11 +1330,8 @@ function renderHistory() {
       div.classList.add('active');
       if (item.data) {
         currentIntake = JSON.parse(JSON.stringify(item.data));
+        hasProcessedIntake = true;
         renderIntakeView();
-        // Switch to review tab when viewing history item
-        if (workspaceContainer.getAttribute('data-active-view') !== 'split') {
-          switchView('review');
-        }
         showToast(`Loaded intake: ${item.id || item.request_id}`, 'info');
       }
     });

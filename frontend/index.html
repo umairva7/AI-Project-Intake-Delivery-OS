@@ -3,44 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Project Intake</title>
+  <title>Project Intake</title>
+  <script>
+    (function() {
+      try {
+        const stored = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch (_) {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Minimal Top Navigation Header -->
+  <!-- Clean Top Navigation Header with View Switcher and Dark Mode Toggle -->
   <header class="app-header">
     <div class="header-inner">
       <div class="header-left">
-        <span class="app-brand">AI Project Intake</span>
+        <span class="app-brand">Project Intake</span>
       </div>
 
-      <nav class="header-nav" aria-label="Main navigation">
-        <button type="button" class="nav-tab active" data-view="intake" id="navTabIntake">Intakes</button>
-        <button type="button" class="nav-tab" data-view="review" id="navTabReview">Review</button>
-        <button type="button" class="nav-tab nav-tab-split" data-view="split" id="navTabSplit">Split View</button>
+      <!-- View Switcher (Default: Split) -->
+      <nav class="header-nav" aria-label="View switcher">
+        <button type="button" class="nav-tab active" data-view="split" id="navTabSplit">Split</button>
+        <button type="button" class="nav-tab" data-view="brief" id="navTabBrief">Brief</button>
+        <button type="button" class="nav-tab" data-view="results" id="navTabResults">Results</button>
       </nav>
 
       <div class="header-right">
-        <div class="api-status-pill" id="apiStatusIndicator" title="Checking API status...">
+        <!-- Theme Toggle Button -->
+        <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle dark / light theme" title="Toggle dark / light theme">
+          <!-- Moon icon for light mode (click to go dark) -->
+          <svg class="theme-icon theme-icon-dark" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <!-- Sun icon for dark mode (click to go light) -->
+          <svg class="theme-icon theme-icon-light" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+
+        <div class="api-status-pill" id="apiStatusIndicator" title="System status">
           <span class="status-dot"></span>
-          <span class="status-text" id="apiStatusText">Connecting</span>
+          <span class="status-text" id="apiStatusText">Ready</span>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Main Application Workspace -->
-  <main class="app-workspace" id="workspaceContainer" data-active-view="intake">
+  <!-- Main Application Workspace (Default: Split View) -->
+  <main class="app-workspace" id="workspaceContainer" data-active-view="split">
 
-    <!-- VIEW 1: Intake Creation & Raw Input -->
-    <section class="workspace-pane pane-intake" id="paneIntake">
-      <div class="pane-content-narrow">
-        <header class="page-intro">
-          <h1 class="page-title">Project Intake</h1>
-          <p class="page-description">Turn an unstructured project brief into a structured intake for review.</p>
+    <!-- LEFT: Project Brief Panel -->
+    <section class="workspace-pane pane-brief" id="paneBrief">
+      <div class="pane-inner">
+        <!-- View return bar when in focused brief mode -->
+        <div class="view-return-bar" id="returnFromBriefBar" style="display: none;">
+          <button type="button" class="btn-link" id="returnToSplitBtnBrief">← Return to Split view</button>
+        </div>
+
+        <header class="pane-header">
+          <h1 class="pane-title">Project brief</h1>
+          <p class="pane-description">
+            Paste the client's request here. Include anything you know about the project, such as what needs to be built, timeline, budget, or existing systems.
+          </p>
         </header>
 
         <!-- Sample Briefs Selector -->
@@ -54,15 +95,15 @@
           </div>
         </div>
 
-        <!-- Intake Form -->
-        <form id="intakeForm" class="intake-form">
+        <!-- Project Brief Form -->
+        <form id="intakeForm" class="brief-form">
           <div class="form-group">
             <div class="textarea-wrapper">
               <textarea 
                 id="rawTextInput" 
                 name="rawText" 
                 rows="11" 
-                placeholder="Paste the client's project brief, email, or meeting notes..."
+                placeholder="Example: We need a dashboard for our sales team that collects weekly sales data from three branches. Should connect to existing PostgreSQL database and be ready in 6 weeks..."
                 maxlength="5000"
                 required
               ></textarea>
@@ -84,7 +125,7 @@
               </select>
             </div>
             <div class="form-group half">
-              <label for="clientNameInput">Client / Organization</label>
+              <label for="clientNameInput">Client or organization</label>
               <input type="text" id="clientNameInput" placeholder="e.g. Apex Realty Ltd." value="Apex Realty Ltd.">
             </div>
           </div>
@@ -94,7 +135,7 @@
             <button type="button" class="btn btn-secondary" id="clearBtn">Clear</button>
             <button type="submit" class="btn btn-primary" id="processBtn">
               <span class="btn-spinner" id="btnSpinner" style="display: none;"></span>
-              <span id="processBtnText">Process intake</span>
+              <span id="processBtnText">Process brief</span>
             </button>
           </div>
         </form>
@@ -112,197 +153,211 @@
       </div>
     </section>
 
-    <!-- VIEW 2: Intake Result / Review Screen -->
-    <section class="workspace-pane pane-review" id="paneReview">
-      <!-- Understated Processing State Overlay -->
-      <div class="processing-overlay" id="processingOverlay" style="display: none;">
-        <div class="processing-card">
-          <div class="processing-spinner"></div>
-          <h3 class="processing-title">Processing intake</h3>
-          <p class="processing-desc">Extracting requirements and preparing the review.</p>
-          <div class="pipeline-progress-list">
-            <div class="progress-step active" id="stepParse">
-              <span class="step-num">1</span>
-              <span class="step-label">Ingestion</span>
-            </div>
-            <div class="progress-step" id="stepExtract">
-              <span class="step-num">2</span>
-              <span class="step-label">Requirements</span>
-            </div>
-            <div class="progress-step" id="stepValidate">
-              <span class="step-num">3</span>
-              <span class="step-label">Validation</span>
-            </div>
-            <div class="progress-step" id="stepRecommend">
-              <span class="step-num">4</span>
-              <span class="step-label">Team recommendation</span>
-            </div>
-            <div class="progress-step" id="stepChecklist">
-              <span class="step-num">5</span>
-              <span class="step-label">Checklist</span>
+    <!-- RIGHT: Intake Results Panel -->
+    <section class="workspace-pane pane-results" id="paneResults">
+      <div class="pane-inner">
+        <!-- View return bar when in focused results mode -->
+        <div class="view-return-bar" id="returnFromResultsBar" style="display: none;">
+          <button type="button" class="btn-link" id="returnToSplitBtnResults">← Return to Split view</button>
+        </div>
+
+        <!-- Understated Processing State Overlay -->
+        <div class="processing-overlay" id="processingOverlay" style="display: none;">
+          <div class="processing-card">
+            <div class="processing-spinner"></div>
+            <h3 class="processing-title">Processing brief</h3>
+            <p class="processing-desc">Organizing requirements and preparing the intake for review.</p>
+            <div class="pipeline-progress-list">
+              <div class="progress-step active" id="stepParse">
+                <span class="step-num">1</span>
+                <span class="step-label">Reading brief</span>
+              </div>
+              <div class="progress-step" id="stepExtract">
+                <span class="step-num">2</span>
+                <span class="step-label">Identifying requirements</span>
+              </div>
+              <div class="progress-step" id="stepValidate">
+                <span class="step-num">3</span>
+                <span class="step-label">Checking details</span>
+              </div>
+              <div class="progress-step" id="stepRecommend">
+                <span class="step-num">4</span>
+                <span class="step-label">Team recommendation</span>
+              </div>
+              <div class="progress-step" id="stepChecklist">
+                <span class="step-num">5</span>
+                <span class="step-label">Delivery checklist</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Main Review Document Content -->
-      <div id="intakeContent" class="review-document">
-        
-        <!-- Header / Identity Area -->
-        <header class="document-header">
-          <div class="breadcrumb">Project Intake</div>
-          <div class="title-status-row">
-            <h1 class="document-title" id="displayProjectName">Property Listing Platform</h1>
-            <div class="status-pill status-pending" id="displayStatus">
-              <span class="status-dot"></span>
-              <span id="statusLabel">Pending review</span>
+        <!-- Main Results Document Container -->
+        <div id="intakeContent" class="review-document">
+          
+          <!-- Document Header -->
+          <header class="document-header">
+            <div class="breadcrumb">Intake Results</div>
+            <div class="title-status-row">
+              <h1 class="document-title" id="displayProjectName">Ready for processing</h1>
+              <div class="status-pill status-neutral" id="displayStatus">
+                <span class="status-dot"></span>
+                <span id="statusLabel">Awaiting brief</span>
+              </div>
             </div>
-          </div>
-          <div class="document-meta-row">
-            <span class="meta-id" id="displayRequestId">INT-824262a0</span>
-            <span class="meta-divider">•</span>
-            <span class="meta-item" id="displaySource">Web Form</span>
-            <span class="meta-divider">•</span>
-            <span class="meta-item" id="displayTimestamp">Just now</span>
-          </div>
-        </header>
-
-        <!-- Section: Summary -->
-        <section class="document-section">
-          <h2 class="section-title">Summary</h2>
-          <p class="summary-body" id="displaySummary">
-            Web platform for browsing and managing property listings with search, filter, and agent contact workflows.
-          </p>
-          <div class="subfield-block">
-            <span class="subfield-label">Business Objective</span>
-            <p class="subfield-body" id="displayObjective">
-              Enable customers to discover properties and contact agents while allowing internal staff to manage listings via an admin dashboard.
-            </p>
-          </div>
-        </section>
-
-        <!-- Section: Requirements -->
-        <section class="document-section">
-          <div class="section-header-inline">
-            <h2 class="section-title">Requirements</h2>
-            <span class="meta-muted" id="reqCount">4 items</span>
-          </div>
-
-          <div class="requirements-group">
-            <div class="group-label">Confirmed</div>
-            <ul class="flat-requirements-list" id="displayRequirementsList">
-              <!-- Populated dynamically via JS -->
-            </ul>
-          </div>
-
-          <!-- Technical Specs -->
-          <div class="subfield-block">
-            <span class="subfield-label">Technical Stack Identified</span>
-            <div class="tag-row" id="displayTechStack">
-              <span class="tech-tag">React Frontend</span>
-              <span class="tech-tag">Python Backend</span>
+            <div class="document-meta-row">
+              <span class="meta-id" id="displayRequestId">INT-READY</span>
+              <span class="meta-divider">•</span>
+              <span class="meta-item" id="displaySource">Web Form</span>
+              <span class="meta-divider">•</span>
+              <span class="meta-item" id="displayTimestamp">Just now</span>
             </div>
-          </div>
+          </header>
 
-          <!-- Constraints & Resources -->
-          <div class="meta-kv-grid">
-            <div class="kv-item">
-              <span class="kv-label">Constraints</span>
-              <span class="kv-value" id="displayConstraints">MVP target of approximately 6 weeks</span>
+          <!-- Section: Summary -->
+          <section class="document-section">
+            <h2 class="section-title">Project summary</h2>
+            <div id="summaryContainer">
+              <p class="summary-body placeholder-state" id="displaySummary">
+                Your project summary will appear here after the brief is processed.
+              </p>
             </div>
-            <div class="kv-item">
-              <span class="kv-label">Existing Resources</span>
-              <span class="kv-value" id="displayResources">UI Designer already available</span>
+            <div class="subfield-block" id="objectiveBlock" style="display: none;">
+              <span class="subfield-label">Business Objective</span>
+              <p class="subfield-body" id="displayObjective"></p>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <!-- Section: Missing Information -->
-        <section class="document-section">
-          <div class="section-header-inline">
-            <h2 class="section-title">Missing Information</h2>
-            <span class="label-notice">Clarification needed</span>
-          </div>
-          <p class="section-note">
-            The following parameters were not specified in the brief and require clarification prior to kickoff:
-          </p>
-          <ul class="flat-missing-list" id="displayMissingList">
-            <!-- Populated dynamically via JS -->
-          </ul>
-        </section>
+          <!-- Section: Requirements -->
+          <section class="document-section">
+            <div class="section-header-inline">
+              <h2 class="section-title">Requirements</h2>
+              <span class="meta-muted" id="reqCount">0 items</span>
+            </div>
 
-        <!-- Section: Recommended Team -->
-        <section class="document-section">
-          <h2 class="section-title">Recommended Team</h2>
-          <div class="team-recommendation-block">
-            <div class="team-primary-row">
-              <span class="team-name" id="displayRecommendedTeam">Web Development</span>
-              <span class="team-confidence" id="displayConfidenceText">95% confidence</span>
-            </div>
-            <div class="confidence-bar-wrap" id="displayConfidenceBadge">
-              <div class="confidence-bar-fill confidence-meter" style="width: 95%;"></div>
-            </div>
-            <div class="team-reasoning-wrap">
-              <span class="subfield-label">Reasoning</span>
-              <ul class="reasoning-list" id="displayReasoningList">
-                <!-- Populated dynamically via JS -->
+            <div class="requirements-group">
+              <ul class="flat-requirements-list" id="displayRequirementsList">
+                <li class="placeholder-state">
+                  Requirements identified from the brief will appear here.
+                </li>
               </ul>
             </div>
-          </div>
-        </section>
 
-        <!-- Section: Implementation Checklist -->
-        <section class="document-section">
-          <div class="section-header-inline">
-            <h2 class="section-title">Implementation Checklist</h2>
-            <span class="meta-muted" id="checklistProgress">0 of 7 complete</span>
-          </div>
-          
-          <div class="checklist-container" id="displayChecklist">
-            <!-- Populated dynamically via JS -->
-          </div>
-
-          <div class="add-task-row">
-            <input type="text" id="newTaskInput" placeholder="Add custom action item..." class="add-task-input">
-            <button type="button" class="btn btn-secondary btn-sm" id="addTaskBtn">Add item</button>
-          </div>
-        </section>
-
-        <!-- Section: Review -->
-        <section class="document-section review-section">
-          <h2 class="section-title">Review</h2>
-          <p class="section-note">Validate requirements and sign off before team assignment.</p>
-
-          <div class="form-row">
-            <div class="form-group half">
-              <label for="reviewerNameInput">Reviewer</label>
-              <input type="text" id="reviewerNameInput" value="Umair Imran (Lead PM)">
+            <!-- Technical Stack Identified -->
+            <div class="subfield-block" id="techStackBlock" style="display: none;">
+              <span class="subfield-label">Technical Stack Identified</span>
+              <div class="tag-row" id="displayTechStack"></div>
             </div>
-            <div class="form-group half">
-              <label for="teamOverrideSelect">Assigned team</label>
-              <select id="teamOverrideSelect">
-                <option value="Web Development" selected>Web Development</option>
-                <option value="Mobile Development">Mobile Development</option>
-                <option value="AI / ML">AI / ML</option>
-                <option value="Data Engineering">Data Engineering</option>
-                <option value="Mixed / Cross-functional">Mixed / Cross-functional</option>
-              </select>
+
+            <!-- Constraints & Resources -->
+            <div class="meta-kv-grid" id="constraintsGrid" style="display: none;">
+              <div class="kv-item">
+                <span class="kv-label">Constraints</span>
+                <span class="kv-value" id="displayConstraints">None</span>
+              </div>
+              <div class="kv-item">
+                <span class="kv-label">Existing Resources</span>
+                <span class="kv-value" id="displayResources">None</span>
+              </div>
             </div>
-          </div>
+          </section>
 
-          <div class="form-group">
-            <label for="reviewNotes">Decision notes</label>
-            <textarea id="reviewNotes" rows="2" placeholder="Add clarifications or notes regarding the intake decision..."></textarea>
-          </div>
+          <!-- Section: Information Needed (Missing Information) -->
+          <section class="document-section">
+            <div class="section-header-inline">
+              <h2 class="section-title">Information needed</h2>
+              <span class="label-notice" id="missingBadge" style="display: none;">Clarification needed</span>
+            </div>
+            <div id="missingIntroContainer" style="display: none;">
+              <p class="section-note">
+                The following details were not specified in the brief and should be confirmed with the client:
+              </p>
+            </div>
+            <ul class="flat-missing-list" id="displayMissingList">
+              <li class="placeholder-state">
+                Any information that needs clarification will appear here.
+              </li>
+            </ul>
+          </section>
 
-          <!-- Review Actions -->
-          <div class="review-actions">
-            <button type="button" class="btn btn-secondary" id="editIntakeBtn">Edit values</button>
-            <button type="button" class="btn btn-danger" id="rejectIntakeBtn">Mark issue</button>
-            <button type="button" class="btn btn-primary" id="approveIntakeBtn">Approve intake</button>
-          </div>
-        </section>
+          <!-- Section: Recommended Team -->
+          <section class="document-section">
+            <h2 class="section-title">Recommended team</h2>
+            <div class="team-recommendation-block" id="teamRecBlock">
+              <div class="team-primary-row">
+                <span class="team-name" id="displayRecommendedTeam">Pending processing</span>
+                <span class="team-confidence" id="displayConfidenceText"></span>
+              </div>
+              <div class="confidence-bar-wrap" id="displayConfidenceBadge" style="display: none;">
+                <div class="confidence-bar-fill confidence-meter" style="width: 0%;"></div>
+              </div>
+              <div class="team-reasoning-wrap">
+                <ul class="reasoning-list" id="displayReasoningList">
+                  <li class="placeholder-state">The recommended team will appear here after processing.</li>
+                </ul>
+              </div>
+            </div>
+          </section>
 
+          <!-- Section: Delivery Checklist -->
+          <section class="document-section">
+            <div class="section-header-inline">
+              <h2 class="section-title">Delivery checklist</h2>
+              <span class="meta-muted" id="checklistProgress">0 complete</span>
+            </div>
+            
+            <div class="checklist-container" id="displayChecklist">
+              <div class="placeholder-state">
+                Your delivery checklist will appear here after processing.
+              </div>
+            </div>
+
+            <div class="add-task-row" id="addTaskRow" style="display: none;">
+              <input type="text" id="newTaskInput" placeholder="Add custom action item..." class="add-task-input">
+              <button type="button" class="btn btn-secondary btn-sm" id="addTaskBtn">Add item</button>
+            </div>
+          </section>
+
+          <!-- Section: Review -->
+          <section class="document-section review-section" id="reviewSection">
+            <h2 class="section-title">Review</h2>
+            <p class="section-note" id="reviewNote">
+              Review options and approval will become available once the brief is processed.
+            </p>
+
+            <div id="reviewControlsWrap" style="display: none;">
+              <div class="form-row">
+                <div class="form-group half">
+                  <label for="reviewerNameInput">Reviewer</label>
+                  <input type="text" id="reviewerNameInput" value="Lead PM">
+                </div>
+                <div class="form-group half">
+                  <label for="teamOverrideSelect">Assigned team</label>
+                  <select id="teamOverrideSelect">
+                    <option value="Web Development" selected>Web Development</option>
+                    <option value="Mobile Development">Mobile Development</option>
+                    <option value="AI / ML">AI / ML</option>
+                    <option value="Data Engineering">Data Engineering</option>
+                    <option value="Mixed / Cross-functional">Mixed / Cross-functional</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="reviewNotes">Decision notes</label>
+                <textarea id="reviewNotes" rows="2" placeholder="Add clarifications or notes regarding the intake decision..."></textarea>
+              </div>
+
+              <!-- Review Actions -->
+              <div class="review-actions">
+                <button type="button" class="btn btn-secondary" id="editIntakeBtn">Edit values</button>
+                <button type="button" class="btn btn-danger" id="rejectIntakeBtn">Needs clarification</button>
+                <button type="button" class="btn btn-primary" id="approveIntakeBtn">Approve intake</button>
+              </div>
+            </div>
+          </section>
+
+        </div>
       </div>
     </section>
 

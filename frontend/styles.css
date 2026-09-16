@@ -1,10 +1,11 @@
 /* ==========================================================================
-   AI Project Intake — Clean, Minimal, Premium Product UI
-   Design System: Neutral, Restrained, Operations-focused (Linear/Notion/Vercel)
+   Project Intake — Clean, Minimal B2B Operations UI
+   Design System: Neutral, Restrained, Non-Technical, Operations-focused
+   Themes: Light & Dark Mode
    ========================================================================== */
 
 :root {
-  /* Core Neutral Palette */
+  /* Core Neutral Palette (Light Mode Default) */
   --bg-app: #fafafa;
   --bg-surface: #ffffff;
   --bg-subtle: #f4f4f5;
@@ -40,9 +41,9 @@
   --status-flagged-bg: #fef2f2;
   --status-flagged-border: #fecaca;
 
-  --status-info-fg: #374151;
-  --status-info-bg: #f3f4f6;
-  --status-info-border: #e5e7eb;
+  --status-neutral-fg: #52525b;
+  --status-neutral-bg: #f4f4f5;
+  --status-neutral-border: #e4e4e7;
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -58,6 +59,62 @@
 
   --transition-fast: 0.12s ease;
   --transition-normal: 0.2s ease;
+
+  --overlay-bg: rgba(255, 255, 255, 0.96);
+  --toast-bg: #0f172a;
+  --toast-fg: #ffffff;
+}
+
+/* ==========================================================================
+   Dark Theme (Explicit Class / Data Attribute)
+   ========================================================================== */
+
+[data-theme="dark"] {
+  --bg-app: #09090b;
+  --bg-surface: #121215;
+  --bg-subtle: #1c1c21;
+  --bg-muted: #18181b;
+  --bg-input: #121215;
+
+  --border-subtle: #1e1e24;
+  --border-color: #27272a;
+  --border-strong: #3f3f46;
+  --border-focus: #f4f4f5;
+
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --text-light: #52525b;
+
+  /* Primary Button in Dark Mode: Crisp Light Neutral */
+  --primary: #f4f4f5;
+  --primary-hover: #e4e4e7;
+  --primary-active: #d4d4d8;
+  --primary-fg: #09090b;
+
+  /* Restrained Translucent Semantic Statuses */
+  --status-pending-fg: #fcd34d;
+  --status-pending-bg: rgba(245, 158, 11, 0.12);
+  --status-pending-border: rgba(245, 158, 11, 0.25);
+
+  --status-approved-fg: #86efac;
+  --status-approved-bg: rgba(34, 197, 94, 0.12);
+  --status-approved-border: rgba(34, 197, 94, 0.25);
+
+  --status-flagged-fg: #fca5a5;
+  --status-flagged-bg: rgba(239, 68, 68, 0.12);
+  --status-flagged-border: rgba(239, 68, 68, 0.25);
+
+  --status-neutral-fg: #a1a1aa;
+  --status-neutral-bg: #1c1c21;
+  --status-neutral-border: #27272a;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+
+  --overlay-bg: rgba(9, 9, 11, 0.94);
+  --toast-bg: #18181b;
+  --toast-fg: #f4f4f5;
 }
 
 /* Reset & Box Model */
@@ -74,6 +131,7 @@ html {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color-scheme: light dark;
 }
 
 body {
@@ -84,10 +142,11 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
 /* ==========================================================================
-   Header & Navigation
+   Header & View Switcher
    ========================================================================== */
 
 .app-header {
@@ -97,10 +156,11 @@ body {
   background-color: var(--bg-surface);
   border-bottom: 1px solid var(--border-color);
   height: 48px;
+  transition: background-color var(--transition-normal), border-color var(--transition-normal);
 }
 
 .header-inner {
-  max-width: 1400px;
+  max-width: 1500px;
   height: 100%;
   margin: 0 auto;
   padding: 0 1.5rem;
@@ -135,7 +195,7 @@ body {
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--text-muted);
-  padding: 0.35rem 0.75rem;
+  padding: 0.35rem 0.85rem;
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -155,9 +215,46 @@ body {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
 }
 
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--bg-subtle);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+/* Toggle Icon Visibility */
+.theme-icon-light {
+  display: none;
+}
+.theme-icon-dark {
+  display: block;
+}
+
+[data-theme="dark"] .theme-icon-dark {
+  display: none;
+}
+[data-theme="dark"] .theme-icon-light {
+  display: block;
+}
+
+/* API Status Indicator */
 .api-status-pill {
   display: inline-flex;
   align-items: center;
@@ -174,10 +271,6 @@ body {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: var(--text-light);
-}
-
-.api-status-pill.connected .status-dot {
   background-color: var(--status-approved-fg);
 }
 
@@ -186,84 +279,108 @@ body {
 }
 
 /* ==========================================================================
-   Workspace Layout Modes
+   Workspace Layout Modes (Split, Brief, Results)
    ========================================================================== */
 
 .app-workspace {
   flex: 1;
   width: 100%;
-  max-width: 1400px;
+  max-width: 1500px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
 }
 
-/* Mode: Intakes Only */
-.app-workspace[data-active-view="intake"] .pane-intake {
-  display: block;
-}
-.app-workspace[data-active-view="intake"] .pane-review {
-  display: none;
-}
-
-/* Mode: Review Only */
-.app-workspace[data-active-view="review"] .pane-intake {
-  display: none;
-}
-.app-workspace[data-active-view="review"] .pane-review {
-  display: block;
-}
-
-/* Mode: Split View */
+/* Mode 1: Default Split View */
 .app-workspace[data-active-view="split"] {
   display: grid;
-  grid-template-columns: 460px 1fr;
-  gap: 2.5rem;
+  grid-template-columns: minmax(420px, 490px) 1fr;
+  gap: 2.75rem;
   align-items: start;
 }
-.app-workspace[data-active-view="split"] .pane-intake,
-.app-workspace[data-active-view="split"] .pane-review {
+
+.app-workspace[data-active-view="split"] .pane-brief {
+  display: block;
+  border-right: 1px solid var(--border-color);
+  padding-right: 2.75rem;
+}
+
+.app-workspace[data-active-view="split"] .pane-results {
   display: block;
 }
 
-.pane-content-narrow {
-  max-width: 760px;
+/* Mode 2: Brief Only */
+.app-workspace[data-active-view="brief"] .pane-brief {
+  display: block;
+  max-width: 780px;
+  margin: 0 auto;
+  border-right: none;
+  padding-right: 0;
+}
+
+.app-workspace[data-active-view="brief"] .pane-results {
+  display: none;
+}
+
+/* Mode 3: Results Only */
+.app-workspace[data-active-view="results"] .pane-brief {
+  display: none;
+}
+
+.app-workspace[data-active-view="results"] .pane-results {
+  display: block;
+  max-width: 840px;
   margin: 0 auto;
 }
 
-.app-workspace[data-active-view="split"] .pane-content-narrow {
-  max-width: 100%;
-  margin: 0;
+/* Return Bar for Focused Modes */
+.view-return-bar {
+  margin-bottom: 1.25rem;
+}
+
+.btn-link {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--transition-fast);
+}
+
+.btn-link:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
 }
 
 /* ==========================================================================
-   Page Intros & Headings
+   Left Panel: Project Brief Area
    ========================================================================== */
 
-.page-intro {
-  margin-bottom: 1.75rem;
+.pane-header {
+  margin-bottom: 1.5rem;
 }
 
-.page-title {
-  font-size: 1.5rem;
+.pane-title {
+  font-size: 1.45rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--text-primary);
   margin-bottom: 0.35rem;
 }
 
-.page-description {
-  font-size: 0.95rem;
+.pane-description {
+  font-size: 0.92rem;
   color: var(--text-muted);
+  line-height: 1.55;
 }
 
-/* ==========================================================================
-   Sample Briefs Selector
-   ========================================================================== */
-
+/* Sample Presets */
 .sample-bar {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
   margin-bottom: 1.25rem;
   flex-wrap: wrap;
 }
@@ -279,7 +396,7 @@ body {
 .sample-chips {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   flex-wrap: wrap;
 }
 
@@ -308,20 +425,18 @@ body {
   border-color: var(--primary);
 }
 
-/* ==========================================================================
-   Intake Form
-   ========================================================================== */
-
-.intake-form {
+/* Brief Form */
+.brief-form {
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2.25rem;
+  transition: background-color var(--transition-normal), border-color var(--transition-normal);
 }
 
 .form-group {
@@ -359,7 +474,7 @@ textarea, input[type="text"], select {
   border-radius: var(--radius-md);
   background-color: var(--bg-input);
   color: var(--text-primary);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-normal), color var(--transition-normal);
 }
 
 textarea {
@@ -397,7 +512,7 @@ textarea:focus, input[type="text"]:focus, select:focus {
 }
 
 /* ==========================================================================
-   Buttons & Micro-interactions
+   Buttons
    ========================================================================== */
 
 .btn {
@@ -408,7 +523,7 @@ textarea:focus, input[type="text"]:focus, select:focus {
   font-family: inherit;
   font-size: 0.85rem;
   font-weight: 500;
-  padding: 0.55rem 1rem;
+  padding: 0.55rem 1.1rem;
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   cursor: pointer;
@@ -465,8 +580,8 @@ textarea:focus, input[type="text"]:focus, select:focus {
 .btn-spinner {
   width: 12px;
   height: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #ffffff;
+  border: 2px solid rgba(128, 128, 128, 0.3);
+  border-top-color: currentColor;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -528,7 +643,7 @@ textarea:focus, input[type="text"]:focus, select:focus {
 
 .history-item:hover {
   border-color: var(--border-strong);
-  background-color: #ffffff;
+  background-color: var(--bg-subtle);
 }
 
 .history-item.active {
@@ -583,28 +698,26 @@ textarea:focus, input[type="text"]:focus, select:focus {
 }
 
 /* ==========================================================================
-   Review Screen Document (Linear/Notion Feel)
+   Right Panel: Intake Results Document
    ========================================================================== */
+
+.pane-results {
+  position: relative;
+}
 
 .review-document {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 2.25rem;
+  padding: 2rem 2.25rem;
   box-shadow: var(--shadow-sm);
-  max-width: 840px;
-  margin: 0 auto;
-}
-
-.app-workspace[data-active-view="split"] .review-document {
-  max-width: 100%;
-  margin: 0;
-  padding: 1.75rem;
+  width: 100%;
+  transition: background-color var(--transition-normal), border-color var(--transition-normal);
 }
 
 /* Document Header */
 .document-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
 }
 
 .breadcrumb {
@@ -613,7 +726,7 @@ textarea:focus, input[type="text"]:focus, select:focus {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-muted);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.35rem;
 }
 
 .title-status-row {
@@ -625,7 +738,7 @@ textarea:focus, input[type="text"]:focus, select:focus {
 }
 
 .document-title {
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--text-primary);
@@ -662,6 +775,16 @@ textarea:focus, input[type="text"]:focus, select:focus {
   line-height: 1;
 }
 
+.status-neutral {
+  background-color: var(--status-neutral-bg);
+  color: var(--status-neutral-fg);
+  border: 1px solid var(--status-neutral-border);
+}
+
+.status-neutral .status-dot {
+  background-color: var(--text-light);
+}
+
 .status-pending {
   background-color: var(--status-pending-bg);
   color: var(--status-pending-fg);
@@ -695,11 +818,11 @@ textarea:focus, input[type="text"]:focus, select:focus {
 /* Document Sections: Flat with Clean Separators */
 .document-section {
   border-top: 1px solid var(--border-color);
-  padding-top: 1.5rem;
-  margin-top: 1.5rem;
+  padding-top: 1.4rem;
+  margin-top: 1.4rem;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.75rem;
 }
 
 .section-header-inline {
@@ -739,6 +862,15 @@ textarea:focus, input[type="text"]:focus, select:focus {
   font-size: 0.92rem;
   color: var(--text-secondary);
   line-height: 1.6;
+}
+
+/* Intentional Placeholder States */
+.placeholder-state {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 0.35rem 0;
+  list-style: none !important;
 }
 
 .subfield-block {
@@ -799,6 +931,11 @@ textarea:focus, input[type="text"]:focus, select:focus {
 
 .flat-requirements-list li:last-child {
   border-bottom: none;
+}
+
+.flat-requirements-list li.placeholder-state {
+  border-bottom: none;
+  padding: 0.3rem 0;
 }
 
 .req-left {
@@ -893,7 +1030,7 @@ textarea:focus, input[type="text"]:focus, select:focus {
 }
 
 /* ==========================================================================
-   Missing Information
+   Missing Information / Information Needed
    ========================================================================== */
 
 .flat-missing-list {
@@ -911,7 +1048,7 @@ textarea:focus, input[type="text"]:focus, select:focus {
   color: var(--text-secondary);
 }
 
-.flat-missing-list li::before {
+.flat-missing-list li:not(.placeholder-state)::before {
   content: "—";
   color: var(--text-light);
 }
@@ -985,7 +1122,7 @@ textarea:focus, input[type="text"]:focus, select:focus {
   gap: 0.4rem;
 }
 
-.reasoning-list li::before {
+.reasoning-list li:not(.placeholder-state)::before {
   content: "•";
   color: var(--text-light);
 }
@@ -1063,7 +1200,7 @@ textarea:focus, input[type="text"]:focus, select:focus {
   color: var(--text-muted);
 }
 
-/* Evidence presentation (Clean, subtle audit trail) */
+/* Evidence presentation */
 .item-evidence {
   display: flex;
   align-items: baseline;
@@ -1112,7 +1249,7 @@ textarea:focus, input[type="text"]:focus, select:focus {
   padding: 1.5rem;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 }
 
 .review-actions {
@@ -1131,7 +1268,7 @@ textarea:focus, input[type="text"]:focus, select:focus {
 .processing-overlay {
   position: absolute;
   inset: 0;
-  background-color: rgba(255, 255, 255, 0.96);
+  background-color: var(--overlay-bg);
   z-index: 40;
   display: flex;
   align-items: center;
@@ -1231,27 +1368,28 @@ textarea:focus, input[type="text"]:focus, select:focus {
 }
 
 .toast {
-  background-color: var(--primary);
-  color: var(--primary-fg);
+  background-color: var(--toast-bg);
+  color: var(--toast-fg);
   padding: 0.65rem 1rem;
   border-radius: var(--radius-md);
   font-size: 0.82rem;
   font-weight: 500;
   box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
   animation: toastSlide 0.2s ease;
   transition: opacity 0.2s ease;
 }
 
 .toast-success {
-  background-color: #0f172a;
+  border-left: 3px solid var(--status-approved-fg);
 }
 
 .toast-warning {
-  background-color: #78350f;
+  border-left: 3px solid var(--status-pending-fg);
 }
 
 .toast-error {
-  background-color: #7f1d1d;
+  border-left: 3px solid var(--status-flagged-fg);
 }
 
 @keyframes toastSlide {
@@ -1259,14 +1397,20 @@ textarea:focus, input[type="text"]:focus, select:focus {
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Responsive adjustments */
-@media (max-width: 960px) {
+/* ==========================================================================
+   Responsive Behavior
+   ========================================================================== */
+
+@media (max-width: 1024px) {
   .app-workspace[data-active-view="split"] {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 2rem;
   }
-  .nav-tab-split {
-    display: none;
+  .app-workspace[data-active-view="split"] .pane-brief {
+    border-right: none;
+    padding-right: 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 2rem;
   }
   .meta-kv-grid {
     grid-template-columns: 1fr;
