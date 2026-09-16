@@ -400,9 +400,9 @@ class PendingIntake(BaseModel):
             "example": {
                 "id": "INT-abc12345",
                 "request_id": "REQ-xyz98765",
-                "extracted": {...},
-                "team_recommendation": {...},
-                "checklist": {...},
+                "extracted": {},
+                "team_recommendation": {},
+                "checklist": {},
                 "status": "pending_review",
                 "requires_manual_review": False,
             }

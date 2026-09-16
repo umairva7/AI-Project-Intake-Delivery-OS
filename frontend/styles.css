@@ -1115,6 +1115,11 @@ textarea:focus, input[type="text"]:focus, select:focus {
   border-left: 4px solid var(--warning);
 }
 
+.toast.toast-error,
+.toast.toast-danger {
+  border-left: 4px solid var(--danger);
+}
+
 @keyframes toastIn {
   from { transform: translateY(100%); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }

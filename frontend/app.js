@@ -239,10 +239,84 @@ const SAMPLE_BRIEFS = {
   }
 };
 
+// Backend API Configuration
+const API_BASE_URL = (window.location.protocol.startsWith('http') && window.location.port === '8000')
+  ? ''
+  : 'http://localhost:8000';
+
+/**
+ * Normalizes a PendingIntake API response from the backend into the shape
+ * expected by the existing UI rendering layer.
+ *
+ * Backend source of truth (PendingIntake):
+ * - id: "INT-xxxx"
+ * - request_id: "REQ-xxxx"
+ * - extracted: { project_name, summary, requirements, missing_information, scope_constraints, confidence }
+ * - team_recommendation: { team, confidence, reasoning, alternative_team, ... }
+ * - checklist: { items: [...], total_tasks: N, generated_at: "..." }
+ * - status: "pending_review" | "approved" | "flagged"
+ */
+function normalizeIntakeResponse(data) {
+  if (!data) return null;
+
+  const extracted = data.extracted || data.project || {};
+  const teamRec = data.team_recommendation || {};
+  const checklistData = data.checklist || {};
+  const rawItems = Array.isArray(checklistData)
+    ? checklistData
+    : (Array.isArray(checklistData.items) ? checklistData.items : []);
+
+  const normalizedChecklist = rawItems.map((item, idx) => ({
+    id: item.id !== undefined && item.id !== null ? item.id : idx + 1,
+    task: item.task || '',
+    priority: item.priority || 'medium',
+    estimated_effort: item.estimated_effort || null,
+    done: Boolean(item.done)
+  }));
+
+  const constraints = extracted.scope_constraints || extracted.constraints || [];
+
+  return {
+    id: data.id || data.intake_id || `INT-${Date.now().toString(36)}`,
+    request_id: data.request_id || data.id || 'REQ-0001',
+    status: data.status || 'pending_review',
+    source: data.source || (document.getElementById('sourceSelect') ? document.getElementById('sourceSelect').value : 'web_form'),
+    created_at: data.created_at || new Date().toISOString(),
+    requires_manual_review: Boolean(data.requires_manual_review),
+    review_notes: data.review_notes || '',
+    project: {
+      name: extracted.project_name || extracted.name || 'Untitled Project',
+      summary: extracted.summary || 'No summary available',
+      business_objective: extracted.business_objective || (
+        extracted.summary ? `Delivery focus: ${extracted.project_name || 'Project Intake'}` : 'Scope defined in project brief'
+      ),
+      requirements: (extracted.requirements || []).map(r => ({
+        description: r.description || '',
+        priority: r.priority || 'medium',
+        confirmed: r.confirmed !== false,
+        source_quote: r.source_quote || null
+      })),
+      technical_requirements: extracted.technical_requirements || [],
+      constraints: constraints,
+      existing_resources: extracted.existing_resources || [],
+      missing_information: extracted.missing_information || []
+    },
+    team_recommendation: {
+      team: teamRec.team || teamRec.recommended_team || 'Web Development',
+      confidence: typeof teamRec.confidence === 'number' ? teamRec.confidence : 0.85,
+      confidence_text: teamRec.confidence_text || `${Math.round((teamRec.confidence || 0) * 100)}% Confidence`,
+      reasoning: teamRec.reasoning || [],
+      alternative_team: teamRec.alternative_team || null
+    },
+    checklist: normalizedChecklist,
+    checklist_total_tasks: checklistData.total_tasks || normalizedChecklist.length
+  };
+}
+
 // Application State
-let currentIntake = JSON.parse(JSON.stringify(SAMPLE_BRIEFS.property.extracted));
+let currentIntake = normalizeIntakeResponse(SAMPLE_BRIEFS.property.extracted);
 let intakeHistory = [
-  { id: "REQ-0001", name: "Property Listing Platform", team: "Web Development", status: "pending_review" }
+  { id: currentIntake.id, request_id: currentIntake.request_id, name: "Property Listing Platform", team: "Web Development", status: "pending_review", data: JSON.parse(JSON.stringify(currentIntake)) }
 ];
 let isEditing = false;
 
@@ -309,11 +383,28 @@ const pipelineSteps = [
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+  checkApiHealth();
   loadSample('property');
   renderHistory();
   renderIntakeView();
   setupEventListeners();
 });
+
+// Check backend API connectivity on load
+async function checkApiHealth() {
+  const statusIndicator = document.getElementById('apiStatusIndicator');
+  const statusText = document.getElementById('apiStatusText');
+  try {
+    const resp = await fetch(`${API_BASE_URL}/openapi.json`, { method: 'GET' });
+    if (resp.ok) {
+      if (statusText) statusText.textContent = 'API Connected';
+      if (statusIndicator) statusIndicator.title = `Connected to API at ${API_BASE_URL || window.location.origin}`;
+    }
+  } catch (_) {
+    if (statusText) statusText.textContent = 'API Offline';
+    if (statusIndicator) statusIndicator.title = `Could not reach API at ${API_BASE_URL}`;
+  }
+}
 
 function setupEventListeners() {
   // Character counter
@@ -359,37 +450,101 @@ function setupEventListeners() {
   });
 
   // Human Review: Approve
-  approveIntakeBtn.addEventListener('click', () => {
-    const reviewer = reviewerNameInput.value.trim() || 'Lead PM';
-    currentIntake.status = 'approved';
-    currentIntake.review = {
-      status: 'approved',
-      reviewer: reviewer,
-      review_notes: reviewNotes.value.trim(),
-      approved_at: new Date().toISOString()
-    };
-    // Sync recommended team if override selected
-    currentIntake.team_recommendation.team = teamOverrideSelect.value;
+  approveIntakeBtn.addEventListener('click', async () => {
+    if (!currentIntake || !currentIntake.id) {
+      showToast('No active intake loaded to approve', 'warning');
+      return;
+    }
 
-    updateStatusUI('approved');
-    updateHistoryStatus(currentIntake.request_id, 'approved');
-    showToast(`✓ Intake ${currentIntake.request_id} approved and finalized!`, 'success');
+    const intakeId = currentIntake.id;
+    approveIntakeBtn.disabled = true;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/briefs/${encodeURIComponent(intakeId)}/approve`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (!response.ok) {
+        let errMsg = `Server returned error (${response.status})`;
+        try {
+          const errJson = await response.json();
+          if (errJson.detail) errMsg = typeof errJson.detail === 'string' ? errJson.detail : JSON.stringify(errJson.detail);
+        } catch (_) {}
+        throw new Error(errMsg);
+      }
+
+      const reviewer = reviewerNameInput.value.trim() || 'Lead PM';
+      currentIntake.status = 'approved';
+      currentIntake.review = {
+        status: 'approved',
+        reviewer: reviewer,
+        review_notes: reviewNotes.value.trim(),
+        approved_at: new Date().toISOString()
+      };
+      currentIntake.team_recommendation.team = teamOverrideSelect.value;
+
+      updateStatusUI('approved');
+      updateHistoryStatus(currentIntake.id, 'approved');
+      showToast(`✓ Intake ${currentIntake.id} approved and finalized!`, 'success');
+    } catch (err) {
+      console.error('Approve failed:', err);
+      showToast(`Approval failed: ${err.message}`, 'error');
+    } finally {
+      approveIntakeBtn.disabled = false;
+    }
   });
 
-  // Human Review: Reject / Request Clarification
-  rejectIntakeBtn.addEventListener('click', () => {
-    const reviewer = reviewerNameInput.value.trim() || 'Lead PM';
-    currentIntake.status = 'rejected';
-    currentIntake.review = {
-      status: 'rejected',
-      reviewer: reviewer,
-      review_notes: reviewNotes.value.trim() || 'Missing critical client specifications',
-      rejected_at: new Date().toISOString()
-    };
+  // Human Review: Reject / Request Clarification (Mark Issues)
+  rejectIntakeBtn.addEventListener('click', async () => {
+    if (!currentIntake || !currentIntake.id) {
+      showToast('No active intake loaded to flag', 'warning');
+      return;
+    }
 
-    updateStatusUI('rejected');
-    updateHistoryStatus(currentIntake.request_id, 'rejected');
-    showToast(`Intake ${currentIntake.request_id} marked as Needs Revision`, 'warning');
+    const intakeId = currentIntake.id;
+    const reviewer = reviewerNameInput.value.trim() || 'Lead PM';
+    const noteText = reviewNotes.value.trim();
+    const issues = noteText ? [noteText] : ['Scope or technical details require clarification'];
+
+    rejectIntakeBtn.disabled = true;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/briefs/${encodeURIComponent(intakeId)}/mark-issues`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ issues: issues })
+      });
+
+      if (!response.ok) {
+        let errMsg = `Server returned error (${response.status})`;
+        try {
+          const errJson = await response.json();
+          if (errJson.detail) errMsg = typeof errJson.detail === 'string' ? errJson.detail : JSON.stringify(errJson.detail);
+        } catch (_) {}
+        throw new Error(errMsg);
+      }
+
+      currentIntake.status = 'flagged';
+      currentIntake.review = {
+        status: 'flagged',
+        reviewer: reviewer,
+        review_notes: noteText || issues[0],
+        flagged_at: new Date().toISOString()
+      };
+
+      updateStatusUI('flagged');
+      updateHistoryStatus(currentIntake.id, 'flagged');
+      showToast(`Intake ${currentIntake.id} marked as Revision Requested`, 'warning');
+    } catch (err) {
+      console.error('Mark issues failed:', err);
+      showToast(`Failed to flag issues: ${err.message}`, 'error');
+    } finally {
+      rejectIntakeBtn.disabled = false;
+    }
   });
 
   // Human Review: Toggle Edit Mode
