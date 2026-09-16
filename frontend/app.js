@@ -342,14 +342,14 @@ const SAMPLE_BRIEFS = {
       },
       team_recommendation: {
         team: "Web Development",
-        confidence: 0.82,
-        confidence_text: "Confidence: Moderate",
+        confidence: 0.35,
+        confidence_text: "Confidence: Low",
         reasoning: [
-          "E-commerce requirements span custom web frontend and payments integration",
-          "Requires architectural evaluation: custom build vs headless commerce platform",
-          "Fixed holiday deadline requires rigorous scope management"
+          "Brief is ambiguous with missing architecture and platform specifications",
+          "Web Development team assigned tentatively, but confidence is low (35%)",
+          "Clarification needed on custom build vs SaaS platform and holiday schedule"
         ],
-        alternative_team: "Automation"
+        alternative_team: "Needs PM Clarification"
       },
       checklist: [
         {
