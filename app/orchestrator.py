@@ -18,7 +18,12 @@ from app.models import (
     UserFeedback,
     extraction_is_usable,
 )
-from app.providers.ollama import OllamaProvider
+from app.providers import (
+    BaseLLMProvider,
+    OllamaProvider,
+    GroqProvider,
+    get_llm_provider,
+)
 from app.services.extraction import ExtractionService
 from app.services.recommendation import recommend_team
 from app.services.checklist import generate_checklist, generate_clarification_checklist
@@ -38,12 +43,15 @@ class IntakeOrchestrator:
     6. Approval: Handles human review, issue marking, and final approval.
     """
 
-    def __init__(self, provider: Optional[OllamaProvider] = None):
+    def __init__(
+        self,
+        provider: Optional[Union[BaseLLMProvider, OllamaProvider, GroqProvider]] = None,
+    ):
         """
         Initialize the orchestrator with an optional LLM provider.
-        Defaults to OllamaProvider. Ensures database tables are initialized.
+        Defaults to the configured primary provider (Groq). Ensures database tables are initialized.
         """
-        self.llm = provider or OllamaProvider()
+        self.llm = provider or get_llm_provider()
         self.extractor = ExtractionService(provider=self.llm)
         init_db()
 
@@ -84,11 +92,16 @@ class IntakeOrchestrator:
                 request.id,
                 extraction_result.error,
             )
-            # Differentiate Ollama offline vs extraction failure
+            # Differentiate Groq missing key vs Ollama offline vs general extraction failure
             err_text = f"{extraction_result.error or ''} {extraction_result.review_notes or ''} {extraction_result.user_message or ''}".lower()
+            is_groq_missing_key = "groq api key not configured" in err_text or "groq_api_key" in err_text
             is_offline = "connection refused" in err_text or "offline" in err_text or "11434" in err_text
 
-            if is_offline:
+            if is_groq_missing_key:
+                fallback_summary = "AI system is not configured. Please ensure GROQ_API_KEY is set."
+                fallback_notes = "AI system unavailable: Groq API key is not configured."
+                fallback_missing = ["Technology preferences", "Timeline", "Budget"]
+            elif is_offline:
                 fallback_summary = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
                 fallback_notes = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
                 fallback_missing = ["Technology preferences", "Timeline", "Budget"]

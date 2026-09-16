@@ -118,6 +118,7 @@ ERROR_CONTAMINATION_TERMS: Set[str] = {
     "timed out", "timeout", "error", "failed", "couldn't extract", "ollama",
     "groq", "status code", "internal server error", "stack trace", "errno",
     "500", "404", "400", "pydantic", "validation failed", "bad gateway",
+    "api key", "unauthorized", "rate limit", "bearer",
 }
 
 

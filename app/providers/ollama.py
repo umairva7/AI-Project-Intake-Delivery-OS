@@ -15,6 +15,7 @@ from app.models import (
     ExtractionResult,
     ErrorResponse,
 )
+from app.providers.base import BaseLLMProvider
 
 logger = logging.getLogger(__name__)
 
@@ -62,12 +63,16 @@ def clean_and_parse_json(text: str) -> Dict[str, Any]:
     return json.loads(cleaned)
 
 
-class OllamaProvider:
+class OllamaProvider(BaseLLMProvider):
     """
     Ollama integration for local LLM inference.
     Handles communication with Ollama API, retries, JSON parsing,
     Pydantic schema validation, and failure scenarios.
     """
+
+    @property
+    def provider_name(self) -> str:
+        return "ollama"
 
     def __init__(
         self,

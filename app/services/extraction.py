@@ -14,7 +14,13 @@ from app.models import (
     RawBrief,
     Requirement,
 )
-from app.providers.ollama import OllamaProvider, clean_and_parse_json
+from app.providers import (
+    BaseLLMProvider,
+    OllamaProvider,
+    GroqProvider,
+    get_llm_provider,
+    clean_and_parse_json,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -331,10 +337,10 @@ class ExtractionService:
 
     def __init__(
         self,
-        provider: Optional[OllamaProvider] = None,
+        provider: Optional[Union[BaseLLMProvider, OllamaProvider, GroqProvider]] = None,
         prompt_path: Optional[Path] = None,
     ):
-        self.provider = provider or OllamaProvider()
+        self.provider = provider or get_llm_provider()
         self.prompt_path = prompt_path or (_PROJECT_ROOT / "app" / "prompts" / "extraction.txt")
 
     def build_prompt(self, brief_text: str) -> str:
@@ -536,7 +542,7 @@ JSON OUTPUT:
 
 def extract_requirements(
     raw_brief: Union[str, RawBrief],
-    provider: Optional[OllamaProvider] = None,
+    provider: Optional[Union[BaseLLMProvider, OllamaProvider, GroqProvider]] = None,
 ) -> ProjectExtraction:
     """
     Stand-alone service entrypoint:
@@ -544,7 +550,7 @@ def extract_requirements(
 
     Args:
         raw_brief: Raw project brief text or RawBrief instance.
-        provider: Optional OllamaProvider instance.
+        provider: Optional BaseLLMProvider instance.
 
     Returns:
         Validated ProjectExtraction model.

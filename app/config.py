@@ -137,8 +137,19 @@ DEFAULT_TEAM_CHECKLIST_TEMPLATES: Dict[str, Dict[str, Any]] = {
 
 
 class Settings:
+    # LLM Provider selection: "groq" (default/primary) or "ollama"
+    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "groq")
+
+    # Groq Configuration (Primary Provider)
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    GROQ_MODEL: str = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+    GROQ_BASE_URL: str = os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
+    GROQ_TIMEOUT: int = int(os.getenv("GROQ_TIMEOUT", "30"))
+
+    # Ollama Configuration (Secondary / Fallback Provider)
     OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "mistral")
+    OLLAMA_TIMEOUT: int = int(os.getenv("OLLAMA_TIMEOUT", "30"))
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./data/intake.db")
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     CONFIDENCE_THRESHOLD: float = float(os.getenv("CONFIDENCE_THRESHOLD", "0.7"))
