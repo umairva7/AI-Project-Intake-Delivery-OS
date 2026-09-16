@@ -249,6 +249,8 @@ class IntakeOrchestrator:
                     team=team_rec.team,
                     missing_information=project_extraction.missing_information,
                     supporting_teams=team_rec.supporting_teams,
+                    brief_text=brief.brief_text,
+                    extraction=project_extraction,
                 )
                 logger.info(
                     "Step 4: Checklist Generation - Implementation checklist generated: %s (%d items)",

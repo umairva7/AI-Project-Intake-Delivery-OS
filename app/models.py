@@ -295,6 +295,38 @@ def extraction_is_usable(
     return status == "validated"
 
 
+class TaskEvidence(BaseModel):
+    """Evidence model justifying a checklist item."""
+
+    type: Literal["requirement", "missing_information", "brief", "implied", "policy"] = Field(
+        default="requirement",
+        description="Type of evidence ('requirement', 'missing_information', 'brief', 'implied', 'policy')",
+    )
+    source_quote: Optional[str] = Field(
+        default=None,
+        description="Source quote or excerpt from the client brief or requirement",
+    )
+    requirement_description: Optional[str] = Field(
+        default=None,
+        description="Description of confirmed requirement this task implements",
+    )
+    confirmed: bool = Field(
+        default=True,
+        description="Whether the underlying requirement is confirmed",
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "type": "requirement",
+                "source_quote": "We need a React frontend",
+                "requirement_description": "React frontend",
+                "confirmed": True,
+            }
+        }
+    )
+
+
 class ChecklistItem(BaseModel):
     """Single item in the delivery checklist"""
 
@@ -310,6 +342,14 @@ class ChecklistItem(BaseModel):
     depends_on: Optional[List[int]] = Field(
         default=None, description="Task IDs this depends on (if any)"
     )
+    task_type: Literal["implementation", "clarification"] = Field(
+        default="implementation",
+        description="Classification: 'implementation' or 'clarification'",
+    )
+    evidence: Optional[TaskEvidence] = Field(
+        default=None,
+        description="Traceable evidence justifying this task",
+    )
 
     @model_validator(mode="before")
     @classmethod
@@ -319,11 +359,20 @@ class ChecklistItem(BaseModel):
                 data["title"] = data["task"]
             elif "title" in data and not data.get("task"):
                 data["task"] = data["title"]
+            # Auto-infer task_type if task starts with clarification prefix
+            task_str = str(data.get("task") or data.get("title") or "")
+            if task_str.lower().startswith("clarify with client") or task_str.lower().startswith("clarify "):
+                if "task_type" not in data:
+                    data["task_type"] = "clarification"
         return data
 
     @property
     def item_title(self) -> str:
         return self.title or self.task
+
+    @property
+    def has_evidence(self) -> bool:
+        return self.evidence is not None and bool(self.evidence.type)
 
     model_config = ConfigDict(
         json_schema_extra={
