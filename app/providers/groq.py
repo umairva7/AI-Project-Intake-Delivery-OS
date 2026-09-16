@@ -76,7 +76,7 @@ class GroqClient:
         timeout: int = 30,
         session: Optional[requests.Session] = None,
     ):
-        self.api_key = (api_key or settings.GROQ_API_KEY).strip()
+        self.api_key = (api_key if api_key is not None else settings.GROQ_API_KEY).strip()
         self.base_url = (base_url or settings.GROQ_BASE_URL).rstrip("/")
         self.timeout = timeout
         self.session = session or requests.Session()
