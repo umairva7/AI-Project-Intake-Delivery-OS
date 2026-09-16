@@ -684,6 +684,11 @@ async function checkApiHealth() {
 }
 
 function setupEventListeners() {
+  // Theme toggle button
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', toggleTheme);
+  }
+
   // View switcher buttons
   if (navTabSplit) navTabSplit.addEventListener('click', () => switchView('split'));
   if (navTabBrief) navTabBrief.addEventListener('click', () => switchView('brief'));
