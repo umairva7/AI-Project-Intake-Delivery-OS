@@ -82,3 +82,12 @@ def flag_issues(brief_id: str, payload: Union[MarkIssuesRequest, list[str]] = Bo
         return {"status": "flagged", "id": brief_id}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+# Mount frontend static files for direct browser access
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
+frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
+if frontend_dir.exists():
+    app.mount("/frontend", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
