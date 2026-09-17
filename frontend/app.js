@@ -398,9 +398,10 @@ const SAMPLE_BRIEFS = {
 };
 
 // Backend API Configuration
-const API_BASE_URL = (window.location.protocol.startsWith('http') && window.location.port === '8000')
-  ? ''
-  : 'http://localhost:8000';
+// When deployed on Vercel or same-origin server, use relative path ('').
+// When running locally via Live Server or development ports, point to local FastAPI server.
+const isLocalFrontendPort = ['5500', '3000', '5173', '8080'].includes(window.location.port) || window.location.protocol === 'file:';
+const API_BASE_URL = isLocalFrontendPort ? 'http://localhost:8000' : '';
 
 function parseConfidenceScore(val, text) {
   if (typeof val === 'number' && !isNaN(val)) {

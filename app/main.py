@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from app.config import settings
 from app.orchestrator import IntakeOrchestrator
 from app.models import RawBrief, PendingIntake
 
@@ -66,6 +67,13 @@ async def global_exception_handler(request: Request, exc: Exception):
             "Could you add more details about: Technology preferences, Timeline, Budget"
         )
     return JSONResponse(status_code=500, content={"detail": detail})
+
+
+@app.get("/health")
+@app.get("/api/health")
+def health_check():
+    """Health check endpoint for deployment verification."""
+    return {"status": "ok", "provider": settings.LLM_PROVIDER, "service": "AI Project Intake API"}
 
 
 class MarkIssuesRequest(BaseModel):
