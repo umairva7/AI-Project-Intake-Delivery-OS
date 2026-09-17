@@ -1,0 +1,1261 @@
+{
+  "metadata": {
+    "dataset_file": "evaluation_data.json",
+    "predictions_file": "eval_predictions.json",
+    "total_cases": 20,
+    "fuzzy_threshold": 0.55
+  },
+  "summary": {
+    "team_decision_accuracy": 0.75,
+    "requirement_precision_micro": 0.4286,
+    "requirement_recall_micro": 0.4714,
+    "requirement_precision_macro": 0.3645,
+    "requirement_recall_macro": 0.7081,
+    "unsupported_inference_rate": 0.0779,
+    "missing_information_recall_micro": 0.2069,
+    "missing_information_recall_macro": 0.1842,
+    "flagged_for_review_rate": 0.9,
+    "error_rate": 0.05,
+    "sensitive_data_detection_rate": 0.0,
+    "injection_attempt_detection_rate": 0.0,
+    "latency": {
+      "mean_ms": 2865.6,
+      "p50_ms": 2987,
+      "p95_ms": 5077
+    }
+  },
+  "category_metrics": {
+    "clear_requests": {
+      "total_cases": 4,
+      "team_accuracy": 0.75,
+      "team_correct": 3,
+      "requirement_precision": 0.7826,
+      "requirement_recall": 0.6429,
+      "missing_info_recall": 0.3333,
+      "flagged_for_review_rate": 0.75,
+      "avg_latency_ms": 3596.2
+    },
+    "ai_ml_requests": {
+      "total_cases": 2,
+      "team_accuracy": 0.5,
+      "team_correct": 1,
+      "requirement_precision": 0.375,
+      "requirement_recall": 0.3,
+      "missing_info_recall": 0.1,
+      "flagged_for_review_rate": 1.0,
+      "avg_latency_ms": 2017.5
+    },
+    "automation_requests": {
+      "total_cases": 2,
+      "team_accuracy": 0.0,
+      "team_correct": 0,
+      "requirement_precision": 0.1111,
+      "requirement_recall": 0.0714,
+      "missing_info_recall": 0.2222,
+      "flagged_for_review_rate": 1.0,
+      "avg_latency_ms": 3134.0
+    },
+    "ambiguous_requests": {
+      "total_cases": 3,
+      "team_accuracy": 1.0,
+      "team_correct": 3,
+      "requirement_precision": 0.0,
+      "requirement_recall": 1.0,
+      "missing_info_recall": 0.2778,
+      "flagged_for_review_rate": 1.0,
+      "avg_latency_ms": 2177.0
+    },
+    "multi_team_requests": {
+      "total_cases": 3,
+      "team_accuracy": 0.6667,
+      "team_correct": 2,
+      "requirement_precision": 0.7333,
+      "requirement_recall": 0.6111,
+      "missing_info_recall": 0.0667,
+      "flagged_for_review_rate": 0.6667,
+      "avg_latency_ms": 3406.0
+    },
+    "edge_cases": {
+      "total_cases": 6,
+      "team_accuracy": 1.0,
+      "team_correct": 6,
+      "requirement_precision": 0.0,
+      "requirement_recall": 1.0,
+      "missing_info_recall": 0.1765,
+      "flagged_for_review_rate": 1.0,
+      "avg_latency_ms": 2645.7
+    }
+  },
+  "cases": [
+    {
+      "case_id": "TC-001",
+      "category": "clear_requests",
+      "difficulty": "easy",
+      "team_evaluation": {
+        "expected": "Web Development",
+        "predicted": "Web Development",
+        "confidence": 0.95,
+        "supporting_teams": [],
+        "flagged_for_review": false,
+        "matched": true,
+        "notes": "Exact team match: 'Web Development'"
+      },
+      "requirements_evaluation": {
+        "expected_count": 6,
+        "predicted_count": 4,
+        "matched_count": 3,
+        "precision": 0.75,
+        "recall": 0.5,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [
+          {
+            "expected": "React frontend",
+            "predicted": "Develop a React frontend",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Python API",
+            "predicted": "Develop a Python API",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Employee information display",
+            "predicted": "Display employee information, project assignments, and work hours on the dashboard",
+            "similarity": 0.75
+          }
+        ],
+        "unmatched_expected": [
+          "React frontend",
+          "Python API",
+          "Employee information display",
+          "Project assignments display",
+          "Work hours tracking",
+          "PostgreSQL database integration"
+        ]
+      },
+      "missing_info_evaluation": {
+        "expected_count": 4,
+        "predicted_count": 6,
+        "matched_count": 2,
+        "recall": 0.5,
+        "matches": [
+          {
+            "expected": "Authentication/authorization details",
+            "predicted": "Details on authentication and authorization mechanisms for internal users",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Hosting/deployment environment",
+            "predicted": "Hosting environment and deployment strategy (on\u2011premise, cloud, containers, etc.)",
+            "similarity": 0.75
+          }
+        ]
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 4929,
+      "error": null
+    },
+    {
+      "case_id": "TC-002",
+      "category": "clear_requests",
+      "difficulty": "easy",
+      "team_evaluation": {
+        "expected": "Mobile Development",
+        "predicted": "Mobile Development",
+        "confidence": 0.95,
+        "supporting_teams": [],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Exact team match: 'Mobile Development'"
+      },
+      "requirements_evaluation": {
+        "expected_count": 6,
+        "predicted_count": 6,
+        "matched_count": 4,
+        "precision": 0.6667,
+        "recall": 0.6667,
+        "unsupported_count": 3,
+        "unsupported_rate": 0.5,
+        "matches": [
+          {
+            "expected": "Workout logging",
+            "predicted": "Implement workout logging functionality",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Progress charts",
+            "predicted": "Provide progress charts to visualize fitness data",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Social sharing",
+            "predicted": "Enable social sharing of fitness achievements",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Notifications",
+            "predicted": "Send notifications to users (e.g., reminders, milestones)",
+            "similarity": 0.75
+          }
+        ],
+        "unmatched_expected": [
+          "iOS native app",
+          "Android native app",
+          "Workout logging",
+          "Progress charts",
+          "Social sharing",
+          "Notifications"
+        ]
+      },
+      "missing_info_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 6,
+        "matched_count": 0,
+        "recall": 0.0,
+        "matches": []
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 2392,
+      "error": null
+    },
+    {
+      "case_id": "TC-003",
+      "category": "clear_requests",
+      "difficulty": "easy",
+      "team_evaluation": {
+        "expected": "Web Development",
+        "predicted": "Web Development",
+        "confidence": 0.85,
+        "supporting_teams": [],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Exact team match: 'Web Development'"
+      },
+      "requirements_evaluation": {
+        "expected_count": 9,
+        "predicted_count": 7,
+        "matched_count": 6,
+        "precision": 0.8571,
+        "recall": 0.6667,
+        "unsupported_count": 2,
+        "unsupported_rate": 0.2857,
+        "matches": [
+          {
+            "expected": "SEO optimization",
+            "predicted": "Provide SEO optimization",
+            "similarity": 0.8
+          },
+          {
+            "expected": "Revision history",
+            "predicted": "Maintain revision history",
+            "similarity": 0.78
+          },
+          {
+            "expected": "PostgreSQL database",
+            "predicted": "Use PostgreSQL as the database",
+            "similarity": 0.776
+          },
+          {
+            "expected": "Next.js frontend",
+            "predicted": "Use Next.js for the frontend",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Node.js backend",
+            "predicted": "Use Node.js for the backend",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Multiple author support",
+            "predicted": "Support multiple authors",
+            "similarity": 0.681
+          }
+        ],
+        "unmatched_expected": [
+          "CMS for blog posts",
+          "Media management",
+          "User roles management",
+          "Multiple author support",
+          "Revision history",
+          "SEO optimization",
+          "Next.js frontend",
+          "Node.js backend",
+          "PostgreSQL database"
+        ]
+      },
+      "missing_info_evaluation": {
+        "expected_count": 4,
+        "predicted_count": 6,
+        "matched_count": 2,
+        "recall": 0.5,
+        "matches": [
+          {
+            "expected": "Media storage limits",
+            "predicted": "Media storage requirements (file types, size limits, CDN usage)",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Deployment environment",
+            "predicted": "Hosting environment or deployment platform",
+            "similarity": 0.75
+          }
+        ]
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 5077,
+      "error": null
+    },
+    {
+      "case_id": "TC-004",
+      "category": "clear_requests",
+      "difficulty": "easy",
+      "team_evaluation": {
+        "expected": "Web Development",
+        "predicted": "",
+        "confidence": 0.0,
+        "supporting_teams": [],
+        "flagged_for_review": true,
+        "matched": false,
+        "notes": "Team mismatch: expected 'Web Development', got ''"
+      },
+      "requirements_evaluation": {
+        "expected_count": 7,
+        "predicted_count": 6,
+        "matched_count": 5,
+        "precision": 0.8333,
+        "recall": 0.7143,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [
+          {
+            "expected": "Inventory management",
+            "predicted": "Inventory management",
+            "similarity": 1.0
+          },
+          {
+            "expected": "Order fulfillment tracking",
+            "predicted": "Order fulfillment tracking",
+            "similarity": 1.0
+          },
+          {
+            "expected": "Payment processing (Stripe)",
+            "predicted": "Payment processing using Stripe",
+            "similarity": 0.862
+          },
+          {
+            "expected": "Shopping cart",
+            "predicted": "Shopping cart functionality",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Physical product catalog",
+            "predicted": "Sell digital and physical products",
+            "similarity": 0.552
+          }
+        ],
+        "unmatched_expected": [
+          "E-commerce platform",
+          "Digital product delivery",
+          "Physical product catalog",
+          "Shopping cart",
+          "Payment processing (Stripe)",
+          "Inventory management",
+          "Order fulfillment tracking"
+        ]
+      },
+      "missing_info_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 6,
+        "matched_count": 2,
+        "recall": 0.4,
+        "matches": [
+          {
+            "expected": "Analytics requirements",
+            "predicted": "Design and UI/UX requirements",
+            "similarity": 0.627
+          },
+          {
+            "expected": "Tax/compliance requirements",
+            "predicted": "Security and compliance requirements (PCI DSS, GDPR, etc.)",
+            "similarity": 0.588
+          }
+        ]
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 1987,
+      "error": null
+    },
+    {
+      "case_id": "TC-005",
+      "category": "ai_ml_requests",
+      "difficulty": "medium",
+      "team_evaluation": {
+        "expected": "AI / ML",
+        "predicted": "AI / ML",
+        "confidence": 0.55,
+        "supporting_teams": [],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Exact team match: 'AI / ML'"
+      },
+      "requirements_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 4,
+        "matched_count": 1,
+        "precision": 0.25,
+        "recall": 0.2,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [
+          {
+            "expected": "Auto-routing based on category",
+            "predicted": "Automatically route tickets by category",
+            "similarity": 0.58
+          }
+        ],
+        "unmatched_expected": [
+          "Ticket classification",
+          "Auto-routing based on category",
+          "Priority escalation",
+          "Human agent handoff",
+          "Historical data ingestion (2 years of tickets)"
+        ]
+      },
+      "missing_info_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 6,
+        "matched_count": 1,
+        "recall": 0.2,
+        "matches": [
+          {
+            "expected": "Integration with ticketing system",
+            "predicted": "Integration points with existing ticketing or CRM systems",
+            "similarity": 0.733
+          }
+        ]
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 2299,
+      "error": null
+    },
+    {
+      "case_id": "TC-006",
+      "category": "ai_ml_requests",
+      "difficulty": "medium",
+      "team_evaluation": {
+        "expected": "AI / ML",
+        "predicted": "",
+        "confidence": 0.0,
+        "supporting_teams": [],
+        "flagged_for_review": true,
+        "matched": false,
+        "notes": "Team mismatch: expected 'AI / ML', got ''"
+      },
+      "requirements_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 4,
+        "matched_count": 2,
+        "precision": 0.5,
+        "recall": 0.4,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [
+          {
+            "expected": "Recommendation engine",
+            "predicted": "Develop a recommendation engine for the e\u2011commerce platform",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Personalized recommendations",
+            "predicted": "Provide personalized recommendations for each user",
+            "similarity": 0.75
+          }
+        ],
+        "unmatched_expected": [
+          "Recommendation engine",
+          "Browsing history analysis",
+          "Purchase pattern analysis",
+          "Personalized recommendations",
+          "Historical transaction ingestion (1M transactions)"
+        ]
+      },
+      "missing_info_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 6,
+        "matched_count": 0,
+        "recall": 0.0,
+        "matches": []
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 1736,
+      "error": null
+    },
+    {
+      "case_id": "TC-007",
+      "category": "automation_requests",
+      "difficulty": "medium",
+      "team_evaluation": {
+        "expected": "Automation / Data",
+        "predicted": "Web Development",
+        "confidence": 0.55,
+        "supporting_teams": [],
+        "flagged_for_review": true,
+        "matched": false,
+        "notes": "Team mismatch: expected 'Automation / Data', got 'Web Development'"
+      },
+      "requirements_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 4,
+        "matched_count": 1,
+        "precision": 0.25,
+        "recall": 0.2,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [
+          {
+            "expected": "Summary dashboard generation",
+            "predicted": "Send a summary dashboard to the operations team",
+            "similarity": 0.693
+          }
+        ],
+        "unmatched_expected": [
+          "Daily data collection from 3 branch CSVs",
+          "Data cleaning/transformation",
+          "Summary dashboard generation",
+          "Anomaly detection",
+          "Email delivery to operations team"
+        ]
+      },
+      "missing_info_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 6,
+        "matched_count": 1,
+        "recall": 0.2,
+        "matches": [
+          {
+            "expected": "Anomaly thresholds",
+            "predicted": "Definition and thresholds for what constitutes an \"anomaly\"",
+            "similarity": 0.75
+          }
+        ]
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 2987,
+      "error": null
+    },
+    {
+      "case_id": "TC-008",
+      "category": "automation_requests",
+      "difficulty": "medium",
+      "team_evaluation": {
+        "expected": "Automation / Data",
+        "predicted": "",
+        "confidence": 0.0,
+        "supporting_teams": [],
+        "flagged_for_review": true,
+        "matched": false,
+        "notes": "Team mismatch: expected 'Automation / Data', got ''"
+      },
+      "requirements_evaluation": {
+        "expected_count": 9,
+        "predicted_count": 5,
+        "matched_count": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [],
+        "unmatched_expected": [
+          "PDF ingestion (100+ daily)",
+          "OCR/text extraction",
+          "Invoice number extraction",
+          "Amount extraction",
+          "Due date extraction",
+          "Customer info extraction",
+          "Validation",
+          "Accounting system integration",
+          "Multi-format handling"
+        ]
+      },
+      "missing_info_evaluation": {
+        "expected_count": 4,
+        "predicted_count": 6,
+        "matched_count": 1,
+        "recall": 0.25,
+        "matches": [
+          {
+            "expected": "Validation rules",
+            "predicted": "Specific validation rules for invoice data",
+            "similarity": 0.75
+          }
+        ]
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 3281,
+      "error": null
+    },
+    {
+      "case_id": "TC-009",
+      "category": "ambiguous_requests",
+      "difficulty": "hard",
+      "team_evaluation": {
+        "expected": "NEEDS_HUMAN_REVIEW",
+        "predicted": "AI / ML",
+        "confidence": 0.65,
+        "supporting_teams": [],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Correctly escalated for human review"
+      },
+      "requirements_evaluation": {
+        "expected_count": 0,
+        "predicted_count": 1,
+        "matched_count": 0,
+        "precision": 0.0,
+        "recall": 1.0,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [],
+        "unmatched_expected": []
+      },
+      "missing_info_evaluation": {
+        "expected_count": 6,
+        "predicted_count": 5,
+        "matched_count": 1,
+        "recall": 0.1667,
+        "matches": [
+          {
+            "expected": "Budget",
+            "predicted": "Budget and timeline constraints",
+            "similarity": 0.75
+          }
+        ]
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 1433,
+      "error": null
+    },
+    {
+      "case_id": "TC-010",
+      "category": "ambiguous_requests",
+      "difficulty": "hard",
+      "team_evaluation": {
+        "expected": "NEEDS_HUMAN_REVIEW",
+        "predicted": "AI / ML",
+        "confidence": 0.6,
+        "supporting_teams": [],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Correctly escalated for human review"
+      },
+      "requirements_evaluation": {
+        "expected_count": 0,
+        "predicted_count": 4,
+        "matched_count": 0,
+        "precision": 0.0,
+        "recall": 1.0,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [],
+        "unmatched_expected": []
+      },
+      "missing_info_evaluation": {
+        "expected_count": 6,
+        "predicted_count": 6,
+        "matched_count": 1,
+        "recall": 0.1667,
+        "matches": [
+          {
+            "expected": "Data availability and format",
+            "predicted": "What type, format, and volume of data is available?",
+            "similarity": 0.562
+          }
+        ]
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 3601,
+      "error": null
+    },
+    {
+      "case_id": "TC-011",
+      "category": "ambiguous_requests",
+      "difficulty": "hard",
+      "team_evaluation": {
+        "expected": "NEEDS_HUMAN_REVIEW",
+        "predicted": "AI / ML",
+        "confidence": 0.5,
+        "supporting_teams": [
+          "Web Development"
+        ],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Correctly escalated for human review"
+      },
+      "requirements_evaluation": {
+        "expected_count": 0,
+        "predicted_count": 2,
+        "matched_count": 0,
+        "precision": 0.0,
+        "recall": 1.0,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [],
+        "unmatched_expected": []
+      },
+      "missing_info_evaluation": {
+        "expected_count": 6,
+        "predicted_count": 6,
+        "matched_count": 3,
+        "recall": 0.5,
+        "matches": [
+          {
+            "expected": "Current technology stack",
+            "predicted": "Current technology stack and architecture of the website",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Budget",
+            "predicted": "Budget or resource constraints",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Data available",
+            "predicted": "Any existing data sources or datasets available for machine learning",
+            "similarity": 0.75
+          }
+        ]
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 1497,
+      "error": null
+    },
+    {
+      "case_id": "TC-012",
+      "category": "multi_team_requests",
+      "difficulty": "hard",
+      "team_evaluation": {
+        "expected": "CROSS_FUNCTIONAL",
+        "predicted": "Mobile Development",
+        "confidence": 0.85,
+        "supporting_teams": [],
+        "flagged_for_review": false,
+        "matched": false,
+        "notes": "Expected cross-functional allocation, but single team 'Mobile Development' assigned with no supporting teams"
+      },
+      "requirements_evaluation": {
+        "expected_count": 6,
+        "predicted_count": 5,
+        "matched_count": 3,
+        "precision": 0.6,
+        "recall": 0.5,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [
+          {
+            "expected": "AI recommendation engine",
+            "predicted": "Integrate an AI recommendation engine",
+            "similarity": 0.787
+          },
+          {
+            "expected": "Real-time messaging",
+            "predicted": "Implement real\u2011time messaging functionality",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Cloud infrastructure",
+            "predicted": "Set up cloud infrastructure to support the app",
+            "similarity": 0.75
+          }
+        ],
+        "unmatched_expected": [
+          "iOS native app",
+          "Android native app",
+          "AI recommendation engine",
+          "Real-time messaging",
+          "Cloud infrastructure",
+          "MVP features"
+        ]
+      },
+      "missing_info_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 5,
+        "matched_count": 0,
+        "recall": 0.0,
+        "matches": []
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 3018,
+      "error": null
+    },
+    {
+      "case_id": "TC-013",
+      "category": "multi_team_requests",
+      "difficulty": "hard",
+      "team_evaluation": {
+        "expected": "CROSS_FUNCTIONAL",
+        "predicted": "AI / ML",
+        "confidence": 0.4,
+        "supporting_teams": [
+          "Mobile Development",
+          "Web Development"
+        ],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Identified cross-functional scope with primary 'AI / ML' and supporting: ['Mobile Development', 'Web Development']"
+      },
+      "requirements_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 4,
+        "matched_count": 3,
+        "precision": 0.75,
+        "recall": 0.6,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [
+          {
+            "expected": "Mobile companion app",
+            "predicted": "Create a mobile companion app",
+            "similarity": 0.816
+          },
+          {
+            "expected": "Web platform",
+            "predicted": "Develop a web platform that incorporates machine learning for fraud detection",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Payment processing",
+            "predicted": "Implement payment processing functionality",
+            "similarity": 0.75
+          }
+        ],
+        "unmatched_expected": [
+          "Web platform",
+          "Fraud detection (ML)",
+          "Payment processing",
+          "Mobile companion app",
+          "Legacy system integration"
+        ]
+      },
+      "missing_info_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 6,
+        "matched_count": 1,
+        "recall": 0.2,
+        "matches": [
+          {
+            "expected": "Timeline and phasing",
+            "predicted": "Timeline and budget constraints",
+            "similarity": 0.627
+          }
+        ]
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 2966,
+      "error": null
+    },
+    {
+      "case_id": "TC-014",
+      "category": "multi_team_requests",
+      "difficulty": "hard",
+      "team_evaluation": {
+        "expected": "CROSS_FUNCTIONAL",
+        "predicted": "Mobile Development",
+        "confidence": 0.55,
+        "supporting_teams": [
+          "Web Development",
+          "AI / ML"
+        ],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Identified cross-functional scope with primary 'Mobile Development' and supporting: ['Web Development', 'AI / ML']"
+      },
+      "requirements_evaluation": {
+        "expected_count": 7,
+        "predicted_count": 6,
+        "matched_count": 5,
+        "precision": 0.8333,
+        "recall": 0.7143,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [
+          {
+            "expected": "Real-time dashboard",
+            "predicted": "Real\u2011time dashboard",
+            "similarity": 1.0
+          },
+          {
+            "expected": "High availability (5000+ concurrent)",
+            "predicted": "High availability",
+            "similarity": 0.75
+          },
+          {
+            "expected": "SAP/Oracle integration",
+            "predicted": "Integration with SAP and Oracle",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Mobile app",
+            "predicted": "Mobile application",
+            "similarity": 0.714
+          },
+          {
+            "expected": "ML-powered analytics",
+            "predicted": "Machine learning\u2011powered analytics",
+            "similarity": 0.704
+          }
+        ],
+        "unmatched_expected": [
+          "Enterprise web application",
+          "High availability (5000+ concurrent)",
+          "ML-powered analytics",
+          "Real-time dashboard",
+          "Mobile app",
+          "SAP/Oracle integration",
+          "Enterprise security requirements"
+        ]
+      },
+      "missing_info_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 6,
+        "matched_count": 0,
+        "recall": 0.0,
+        "matches": []
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 4234,
+      "error": null
+    },
+    {
+      "case_id": "TC-015",
+      "category": "edge_cases",
+      "difficulty": "very_hard",
+      "team_evaluation": {
+        "expected": "NEEDS_HUMAN_REVIEW",
+        "predicted": "",
+        "confidence": 0.0,
+        "supporting_teams": [],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Correctly escalated for human review"
+      },
+      "requirements_evaluation": {
+        "expected_count": 0,
+        "predicted_count": 0,
+        "matched_count": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [],
+        "unmatched_expected": []
+      },
+      "missing_info_evaluation": {
+        "expected_count": 1,
+        "predicted_count": 0,
+        "matched_count": 0,
+        "recall": 0.0,
+        "matches": []
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 2,
+      "error": "1 validation error for RawBrief\nbrief_text\n  String should have at least 10 characters [type=string_too_short, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.4/v/string_too_short"
+    },
+    {
+      "case_id": "TC-016",
+      "category": "edge_cases",
+      "difficulty": "very_hard",
+      "team_evaluation": {
+        "expected": "NEEDS_HUMAN_REVIEW",
+        "predicted": "",
+        "confidence": 0.0,
+        "supporting_teams": [],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Correctly escalated for human review"
+      },
+      "requirements_evaluation": {
+        "expected_count": 0,
+        "predicted_count": 1,
+        "matched_count": 0,
+        "precision": 0.0,
+        "recall": 1.0,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [],
+        "unmatched_expected": []
+      },
+      "missing_info_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 6,
+        "matched_count": 2,
+        "recall": 0.4,
+        "matches": [
+          {
+            "expected": "Target platform",
+            "predicted": "Target platform(s) (e.g., iOS, Android, web)",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Features",
+            "predicted": "Key features and functionality",
+            "similarity": 0.75
+          }
+        ]
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 2319,
+      "error": null
+    },
+    {
+      "case_id": "TC-017",
+      "category": "edge_cases",
+      "difficulty": "very_hard",
+      "team_evaluation": {
+        "expected": "NEEDS_HUMAN_REVIEW",
+        "predicted": "Web Development",
+        "confidence": 0.7,
+        "supporting_teams": [],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Correctly escalated for human review"
+      },
+      "requirements_evaluation": {
+        "expected_count": 0,
+        "predicted_count": 2,
+        "matched_count": 0,
+        "precision": 0.0,
+        "recall": 1.0,
+        "unsupported_count": 1,
+        "unsupported_rate": 0.5,
+        "matches": [],
+        "unmatched_expected": []
+      },
+      "missing_info_evaluation": {
+        "expected_count": 1,
+        "predicted_count": 5,
+        "matched_count": 0,
+        "recall": 0.0,
+        "matches": []
+      },
+      "security": {
+        "sensitive_data_expected": true,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": true,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 3103,
+      "error": null
+    },
+    {
+      "case_id": "TC-018",
+      "category": "edge_cases",
+      "difficulty": "very_hard",
+      "team_evaluation": {
+        "expected": "NEEDS_HUMAN_REVIEW",
+        "predicted": "Mobile Development",
+        "confidence": 0.45,
+        "supporting_teams": [
+          "AI / ML"
+        ],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Correctly escalated for human review"
+      },
+      "requirements_evaluation": {
+        "expected_count": 0,
+        "predicted_count": 7,
+        "matched_count": 0,
+        "precision": 0.0,
+        "recall": 1.0,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [],
+        "unmatched_expected": []
+      },
+      "missing_info_evaluation": {
+        "expected_count": 4,
+        "predicted_count": 6,
+        "matched_count": 0,
+        "recall": 0.0,
+        "matches": []
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 3961,
+      "error": null
+    },
+    {
+      "case_id": "TC-019",
+      "category": "edge_cases",
+      "difficulty": "very_hard",
+      "team_evaluation": {
+        "expected": "NEEDS_HUMAN_REVIEW",
+        "predicted": "DevOps / Infrastructure",
+        "confidence": 0.55,
+        "supporting_teams": [
+          "AI / ML"
+        ],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Correctly escalated for human review"
+      },
+      "requirements_evaluation": {
+        "expected_count": 0,
+        "predicted_count": 4,
+        "matched_count": 0,
+        "precision": 0.0,
+        "recall": 1.0,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [],
+        "unmatched_expected": []
+      },
+      "missing_info_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 5,
+        "matched_count": 1,
+        "recall": 0.2,
+        "matches": [
+          {
+            "expected": "Success metrics",
+            "predicted": "Performance metrics and success criteria for the AI optimization",
+            "similarity": 0.75
+          }
+        ]
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 3759,
+      "error": null
+    },
+    {
+      "case_id": "TC-020",
+      "category": "edge_cases",
+      "difficulty": "very_hard",
+      "team_evaluation": {
+        "expected": "NEEDS_HUMAN_REVIEW",
+        "predicted": "",
+        "confidence": 0.0,
+        "supporting_teams": [],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Correctly escalated for human review"
+      },
+      "requirements_evaluation": {
+        "expected_count": 0,
+        "predicted_count": 1,
+        "matched_count": 0,
+        "precision": 0.0,
+        "recall": 1.0,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
+        "matches": [],
+        "unmatched_expected": []
+      },
+      "missing_info_evaluation": {
+        "expected_count": 1,
+        "predicted_count": 5,
+        "matched_count": 0,
+        "recall": 0.0,
+        "matches": []
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 2730,
+      "error": null
+    }
+  ]
+}
