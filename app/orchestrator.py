@@ -111,8 +111,12 @@ class IntakeOrchestrator:
                 fallback_notes = "AI system unavailable: Groq API key is not configured."
                 fallback_missing = ["Technology preferences", "Timeline", "Budget"]
             elif is_offline:
-                fallback_summary = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
-                fallback_notes = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
+                if "ollama" in err_text or getattr(self.llm, "provider_name", "").lower() == "ollama":
+                    fallback_summary = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
+                    fallback_notes = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
+                else:
+                    fallback_summary = "AI system unavailable. Please check your network connection or Groq API configuration."
+                    fallback_notes = "AI system unavailable: Groq API service is unreachable."
                 fallback_missing = ["Technology preferences", "Timeline", "Budget"]
             else:
                 fallback_summary = (

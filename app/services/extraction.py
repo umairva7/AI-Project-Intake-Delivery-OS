@@ -520,8 +520,12 @@ JSON OUTPUT:
         except (ExtractionError, ValueError, Exception) as err:
             err_str = str(err).lower()
             if "connection refused" in err_str or "offline" in err_str or "11434" in err_str:
-                user_msg = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
-                rev_note = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
+                if "ollama" in err_str or getattr(self.provider, "provider_name", "").lower() == "ollama":
+                    user_msg = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
+                    rev_note = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
+                else:
+                    user_msg = "AI system unavailable. Please check your network connection or Groq API configuration."
+                    rev_note = "AI system unavailable: Groq service is unreachable."
             else:
                 user_msg = (
                     "We couldn't confidently extract requirements from this brief. \n"

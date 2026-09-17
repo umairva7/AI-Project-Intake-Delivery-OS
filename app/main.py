@@ -60,7 +60,12 @@ async def global_exception_handler(request: Request, exc: Exception):
     logger.error("API unhandled exception on %s: %s", request.url.path, exc, exc_info=True)
     err_str = str(exc).lower()
     if "connection refused" in err_str or "offline" in err_str or "11434" in err_str:
-        detail = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
+        if "ollama" in err_str:
+            detail = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
+        elif settings.LLM_PROVIDER.lower() == "groq":
+            detail = "AI system unavailable. Please check your network connection or Groq API configuration."
+        else:
+            detail = f"AI system unavailable. Please ensure {settings.LLM_PROVIDER.capitalize()} is running."
     else:
         detail = (
             "We couldn't confidently extract requirements from this brief. \n"
@@ -104,7 +109,12 @@ def create_brief(brief: RawBrief):
         logger.error("API: Unexpected error during brief processing: %s", e, exc_info=True)
         err_str = str(e).lower()
         if "connection refused" in err_str or "offline" in err_str:
-            detail = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
+            if "ollama" in err_str:
+                detail = "AI system unavailable. Please ensure Ollama is running on http://localhost:11434"
+            elif settings.LLM_PROVIDER.lower() == "groq":
+                detail = "AI system unavailable. Please check your network connection or Groq API configuration."
+            else:
+                detail = f"AI system unavailable. Please ensure {settings.LLM_PROVIDER.capitalize()} is running."
         else:
             detail = (
                 "We couldn't confidently extract requirements from this brief. \n"

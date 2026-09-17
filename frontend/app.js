@@ -703,15 +703,27 @@ async function checkApiHealth() {
   const statusIndicator = document.getElementById('apiStatusIndicator');
   const statusText = document.getElementById('apiStatusText');
   try {
-    const resp = await fetch(`${API_BASE_URL}/openapi.json`, { method: 'GET' });
+    const resp = await fetch(`${API_BASE_URL}/health`, { method: 'GET' });
     if (resp.ok) {
+      const data = await resp.json().catch(() => ({}));
+      const provider = (data.provider || 'groq').toLowerCase();
+      const providerLabel = provider === 'groq' ? 'Groq' : (provider === 'ollama' ? 'Ollama' : provider.toUpperCase());
       if (statusIndicator) {
         statusIndicator.className = 'api-status-pill';
-        statusIndicator.title = `Connected to API at ${API_BASE_URL || window.location.origin}`;
+        statusIndicator.title = `Connected to API (${providerLabel}) at ${API_BASE_URL || window.location.origin}`;
       }
-      if (statusText) statusText.textContent = 'Ready';
+      if (statusText) statusText.textContent = `Ready (${providerLabel})`;
     } else {
-      throw new Error();
+      const fallbackResp = await fetch(`${API_BASE_URL}/openapi.json`, { method: 'GET' });
+      if (fallbackResp.ok) {
+        if (statusIndicator) {
+          statusIndicator.className = 'api-status-pill';
+          statusIndicator.title = `Connected to API at ${API_BASE_URL || window.location.origin}`;
+        }
+        if (statusText) statusText.textContent = 'Ready (Groq)';
+      } else {
+        throw new Error();
+      }
     }
   } catch (_) {
     if (statusIndicator) {
