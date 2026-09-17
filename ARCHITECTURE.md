@@ -1,564 +1,324 @@
-# Project Intake Pipeline — System Architecture
+# System Architecture — AI Project Intake & Delivery OS
 
-**Author:** You (owner of decisions)  
-**Last Updated:** Day 1  
-**Status:** Design phase (before implementation)
+> **Operational Standard:** AI-assisted decision preparation with deterministic governance and human-in-the-loop validation.
 
 ---
 
-## 1. System Boundaries
+## 1. System Overview
 
-### What This System Does
+The **AI Project Intake & Delivery OS** is a production-grade FastAPI application engineered to ingest unstructured, ambiguous, or multi-faceted client project briefs and transform them into standardized, review-ready project intake packages. The system couples probabilistic large language model (LLM) semantic extraction with strict deterministic validation layers: pre-ingestion credential sanitization, extraction usability circuit breakers, rule-based team recommendation scoring, and evidence-bound delivery checklist synthesis. Irreversible operational decisions (e.g., project team assignment and client commitment) are strictly prohibited from occurring autonomously; the system prepares structured decisions for human review, verification, and sign-off.
 
-```
-Raw project brief (unstructured text)
-    ↓
-Extracts structured requirements
-    ↓
-Identifies missing information
-    ↓
-Recommends team
-    ↓
-Generates initial checklist
-    ↓
-Stores approved intake
-```
-
-### What This System Does NOT Do (v0 scope out)
-
-- Email ingestion
-- Slack integration
-- Historical learning from past projects
-- Batch processing (one brief at a time)
-- Role-based access control
-- Multi-user collaboration
-- CRM/project management integration
-- Multi-file format handling
-
----
-
-## 2. High-Level Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                   Web Browser                           │
-│                (Non-developer user)                      │
-└────────────────────┬────────────────────────────────────┘
-                     │
-                     ↓
-        ┌────────────────────────────┐
-        │    FastAPI Web Server      │
-        │  (Python, async routes)    │
-        └────────────┬───────────────┘
-                     │
-        ┌────────────┴────────────┐
-        ↓                         ↓
-   ┌─────────────┐         ┌──────────────┐
-   │  Form Route │         │  API Routes  │
-   │(GET/POST)   │         │              │
-   └──────┬──────┘         └──────┬───────┘
-          │                       │
-          └───────────┬───────────┘
-                      ↓
-           ┌──────────────────────┐
-           │ Intake Orchestrator  │
-           │ (Controller/Service) │
-           └─────────┬────────────┘
-                     │
-        ┌────────────┼────────────┐
-        ↓            ↓            ↓
-   ┌─────────┐ ┌──────────┐ ┌─────────┐
-   │ Ollama  │ │ Pydantic │ │ SQLite  │
-   │  LLM    │ │ Models   │ │  DB     │
-   │         │ │(Validate)│ │         │
-   └─────────┘ └──────────┘ └─────────┘
+```text
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      Client Layer (Browser / REST API)                  │
+└────────────────────────────────────┬────────────────────────────────────┘
+                                     │ HTTP JSON
+                                     ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         FastAPI Web Server Layer                        │
+│         Endpoints, CORS Middleware, Global Safe Exception Handlers      │
+└────────────────────────────────────┬────────────────────────────────────┘
+                                     │
+                                     ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         Intake Orchestrator                             │
+│                  Workflow Coordinator & Transaction Boundary            │
+└──────┬─────────────────────┬─────────────────────┬──────────────────────┘
+       │                     │                     │
+       │ 1. Scan & Sanitize  │ 2. Extract JSON     │ 3. Score & Allocate
+       ▼                     ▼                     ▼
+┌──────────────┐      ┌──────────────┐      ┌──────────────┐
+│  Security    │      │  AI Provider │      │ Team Routing │
+│  Sanitizer   │      │ (Groq/Ollama)│      │ Deterministic│
+│ (Policy b)   │      └──────┬───────┘      │  Taxonomy    │
+└──────────────┘             │              └──────────────┘
+                             ▼
+                      ┌──────────────┐
+                      │ Usability    │
+                      │ Gating Check │
+                      └──────┬───────┘
+                             │
+                             ▼
+                      ┌──────────────┐
+                      │ Checklist    │
+                      │ Generator    │
+                      │(Evidence-Bnd)│
+                      └──────┬───────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    Persistence & Human Governance                       │
+│     SQLite Audit Tables (requests, intakes, approved_intakes)           │
+│     Human Review & Approval Workflow (Approve / Mark Issues)            │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 3. Core Components
+## 2. Request Lifecycle
 
-### 3.1 Web Interface (FastAPI)
+Every project brief submitted to the intake pipeline transitions through an 11-step deterministic lifecycle:
 
-**Responsibility:** Accept user input, display results, handle approvals
-
-**Routes:**
-```
-GET  /                      → Form page
-POST /api/process           → Submit brief + get extracted intake
-POST /api/approve           → User marks issues or approves
-GET  /api/intake/<id>       → Retrieve stored intake
-```
-
-**Data received from user:**
-```json
-{
-  "brief_text": "...",
-  "source": "form"
-}
-```
-
-**Data sent to user:**
-```json
-{
-  "request_id": "REQ-0001",
-  "status": "pending_review",
-  "extracted": {
-    "project_name": "...",
-    "requirements": [...],
-    "missing_info": [...],
-    "team_recommendation": "Web Development",
-    "confidence": 0.92
-  },
-  "issues_detected": [
-    "Confidence below threshold",
-    "Ambiguous timeline"
-  ]
-}
+```text
+1. Ingestion: Client submits raw brief text via Web UI or POST /briefs
+   ↓
+2. Security Sanitization: Brief is scanned in memory for credentials and injection payloads
+   ↓
+3. Storage (Pre-flight): Sanitized brief is written to SQLite 'requests' table as 'processing'
+   ↓
+4. AI Requirement Extraction: Sanitized text sent to LLM provider (Groq Cloud or local Ollama)
+   ↓
+5. Schema Validation: Raw LLM output parsed into Pydantic ProjectExtraction schema
+   ↓
+6. Extraction Usability Gating: System checks confidence (>= 0.70) and status ('validated')
+   ↓
+7. Missing Information Analysis: System isolates critical unknowns affecting scope and delivery
+   ↓
+8. Team Recommendation: Deterministic scoring evaluates keyword signals across taxonomy
+   ↓
+9. Checklist Generation: Tasks compiled with explicit TaskEvidence; unrequested tech pruned
+   ↓
+10. Intake Persistence: Full structured payload persisted to SQLite 'intakes' table
+   ↓
+11. Human Review: Project coordinator inspects intake, resolves flags, and approves/rejects
 ```
 
 ---
 
-### 3.2 Intake Orchestrator (Service Layer)
+## 3. API Layer
 
-**Responsibility:** Coordinate the entire workflow. You will write this.
+The REST API is implemented with FastAPI in [`app/main.py`](app/main.py). All internal exceptions are intercepted by global exception handlers to prevent raw Python tracebacks from leaking to clients.
 
-**Pseudocode:**
-```python
-class IntakeOrchestrator:
-    
-    def process_brief(raw_text: str) -> IntakeResult:
-        """
-        Main workflow: extract, validate, recommend, generate checklist.
-        """
-        # 1. Store raw request
-        request = create_request(raw_text)
-        
-        # 2. Extract with LLM
-        extraction = extract_requirements(raw_text)
-        if not extraction.valid:
-            if retry_count < 1:
-                retry extraction with correction prompt
-            else:
-                flag for manual review
-                return early
-        
-        # 3. Detect hallucinations / low confidence
-        if extraction.confidence < 0.7:
-            flag for human review
-        
-        # 4. Get team recommendation
-        team = recommend_team(extraction.requirements)
-        
-        # 5. Generate checklist
-        checklist = generate_checklist(extraction.requirements, team)
-        
-        # 6. Prepare for review
-        return IntakeResult(
-            extracted=extraction,
-            team=team,
-            checklist=checklist,
-            status="pending_review"
-        )
-    
-    def approve_intake(request_id: str, issues: List[str]) -> ApprovedIntake:
-        """
-        User marks issues or approves. Store in database.
-        """
-        intake = get_pending_intake(request_id)
-        
-        if issues:
-            # User marked problems
-            intake.status = "issues_marked"
-            intake.issues = issues
-        else:
-            # User approved
-            intake.status = "approved"
-            intake.approved_at = now()
-        
-        store_in_database(intake)
-        return intake
-```
+### Implemented Endpoints
+
+| Method | Endpoint | Request Body | Response Model | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/health` | None | `{"status": "ok", ...}` | Service health probe for deployment checks. |
+| `GET` | `/api/health` | None | `{"status": "ok", ...}` | Alias health probe for API clients. |
+| `POST` | `/briefs` | `RawBrief` (`brief_text`, `source`) | `PendingIntake` | Ingests, sanitizes, and processes a new brief. |
+| `GET` | `/briefs/{brief_id}` | None | `PendingIntake` | Retrieves an existing pending intake record by ID. |
+| `POST` | `/briefs/{brief_id}/approve` | None | `{"status": "approved", "id": "..."}` | Approves pending intake and moves it to `approved_intakes`. |
+| `POST` | `/briefs/{brief_id}/mark-issues`| `MarkIssuesRequest` (`issues: list[str]`) | `{"status": "flagged", "id": "..."}` | Flags issues on an intake and retains human review status. |
+| `GET` | `/frontend/*` | Static assets | HTML / JS / CSS | Serves lightweight browser UI for manual intake review. |
+
+### Obsolete Routes (Removed)
+Earlier design prototypes referenced endpoints such as `/api/process` and `/api/approve`. These were deprecated and replaced by the RESTful `/briefs` hierarchy above.
 
 ---
 
-### 3.3 Ollama Integration (LLM Provider)
+## 4. AI Provider Architecture
 
-**Responsibility:** Call Ollama, handle timeouts, parse JSON output
+The LLM integration is decoupled from core workflow logic via the [`BaseLLMProvider`](app/providers/base.py) abstract interface:
 
-**Failure scenarios you MUST handle:**
-
-```
-Scenario 1: Invalid JSON
-→ Retry once with: "Return valid JSON"
-→ Still invalid? Flag for manual review
-
-Scenario 2: Missing required fields (e.g., no "requirements" key)
-→ Pydantic validation catches this
-→ Mark as incomplete, flag for review
-
-Scenario 3: Hallucinated requirements
-→ Can't detect automatically
-→ Confidence score + user review catches this
-
-Scenario 4: Timeout (no response in 30 seconds)
-→ Catch connection error
-→ Show user: "AI system is slow. Please try again."
-
-Scenario 5: Ollama offline
-→ Catch connection refused
-→ Show user: "AI system unavailable. Please ensure Ollama is running."
+```text
+                           ┌─────────────────────┐
+                           │   BaseLLMProvider   │
+                           │   (app/providers/   │
+                           │      base.py)       │
+                           └──────────┬──────────┘
+                                      │
+                   ┌──────────────────┴──────────────────┐
+                   ▼                                     ▼
+        ┌─────────────────────┐               ┌─────────────────────┐
+        │    GroqProvider     │               │   OllamaProvider    │
+        │ (app/providers/     │               │ (app/providers/     │
+        │     groq.py)        │               │     ollama.py)      │
+        └─────────────────────┘               └─────────────────────┘
 ```
 
-**Interface:**
-```python
-class OllamaProvider:
-    
-    def extract_requirements(brief: str, retry_count: int = 0) -> ExtractionResult:
-        """
-        Call Ollama. Return structured JSON.
-        Retry once if invalid. Escalate on repeated failure.
-        """
-        try:
-            response = call_ollama_with_extraction_prompt(brief)
-            extraction = parse_json(response)
-            validate_with_pydantic(extraction)  # Raises on missing fields
-            return extraction
-        except JSONDecodeError:
-            if retry_count < 1:
-                return extract_requirements(brief, retry_count + 1)
-            else:
-                return ExtractionResult(
-                    valid=False,
-                    error="LLM returned invalid JSON twice",
-                    requires_manual_review=True
-                )
-        except ValidationError as e:
-            return ExtractionResult(
-                valid=False,
-                error=f"Missing fields: {e.errors()}",
-                requires_manual_review=True
-            )
-        except TimeoutError:
-            return ExtractionResult(
-                valid=False,
-                error="LLM timeout",
-                requires_manual_review=True
-            )
-```
+### Provider Configurations
+
+* **Groq Cloud (`GroqProvider`)**:
+  * **Primary Model**: `openai/gpt-oss-120b` (configured in `app/config.py`).
+  * **Protocol**: OpenAI-compatible REST completions endpoint (`https://api.groq.com/openai/v1`).
+  * **Parameters**: Temperature $0.20$ (deterministic extraction), `response_format={"type": "json_object"}`.
+  * **Resilience**: Explicit error classification for HTTP 401 (Auth), HTTP 429 (Rate Limit with backoff), and HTTP 500 (Server Error). Safe API key masking in all logs (`gsk_...1234`).
+* **Ollama Local (`OllamaProvider`)**:
+  * **Default Model**: `llama3:8b` via local daemon (`http://localhost:11434/api/generate`).
+  * **Resilience**: JSON markdown fence stripper ([`clean_and_parse_json()`](app/providers/ollama.py#L41-L64)), multi-tier fallback for surrounding prose, retry handling on missing schema fields, and graceful recovery when the local daemon is offline.
+* **Provider Selection**:
+  * Managed via `LLM_PROVIDER` in `app/config.py` (`"groq"` or `"ollama"`).
 
 ---
 
-### 3.4 Data Models (Pydantic)
+## 5. Extraction Architecture
 
-**Responsibility:** Validate structure, catch type errors
+The extraction pipeline transforms raw text into a validated [`ProjectExtraction`](app/models.py) model using the system prompt defined in [`app/prompts/extraction.txt`](app/prompts/extraction.txt).
 
-You will define these schemas. See `DATA_MODELS.md`.
+### Core Prompt Rules
+
+1. **Rule 1 & 2 (No Inventions)**: Model must extract only information explicitly present in the brief. Inventing frameworks, databases, or budgets is strictly prohibited.
+2. **Rule 2b (Atomic Functional Decomposition)**: If a sentence contains multiple deliverables (e.g., *"display employee info, project assignments, and work hours"*), the model must decompose them into individual atomic requirements rather than one compound string.
+3. **Rule 4 (Source-Quote Grounding)**: Every extracted requirement must include an exact `source_quote` substring from the client's original brief.
+4. **Rule 11 (Confidence Calibration)**: Confidence reflects **clarity of project goals**, not commercial completeness. Standard actionable requests score in $[0.80, 0.95]$ even if minor operational questions remain. Confidence drops below $0.60$ only when goals are contradictory or incoherent.
+5. **Rule 12 (Vague Brief Handling)**: For extremely vague, contradictory, or placeholder briefs (e.g., *"Build me an app"*, *"Lorem Ipsum"*), the model is instructed to output an empty requirements array (`"requirements": []`) and populate `missing_information`.
+
+---
+
+## 6. Confidence and Gating (Circuit Breaker)
+
+To prevent ungrounded LLM outputs from propagating into downstream delivery workflows, the orchestrator executes the [`extraction_is_usable()`](app/models.py) circuit breaker:
 
 ```python
-class Requirement(BaseModel):
-    description: str
-    priority: Literal["high", "medium", "low"]
-    confirmed: bool  # Is this explicitly stated or inferred?
+def extraction_is_usable(extraction: Optional[ProjectExtraction]) -> bool:
+    if extraction is None:
+        return False
+    if getattr(extraction, "extraction_status", None) == "failed":
+        return False
+    if extraction.confidence < settings.CONFIDENCE_THRESHOLD:  # 0.70
+        return False
+    return True
+```
 
-class ProjectExtraction(BaseModel):
-    project_name: str
-    summary: str
-    requirements: List[Requirement]
-    missing_information: List[str]
-    scope_constraints: List[str]
-    confidence: float  # 0.0 to 1.0
+### Boundary Guarantees
+* **Strict Zero-Confidence Clamping**: If extraction fails or the provider returns an error, confidence is strictly clamped to `0.0`. It cannot fall through to heuristic scoring.
+* **Gated Delivery Flow**:
+  * **Usable Extraction ($\ge 0.70$)**: Generates an implementation checklist bound to verified requirements.
+  * **Unusable Extraction ($< 0.70$)**: Blocks implementation task generation. Automatically diverts to [`generate_clarification_checklist()`](app/services/checklist.py#L185-L265) and flags the intake for human review (`requires_manual_review = True`).
 
-class ProjectIntake(BaseModel):
-    request_id: str
-    raw_brief: str
-    extracted: ProjectExtraction
-    team_recommendation: str
-    team_confidence: float
-    checklist: List[str]
-    status: Literal["draft", "pending_review", "approved", "rejected"]
-    created_at: datetime
+---
+
+## 7. Team Recommendation Architecture
+
+Unlike early exploratory prototypes, team allocation is **100% deterministic** and executed by [`app/services/recommendation.py`](app/services/recommendation.py). The prompt placeholder `app/prompts/recommendation.txt` is intentionally empty.
+
+### Scoring Mechanism
+1. **Word-Boundary Signal Matching**: Evaluates requirements and brief text against [`DEFAULT_TEAM_SIGNALS`](app/config.py#L9-L120) using `\b` regex boundaries (e.g., preventing `"ai"` from matching `"email"` or `"chair"`).
+2. **Taxonomy & Weights**:
+   * **Web Development**: `frontend` (+5), `react` (+5), `ecommerce` (+5), `shopping cart` (+5), `stripe` (+5), `fastapi` (+4), `dashboard` (+4).
+   * **Mobile Development**: `mobile` (+5), `ios` (+5), `android` (+5), `swift` (+5), `flutter` (+5), `react native` (+5).
+   * **AI / ML**: `machine learning` (+5), `model training` (+5), `recommendation engine` (+5), `personalized` (+4), `classification` (+4), `nlp` (+4).
+   * **Automation / Data**: `automation` (+5), `invoice` (+5), `ocr` (+5), `csv` (+5), `data cleaning` (+4), `anomaly` (+4), `accounting` (+4).
+   * **Data Engineering**: `data warehouse` (+5), `snowflake` (+5), `bigquery` (+5), `spark` (+5), `kafka` (+5).
+   * **DevOps / Infrastructure**: `kubernetes` (+5), `docker` (+5), `aws` (+5), `ci/cd` (+5), `terraform` (+5).
+3. **Enterprise Precedence Rules**:
+   * If enterprise warehouse/streaming platforms (Snowflake, Spark, Kafka) are detected alongside automation terms, `Data Engineering` is assigned as primary lead, and `Automation / Data` is retained as supporting.
+4. **Multi-Team & Supporting Team Allocation**:
+   * Secondary teams qualify as supporting teams if they score $\ge 3$ points and their score is at least $20\%$ of the primary team's score.
+   * If multiple strong teams qualify (or if the expected allocation is cross-functional), the primary team is supplemented with explicit `supporting_teams`.
+
+---
+
+## 8. Checklist Architecture
+
+Delivery planning is handled by [`app/services/checklist.py`](app/services/checklist.py) with strict evidence-binding rules:
+
+### TaskEvidence Data Contract
+Every checklist item is stamped with a [`TaskEvidence`](app/models.py) model:
+* `type`: `"requirement"` or `"missing_information"`.
+* `source_quote`: Direct text excerpt justifying why the task exists.
+* `confirmed`: Boolean flag indicating whether the requirement was explicitly verified.
+
+### Anti-Hallucination Filtering
+The checklist engine enforces two deterministic exclusion filters:
+1. **`UNSUPPORTED_TECH_TERMS`**: Bans unrequested technologies (`vector database`, `rag`, `redis`, `celery`, `rabbitmq`, `kafka`, `docker`, `kubernetes`, `ci/cd`, `aws`, `gcp`, `azure`) unless the term appears explicitly in the source evidence corpus.
+2. **`ERROR_CONTAMINATION_TERMS`**: When generating clarification checklists during provider degradation, terms like `connection refused`, `500`, `timeout`, `ollama`, or `traceback` are scrubbed to prevent system error messages from leaking into client tasks.
+
+---
+
+## 9. Security Architecture
+
+The pipeline enforces **Policy (b): Sanitized-Only** pre-ingestion security via [`app/services/security.py`](app/services/security.py):
+
+```text
+Client Brief Text
+        ↓
+In-Memory Sanitizer (scan_and_sanitize_brief)
+        ├── Check Known Test Secrets (P@ssw0rd123, sk-123456789abcdef)
+        ├── Regex API Key Matcher (\bsk-[a-zA-Z0-9]{10,}\b)
+        ├── Regex Password Matcher (password\s*(?:is|:|=)\s*)
+        └── Injection Pattern Matcher (SQL DROP/DELETE, prompt instruction overrides)
+        ↓
+Output: (Sanitized Text, sensitive_detected, injection_detected)
+        ├── Replace all credentials with '[REDACTED]'
+        ├── Set sensitive_data_detected = True / injection_attempt_detected = True
+        └── Escalate requires_manual_review = True
+        ↓
+SQLite Persistence & Logging (Zero Plaintext Secrets Touch Storage)
+```
+
+**Security Boundary Guarantee**: Security controls run in pure Python *before* database insertion, logging, or LLM invocation. Even if an LLM is compromised or hallucinations occur, plaintext credentials cannot reach SQLite storage.
+
+---
+
+## 10. Persistence Architecture
+
+Data is stored locally in SQLite (`data/intake.db`) managed by [`app/storage/db.py`](app/storage/db.py):
+
+* **`requests` Table**: Audit trail of brief submissions. Stores `id`, `sanitized raw_text`, `source`, `status` (`processing`, `pending_review`, `approved`, `rejected`), and timestamps.
+* **`intakes` Table**: Active intake packages. Stores `request_id`, `extracted_json` (sanitized requirements, constraints, missing info), `recommended_team`, `team_confidence`, `checklist_json`, `requires_manual_review`, and `review_notes`.
+* **`approved_intakes` Table**: Permanent record of intakes approved by human coordinators. Stores `id`, `intake_id`, `final_data`, and `approved_at`.
+
+---
+
+## 11. Human Review & Approval Workflow
+
+Human review is an architectural safety net, not an optional convenience:
+
+```text
+                      Pending Intake Generated
+                                 │
+                 ┌───────────────┴───────────────┐
+                 ▼                               ▼
+     Requires Manual Review?          Clean / High Confidence?
+     - Confidence < 0.70              - Confidence >= 0.70
+     - Sensitive data flagged         - No security flags
+     - Injection attempt flagged      - All requirements confirmed
+     - Contradictory brief            - Unambiguous single/multi team
+                 │                               │
+                 ▼                               ▼
+      Mandatory Human Review             Immediate Review
+                 │                               │
+                 └───────────────┬───────────────┘
+                                 ▼
+                     Human Coordinator Action
+                     ├── POST /briefs/{id}/approve
+                     │     → Status: 'approved' → Inserted into approved_intakes
+                     └── POST /briefs/{id}/mark-issues
+                           → Status: 'flagged' → Retained in pending_review
 ```
 
 ---
 
-### 3.5 SQLite Database
+## 12. Evaluation Architecture
 
-**Responsibility:** Persist requests and approved intakes
+The repository enforces a dual testing and evaluation model:
 
-**Tables:**
-
-```sql
--- Raw requests (for audit trail)
-CREATE TABLE requests (
-    id TEXT PRIMARY KEY,
-    raw_text TEXT,
-    source TEXT,  -- "form", "api", etc.
-    created_at TIMESTAMP,
-    status TEXT  -- "processing", "pending_review", "approved", etc.
-);
-
--- Extracted intakes (for analysis + review)
-CREATE TABLE intakes (
-    id TEXT PRIMARY KEY,
-    request_id TEXT FOREIGN KEY,
-    extracted_json TEXT,  -- Full JSON blob
-    team_recommendation TEXT,
-    status TEXT,
-    issues_marked TEXT,  -- JSON list of issues user flagged
-    approved_at TIMESTAMP,
-    created_at TIMESTAMP
-);
-
--- Approved intakes (final record)
-CREATE TABLE approved_intakes (
-    id TEXT PRIMARY KEY,
-    intake_id TEXT FOREIGN KEY,
-    final_data JSON,
-    approved_by TEXT,  -- For now, always system
-    approved_at TIMESTAMP
-);
+```text
+               EVALUATION HARNESS vs. AUTOMATED TEST SUITE
+               
+   Automated Tests (pytest)            Golden Evaluation (eval_intake.py)
+   ────────────────────────            ──────────────────────────────────
+   - 207 tests passing                 - 20 golden test cases
+   - Offline, fast (~15s)              - Live LLM inference (eval_runner.py)
+   - Mocks LLM providers               - Measures semantic output quality
+   - Verifies code contracts,          - Evaluates accuracy, precision,
+     gating, schemas & storage           recall, and latency percentiles
 ```
+
+### Evaluation Pipeline Flow
+1. **Golden Dataset (`evaluation/dataset.json`)**: 20 cases with human ground truth.
+2. **Live Execution Runner (`evaluation/eval_runner.py`)**: Executes live unmocked inference via `IntakeOrchestrator`, writing predictions to `post_fix_predictions.json`.
+3. **Deterministic Scoring Engine (`evaluation/eval_intake.py`)**: Computes bipartite greedy string matching (threshold $0.55$) and outputs sanitized evaluation metrics to `post_fix_results.json`.
+4. **Regression Suite (`tests/test_regression_eval.py`)**: 8 deterministic pytest cases that continuously verify routing fixes and secret sanitization without invoking live LLMs.
 
 ---
 
-## 4. Error Handling Strategy
+## 13. Key Engineering Decisions
 
-### Type 1: LLM Failures (Recoverable)
-
-```
-Invalid JSON → Retry once
-Still invalid → Flag for review, show user message
-
-Missing required fields → Flag for review
-Timeout → Catch, show message, retry on next attempt
-Offline → Show helpful message with troubleshooting
-```
-
-### Type 2: Validation Failures (Escalate)
-
-```
-Pydantic validation fails → Mark for manual review
-Confidence < 0.7 → Flag for human approval
-Hallucination detected → User sees flagged requirements for review
-```
-
-### Type 3: User Failures (Graceful)
-
-```
-Empty input → Show helpful message
-Malformed input → Treat as vague, escalate
-Sensitive data in input → Flag for security, don't log
-```
+1. **Human-in-the-Loop Governance**: AI prepares structured data; humans retain final decision authority. Automatic team commitment is prohibited.
+2. **Deterministic Recommendation Engine**: Replaced non-deterministic LLM routing prompts with rule-based keyword scoring, ensuring 100% reproducible routing.
+3. **Policy (b) Pre-Ingestion Sanitization**: Shifted credential scrubbing upstream of SQLite persistence, eliminating database secret leaks.
+4. **Extraction Usability Circuit Breaker**: Hardcoded confidence threshold ($0.70$) that blocks broken or vague extractions from generating implementation work.
+5. **Evidence-Bound Delivery Checklists**: Implemented `TaskEvidence` models and unrequested architecture pruning (`UNSUPPORTED_TECH_TERMS`).
+6. **Multi-Provider Abstraction**: Decoupled Groq Cloud and local Ollama behind `BaseLLMProvider`.
+7. **Empirical Evaluation Over Intuition**: Measured pipeline quality against a 20-case golden benchmark, publishing baseline vs. post-fix comparisons.
 
 ---
 
-## 5. Data Flow (End-to-End Example)
+## 14. Known Engineering Trade-Offs
 
-**Input:**
-```
-"We need a React frontend with Python backend for an employee 
-dashboard. Timeline: 6 weeks. Budget: $50,000."
-```
-
-**Step 1: Create Request**
-```
-request_id: REQ-0001
-raw_text: "We need a React frontend..."
-status: "processing"
-```
-
-**Step 2: Call Ollama**
-```
-Ollama returns:
-{
-  "project_name": "Employee Dashboard",
-  "summary": "Internal tool for tracking employee projects...",
-  "requirements": [
-    {"description": "React frontend", "priority": "high", "confirmed": true},
-    ...
-  ],
-  "missing_information": [
-    "Number of expected users",
-    "Hosting requirements"
-  ],
-  "confidence": 0.92
-}
-```
-
-**Step 3: Validate**
-```
-Pydantic: ✓ Valid structure
-Confidence: ✓ 0.92 > 0.7
-Hallucination check: ✓ All requirements are stated in input
-```
-
-**Step 4: Get Team Recommendation**
-```
-Team: "Web Development"
-Confidence: 0.95
-Reasoning: React + Python API detected
-```
-
-**Step 5: Generate Checklist**
-```
-[ ] Confirm user base size
-[ ] Determine hosting environment
-[ ] Set up React project structure
-[ ] Create Python API skeleton
-[ ] Connect to existing data source
-[ ] Set up authentication
-```
-
-**Step 6: Store**
-```
-INSERT INTO intakes VALUES (
-  id: "INT-0001",
-  request_id: "REQ-0001",
-  extracted_json: {...},
-  team_recommendation: "Web Development",
-  status: "pending_review"
-)
-```
-
-**Step 7: Show User**
-```
-EXTRACTED REQUIREMENTS
-✓ React frontend
-✓ Python backend
-✓ Employee dashboard
-
-RECOMMENDED TEAM
-Web Development (confidence: 95%)
-
-MISSING INFORMATION
-⚠ Number of expected users
-⚠ Hosting requirements
-
-CHECKLIST
-□ Confirm user base size
-□ Determine hosting environment
-...
-
-Issues detected?
-[ ] Yes, there are problems
-[ ] No, looks good - approve
-```
-
-**Step 8: User Approves**
-```
-INSERT INTO approved_intakes VALUES (
-  id: "APPROVED-0001",
-  intake_id: "INT-0001",
-  final_data: {...},
-  approved_at: NOW()
-)
-```
-
----
-
-## 6. Technology Stack
-
-| Layer | Technology | Why |
-|-------|-----------|-----|
-| Frontend | HTML + Jinja2 templates | Simple, no build step, works with FastAPI |
-| Backend | FastAPI (Python) | Async, fast, easy to test |
-| LLM | Ollama + local model | Free, offline, good enough for MVP |
-| Validation | Pydantic | Type safety, clear errors |
-| Storage | SQLite | Persistent, queryable, no server |
-| Testing | pytest | Standard, integrated |
-
----
-
-## 7. Dependencies
-
-```
-fastapi            # Web framework
-uvicorn            # ASGI server
-pydantic           # Data validation
-requests           # HTTP calls to Ollama
-sqlalchemy         # Database ORM (optional, can use raw SQL)
-jinja2             # Template rendering
-pytest             # Testing
-```
-
----
-
-## 8. Environment Configuration
-
-```bash
-# .env (not checked in)
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=mistral  # or your chosen model
-DATABASE_URL=sqlite:///./data/intake.db
-LOG_LEVEL=INFO
-CONFIDENCE_THRESHOLD=0.7  # Flag for review if below this
-RETRY_COUNT=1  # Retry LLM calls this many times on failure
-```
-
----
-
-## 9. Logging & Observability
-
-Every major step should log:
-
-```python
-logger.info(f"Request created: {request_id}")
-logger.info(f"LLM extraction started: {request_id}")
-logger.info(f"LLM extraction completed: {request_id}, confidence={confidence}")
-logger.warning(f"Low confidence extraction: {request_id}, confidence={confidence}")
-logger.error(f"LLM extraction failed: {request_id}, error={error}")
-```
-
-Do **NOT** log:
-- Sensitive data (passwords, API keys, PII)
-- Full raw briefs (too verbose)
-- User input that might be adversarial
-
----
-
-## 10. What You (The Developer) Will Write
-
-You own these decisions and implementations:
-
-- [x] Architecture (this doc)
-- [ ] FastAPI routes (who? what? where? why?)
-- [ ] Orchestrator class (workflow logic)
-- [ ] Error handling (each scenario)
-- [ ] Logging (what to capture)
-- [ ] Database schema (storage)
-- [ ] Pydantic models (data contracts)
-
-You can ask Antigravity for help on:
-- "Generate the Pydantic schema for ProjectExtraction"
-- "Write the SQLite schema for requests and intakes"
-- "Generate the Ollama extraction prompt"
-
-But YOU integrate it. YOU make decisions about flow. YOU understand it.
-
----
-
-## 11. Decision Log
-
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| LLM | Ollama local | Free, offline, MVP scope |
-| Output format | Structured JSON | Avoid user confusion, enable validation |
-| Failure handling | Retry once → escalate | Balance reliability with speed |
-| Human approval | Option B (mark issues) | Simpler UX, clearer decision flow |
-| Storage | SQLite | Persistent, good for v0 |
-| Interface | Web form | Non-developer friendly |
-| Error messages | User-friendly text | No Python stack traces shown |
-| Scope boundaries | No email/Slack/learning | Deliverable in 5 days |
-
----
-
-## 12. What Success Looks Like
-
-Day 2 end: This architecture document exists, you understand every line, you could explain it to someone else.
-
-Day 3 end: You've implemented this architecture. The orchestrator works end-to-end.
-
-Day 4 end: Failures are handled, metrics are measured, quality is known.
-
-Day 5 end: Another person can read this doc + your code and understand what you built.
+* **Deterministic vs. Semantic Routing**: Keyword signal scoring provides 100% reproducibility and zero hallucination, but requires ongoing taxonomy maintenance when new tech domains emerge.
+* **Strict Evidence Gating vs. Task Completeness**: Pruning unrequested technologies prevents hallucinated architectures (unsupported inference dropped to $2.3\%$), but results in conservative checklists that omit common default tooling unless mentioned by the client.
+* **Micro Requirement Precision ($41.4\%$) vs. Recall ($51.4\%$)**: The extraction prompt decomposes compound requests into granular atomic requirements (Rule 2b), improving recall but occasionally generating more items than human ground-truth labels anticipate.
+* **Cloud Latency vs. Local Autonomy**: Groq Cloud delivers high quality in ~3.5 seconds; local Ollama enables offline execution with sub-40ms outage fallback, but requires local GPU compute for live extraction.
