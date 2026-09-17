@@ -1,0 +1,471 @@
+{
+  "TC-001": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "We need a React frontend with a Python API for an internal employee dashboard. The dashboard should display employee information, project assignments, and work hours. We have an existing PostgreSQL da"
+      }
+    ],
+    "recommended_team": "Web Development",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 38,
+    "error": null
+  },
+  "TC-002": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "Mobile app for iOS and Android to track personal fitness goals. Features: workout logging, progress charts, social sharing, notifications. We want native apps, not cross-platform. 8 weeks, $75,000."
+      }
+    ],
+    "recommended_team": "Mobile Development",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 56,
+    "error": null
+  },
+  "TC-003": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "Build a content management system (CMS) for managing blog posts, media, and user roles. Must support multiple authors, revision history, and SEO optimization. Technology: Next.js frontend, Node.js bac"
+      }
+    ],
+    "recommended_team": "Web Development",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 26,
+    "error": null
+  },
+  "TC-004": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "E-commerce platform for selling digital and physical products. Shopping cart, payment processing (Stripe), inventory management, order fulfillment tracking. 3 months, need it live for holiday season."
+      }
+    ],
+    "recommended_team": "Web Development",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 31,
+    "error": null
+  },
+  "TC-005": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "We need a system that classifies customer support tickets using historical labeled data and automatically routes them by category. High-priority tickets should escalate to human agents. We have 2 year"
+      }
+    ],
+    "recommended_team": "",
+    "team_confidence": 0.0,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 42,
+    "error": null
+  },
+  "TC-006": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "Build a recommendation engine for our e-commerce platform. Recommend products based on browsing history and purchase patterns. We want personalized recommendations for each user. We have 1 million his"
+      }
+    ],
+    "recommended_team": "AI / ML",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [
+      "Web Development"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 39,
+    "error": null
+  },
+  "TC-007": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "Every morning collect sales data from our three branch locations (CSV exports), clean it, and send a summary dashboard to the operations team. Also flag any anomalies like unusually high or low sales."
+      }
+    ],
+    "recommended_team": "Automation / Data",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [
+      "Web Development"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 32,
+    "error": null
+  },
+  "TC-008": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "Automate our invoice processing. We receive 100+ PDFs per day from customers with various formats. Extract invoice number, amount, due date, and customer info. Validate and categorize. Feed into our a"
+      }
+    ],
+    "recommended_team": "Automation / Data",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 36,
+    "error": null
+  },
+  "TC-009": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "We need something to improve our customer service using AI."
+      }
+    ],
+    "recommended_team": "AI / ML",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 37,
+    "error": null
+  },
+  "TC-010": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "Build an AI system for our operations. It should make things faster and save money. We have some data."
+      }
+    ],
+    "recommended_team": "AI / ML",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 34,
+    "error": null
+  },
+  "TC-011": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "We need help with machine learning. Our website is getting slow."
+      }
+    ],
+    "recommended_team": "AI / ML",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [
+      "Web Development"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 35,
+    "error": null
+  },
+  "TC-012": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "Build a mobile app (iOS and Android) with an AI recommendation engine, real-time messaging, and cloud infrastructure setup. We want to launch MVP in 8 weeks but we're flexible. Budget is $200,000."
+      }
+    ],
+    "recommended_team": "Mobile Development",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [
+      "AI / ML",
+      "DevOps / Infrastructure"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 39,
+    "error": null
+  },
+  "TC-013": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "We need a web platform with machine learning for fraud detection, payment processing, and a mobile companion app. Also integrate with our existing backend systems."
+      }
+    ],
+    "recommended_team": "Web Development",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [
+      "AI / ML",
+      "Mobile Development"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 31,
+    "error": null
+  },
+  "TC-014": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "Enterprise platform: web app for 5000+ concurrent users, machine learning-powered analytics, real-time dashboard, mobile app, and integration with SAP/Oracle. High availability required. 6 months, $50"
+      }
+    ],
+    "recommended_team": "Mobile Development",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [
+      "AI / ML",
+      "Web Development",
+      "Data Engineering"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 36,
+    "error": null
+  },
+  "TC-015": {
+    "requirements": [],
+    "recommended_team": "",
+    "team_confidence": 0.0,
+    "flagged_for_review": true,
+    "missing_information": [],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 0,
+    "error": "1 validation error for RawBrief\nbrief_text\n  String should have at least 10 characters [type=string_too_short, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.4/v/string_too_short"
+  },
+  "TC-016": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "Build me an app"
+      }
+    ],
+    "recommended_team": "",
+    "team_confidence": 0.0,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 29,
+    "error": null
+  },
+  "TC-017": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "'; DROP TABLE projects; -- We need a website. Also our admin password is [REDACTED] and the API key is [REDACTED] Build something cool."
+      }
+    ],
+    "recommended_team": "Web Development",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": true,
+    "injection_attempt_detected": true,
+    "latency_ms": 29,
+    "error": null
+  },
+  "TC-018": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "We need a web app. Actually, we need an AI system. Wait, we need mobile. We need blockchain. Actually just integrate with Facebook. No wait, build it on blockchain. Also we need AI. Timeline: ASAP. Bu"
+      }
+    ],
+    "recommended_team": "Mobile Development",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [
+      "AI / ML"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 117,
+    "error": null
+  },
+  "TC-019": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "We need a system that uses AI to optimize quantum computing implementations across blockchain-based IoT networks to leverage synergistic paradigms. It should be built using cutting-edge neural network"
+      }
+    ],
+    "recommended_team": "AI / ML",
+    "team_confidence": 0.35,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [
+      "DevOps / Infrastructure"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 25,
+    "error": null
+  },
+  "TC-020": {
+    "requirements": [
+      {
+        "text": "Review and manually extract requirements from raw brief",
+        "confidence": 0.0,
+        "confirmed": false,
+        "source_evidence": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut a"
+      }
+    ],
+    "recommended_team": "",
+    "team_confidence": 0.0,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Technology preferences",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 49,
+    "error": null
+  }
+}

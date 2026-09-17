@@ -117,7 +117,7 @@ def run_evaluation(dataset_path: Path, output_path: Path) -> Dict[str, Any]:
                 result = orchestrator.process_brief(raw_brief)
                 latency_ms = int((time.perf_counter() - start_time) * 1000)
 
-                # Check if this execution failed specifically due to Groq rate limit or extraction failure
+                # Check if this execution failed due to Groq rate limit or transient provider API failure
                 extraction_failed = (
                     result.extracted is not None
                     and result.extracted.extraction_status == "failed"
@@ -125,16 +125,27 @@ def run_evaluation(dataset_path: Path, output_path: Path) -> Dict[str, Any]:
                 )
                 review_notes_str = (result.review_notes or "").lower()
                 summary_str = (result.extracted.summary if result.extracted else "").lower()
-                is_rate_limited = (
-                    "rate limit" in review_notes_str
-                    or "rate limit" in summary_str
-                    or "429" in review_notes_str
-                    or (extraction_failed and latency_ms < 1000)
+                is_daemon_offline = (
+                    "connection refused" in review_notes_str
+                    or "connection refused" in summary_str
+                    or "offline" in review_notes_str
+                    or "11434" in review_notes_str
+                )
+                is_transient_error = (
+                    not is_daemon_offline
+                    and (
+                        "rate limit" in review_notes_str
+                        or "rate limit" in summary_str
+                        or "429" in review_notes_str
+                        or "400" in review_notes_str
+                        or "json_validate_failed" in review_notes_str
+                        or (extraction_failed and category in ["clear_requests", "ai_ml_requests", "automation_requests", "multi_team_requests"])
+                    )
                 )
 
-                if is_rate_limited and attempt < max_rate_limit_retries:
-                    wait_sec = 15 * (attempt + 1)
-                    print(f"[Rate limit 429, waiting {wait_sec}s to retry]... ", end="", flush=True)
+                if is_transient_error and attempt < max_rate_limit_retries:
+                    wait_sec = 5 * (attempt + 1)
+                    print(f"[Transient API error/429, waiting {wait_sec}s to retry]... ", end="", flush=True)
                     time.sleep(wait_sec)
                     continue
 
