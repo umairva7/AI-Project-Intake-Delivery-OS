@@ -658,15 +658,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function initTheme() {
   const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
   updateThemeButtonUI(currentTheme);
-
-  // Listen for OS scheme changes if user hasn't set an explicit preference
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (!localStorage.getItem('theme')) {
-      const newSystemTheme = e.matches ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', newSystemTheme);
-      updateThemeButtonUI(newSystemTheme);
-    }
-  });
 }
 
 function updateThemeButtonUI(theme) {
