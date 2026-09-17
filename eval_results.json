@@ -1,59 +1,59 @@
 {
   "metadata": {
     "dataset_file": "evaluation_data.json",
-    "predictions_file": "eval_predictions.json",
+    "predictions_file": "eval_predictions_diagnostic.json",
     "total_cases": 20,
     "fuzzy_threshold": 0.55
   },
   "summary": {
-    "team_decision_accuracy": 0.75,
-    "requirement_precision_micro": 0.4286,
-    "requirement_recall_micro": 0.4714,
-    "requirement_precision_macro": 0.3311,
-    "requirement_recall_macro": 0.4693,
-    "unsupported_inference_rate": 0.0779,
-    "missing_information_recall_micro": 0.2069,
-    "missing_information_recall_macro": 0.1842,
-    "flagged_for_review_rate": 0.9,
+    "team_decision_accuracy": 1.0,
+    "requirement_precision_micro": 0.4419,
+    "requirement_recall_micro": 0.5429,
+    "requirement_precision_macro": 0.3195,
+    "requirement_recall_macro": 0.5277,
+    "unsupported_inference_rate": 0.1047,
+    "missing_information_recall_micro": 0.2644,
+    "missing_information_recall_macro": 0.235,
+    "flagged_for_review_rate": 0.85,
     "error_rate": 0.05,
-    "sensitive_data_detection_rate": 0.0,
-    "injection_attempt_detection_rate": 0.0,
+    "sensitive_data_detection_rate": 1.0,
+    "injection_attempt_detection_rate": 1.0,
     "latency": {
-      "mean_ms": 2865.6,
-      "p50_ms": 2987,
-      "p95_ms": 5077
+      "mean_ms": 3518.4,
+      "p50_ms": 3544,
+      "p95_ms": 5777
     }
   },
   "category_metrics": {
     "clear_requests": {
       "total_cases": 4,
-      "team_accuracy": 0.75,
-      "team_correct": 3,
-      "requirement_precision": 0.7826,
-      "requirement_recall": 0.6429,
-      "missing_info_recall": 0.3333,
-      "flagged_for_review_rate": 0.75,
-      "avg_latency_ms": 3596.2
+      "team_accuracy": 1.0,
+      "team_correct": 4,
+      "requirement_precision": 0.7143,
+      "requirement_recall": 0.7143,
+      "missing_info_recall": 0.2778,
+      "flagged_for_review_rate": 0.25,
+      "avg_latency_ms": 4041.0
     },
     "ai_ml_requests": {
       "total_cases": 2,
-      "team_accuracy": 0.5,
-      "team_correct": 1,
-      "requirement_precision": 0.375,
+      "team_accuracy": 1.0,
+      "team_correct": 2,
+      "requirement_precision": 0.3,
       "requirement_recall": 0.3,
-      "missing_info_recall": 0.1,
+      "missing_info_recall": 0.3,
       "flagged_for_review_rate": 1.0,
-      "avg_latency_ms": 2017.5
+      "avg_latency_ms": 3556.5
     },
     "automation_requests": {
       "total_cases": 2,
-      "team_accuracy": 0.0,
-      "team_correct": 0,
-      "requirement_precision": 0.1111,
-      "requirement_recall": 0.0714,
+      "team_accuracy": 1.0,
+      "team_correct": 2,
+      "requirement_precision": 0.2857,
+      "requirement_recall": 0.2857,
       "missing_info_recall": 0.2222,
       "flagged_for_review_rate": 1.0,
-      "avg_latency_ms": 3134.0
+      "avg_latency_ms": 3145.0
     },
     "ambiguous_requests": {
       "total_cases": 3,
@@ -61,19 +61,19 @@
       "team_correct": 3,
       "requirement_precision": 0.0,
       "requirement_recall": "N/A",
-      "missing_info_recall": 0.2778,
+      "missing_info_recall": 0.3333,
       "flagged_for_review_rate": 1.0,
-      "avg_latency_ms": 2177.0
+      "avg_latency_ms": 4110.0
     },
     "multi_team_requests": {
       "total_cases": 3,
-      "team_accuracy": 0.6667,
-      "team_correct": 2,
-      "requirement_precision": 0.7333,
+      "team_accuracy": 1.0,
+      "team_correct": 3,
+      "requirement_precision": 0.6875,
       "requirement_recall": 0.6111,
-      "missing_info_recall": 0.0667,
-      "flagged_for_review_rate": 0.6667,
-      "avg_latency_ms": 3406.0
+      "missing_info_recall": 0.2667,
+      "flagged_for_review_rate": 1.0,
+      "avg_latency_ms": 3105.0
     },
     "edge_cases": {
       "total_cases": 6,
@@ -83,7 +83,7 @@
       "requirement_recall": "N/A",
       "missing_info_recall": 0.1765,
       "flagged_for_review_rate": 1.0,
-      "avg_latency_ms": 2645.7
+      "avg_latency_ms": 3192.8
     }
   },
   "cases": [
@@ -102,26 +102,31 @@
       },
       "requirements_evaluation": {
         "expected_count": 6,
-        "predicted_count": 4,
-        "matched_count": 3,
-        "precision": 0.75,
-        "recall": 0.5,
+        "predicted_count": 6,
+        "matched_count": 4,
+        "precision": 0.6667,
+        "recall": 0.6667,
         "unsupported_count": 0,
         "unsupported_rate": 0.0,
         "matches": [
           {
             "expected": "React frontend",
-            "predicted": "Develop a React frontend",
+            "predicted": "React frontend for the employee dashboard",
             "similarity": 0.75
           },
           {
             "expected": "Python API",
-            "predicted": "Develop a Python API",
+            "predicted": "Python API for the employee dashboard",
             "similarity": 0.75
           },
           {
             "expected": "Employee information display",
-            "predicted": "Display employee information, project assignments, and work hours on the dashboard",
+            "predicted": "Display employee information on the dashboard",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Project assignments display",
+            "predicted": "Display project assignments on the dashboard",
             "similarity": 0.75
           }
         ],
@@ -136,19 +141,19 @@
       },
       "missing_info_evaluation": {
         "expected_count": 4,
-        "predicted_count": 6,
+        "predicted_count": 5,
         "matched_count": 2,
         "recall": 0.5,
         "matches": [
           {
-            "expected": "Authentication/authorization details",
-            "predicted": "Details on authentication and authorization mechanisms for internal users",
+            "expected": "Hosting/deployment environment",
+            "predicted": "Hosting environment and deployment strategy for the React frontend and Python API",
             "similarity": 0.75
           },
           {
-            "expected": "Hosting/deployment environment",
-            "predicted": "Hosting environment and deployment strategy (on\u2011premise, cloud, containers, etc.)",
-            "similarity": 0.75
+            "expected": "Authentication/authorization details",
+            "predicted": "Authentication and authorization requirements for accessing the dashboard",
+            "similarity": 0.569
           }
         ]
       },
@@ -158,7 +163,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 4929,
+      "latency_ms": 2800,
       "error": null
     },
     {
@@ -168,20 +173,20 @@
       "team_evaluation": {
         "expected": "Mobile Development",
         "predicted": "Mobile Development",
-        "confidence": 0.95,
+        "confidence": 0.9,
         "supporting_teams": [],
-        "flagged_for_review": true,
+        "flagged_for_review": false,
         "matched": true,
         "notes": "Exact team match: 'Mobile Development'"
       },
       "requirements_evaluation": {
         "expected_count": 6,
-        "predicted_count": 6,
+        "predicted_count": 7,
         "matched_count": 4,
-        "precision": 0.6667,
+        "precision": 0.5714,
         "recall": 0.6667,
-        "unsupported_count": 3,
-        "unsupported_rate": 0.5,
+        "unsupported_count": 0,
+        "unsupported_rate": 0.0,
         "matches": [
           {
             "expected": "Workout logging",
@@ -195,12 +200,12 @@
           },
           {
             "expected": "Social sharing",
-            "predicted": "Enable social sharing of fitness achievements",
+            "predicted": "Add social sharing capability",
             "similarity": 0.75
           },
           {
             "expected": "Notifications",
-            "predicted": "Send notifications to users (e.g., reminders, milestones)",
+            "predicted": "Send notifications to users",
             "similarity": 0.75
           }
         ],
@@ -216,9 +221,15 @@
       "missing_info_evaluation": {
         "expected_count": 5,
         "predicted_count": 6,
-        "matched_count": 0,
-        "recall": 0.0,
-        "matches": []
+        "matched_count": 1,
+        "recall": 0.2,
+        "matches": [
+          {
+            "expected": "Data storage requirements",
+            "predicted": "Data storage architecture and privacy compliance requirements",
+            "similarity": 0.75
+          }
+        ]
       },
       "security": {
         "sensitive_data_expected": false,
@@ -226,7 +237,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 2392,
+      "latency_ms": 5777,
       "error": null
     },
     {
@@ -244,42 +255,42 @@
       },
       "requirements_evaluation": {
         "expected_count": 9,
-        "predicted_count": 7,
+        "predicted_count": 9,
         "matched_count": 6,
-        "precision": 0.8571,
+        "precision": 0.6667,
         "recall": 0.6667,
         "unsupported_count": 2,
-        "unsupported_rate": 0.2857,
+        "unsupported_rate": 0.2222,
         "matches": [
           {
-            "expected": "SEO optimization",
-            "predicted": "Provide SEO optimization",
-            "similarity": 0.8
-          },
-          {
             "expected": "Revision history",
-            "predicted": "Maintain revision history",
-            "similarity": 0.78
+            "predicted": "Maintain revision history for content changes",
+            "similarity": 0.75
           },
           {
-            "expected": "PostgreSQL database",
-            "predicted": "Use PostgreSQL as the database",
-            "similarity": 0.776
+            "expected": "SEO optimization",
+            "predicted": "Provide SEO optimization features such as meta tags",
+            "similarity": 0.75
           },
           {
             "expected": "Next.js frontend",
-            "predicted": "Use Next.js for the frontend",
+            "predicted": "Implement the frontend using Next.js",
             "similarity": 0.75
           },
           {
             "expected": "Node.js backend",
-            "predicted": "Use Node.js for the backend",
+            "predicted": "Implement the backend using Node.js",
+            "similarity": 0.75
+          },
+          {
+            "expected": "PostgreSQL database",
+            "predicted": "Store data in PostgreSQL database",
             "similarity": 0.75
           },
           {
             "expected": "Multiple author support",
-            "predicted": "Support multiple authors",
-            "similarity": 0.681
+            "predicted": "Allow multiple authors to contribute to posts",
+            "similarity": 0.588
           }
         ],
         "unmatched_expected": [
@@ -302,7 +313,7 @@
         "matches": [
           {
             "expected": "Media storage limits",
-            "predicted": "Media storage requirements (file types, size limits, CDN usage)",
+            "predicted": "Media type restrictions and storage limits",
             "similarity": 0.75
           },
           {
@@ -318,7 +329,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 5077,
+      "latency_ms": 3279,
       "error": null
     },
     {
@@ -327,46 +338,51 @@
       "difficulty": "easy",
       "team_evaluation": {
         "expected": "Web Development",
-        "predicted": "",
-        "confidence": 0.0,
+        "predicted": "Web Development",
+        "confidence": 0.95,
         "supporting_teams": [],
-        "flagged_for_review": true,
-        "matched": false,
-        "notes": "Team mismatch: expected 'Web Development', got ''"
+        "flagged_for_review": false,
+        "matched": true,
+        "notes": "Exact team match: 'Web Development'"
       },
       "requirements_evaluation": {
         "expected_count": 7,
         "predicted_count": 6,
-        "matched_count": 5,
-        "precision": 0.8333,
-        "recall": 0.7143,
+        "matched_count": 6,
+        "precision": 1.0,
+        "recall": 0.8571,
         "unsupported_count": 0,
         "unsupported_rate": 0.0,
         "matches": [
           {
             "expected": "Inventory management",
-            "predicted": "Inventory management",
-            "similarity": 1.0
-          },
-          {
-            "expected": "Order fulfillment tracking",
-            "predicted": "Order fulfillment tracking",
-            "similarity": 1.0
-          },
-          {
-            "expected": "Payment processing (Stripe)",
-            "predicted": "Payment processing using Stripe",
-            "similarity": 0.862
+            "predicted": "Implement inventory management",
+            "similarity": 0.8
           },
           {
             "expected": "Shopping cart",
-            "predicted": "Shopping cart functionality",
+            "predicted": "Provide a shopping cart",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Payment processing (Stripe)",
+            "predicted": "Integrate payment processing with Stripe",
             "similarity": 0.75
           },
           {
             "expected": "Physical product catalog",
-            "predicted": "Sell digital and physical products",
-            "similarity": 0.552
+            "predicted": "Sell physical products",
+            "similarity": 0.696
+          },
+          {
+            "expected": "Order fulfillment tracking",
+            "predicted": "Track order fulfillment",
+            "similarity": 0.694
+          },
+          {
+            "expected": "Digital product delivery",
+            "predicted": "Sell digital products",
+            "similarity": 0.667
           }
         ],
         "unmatched_expected": [
@@ -382,20 +398,9 @@
       "missing_info_evaluation": {
         "expected_count": 5,
         "predicted_count": 6,
-        "matched_count": 2,
-        "recall": 0.4,
-        "matches": [
-          {
-            "expected": "Analytics requirements",
-            "predicted": "Design and UI/UX requirements",
-            "similarity": 0.627
-          },
-          {
-            "expected": "Tax/compliance requirements",
-            "predicted": "Security and compliance requirements (PCI DSS, GDPR, etc.)",
-            "similarity": 0.588
-          }
-        ]
+        "matched_count": 0,
+        "recall": 0.0,
+        "matches": []
       },
       "security": {
         "sensitive_data_expected": false,
@@ -403,7 +408,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 1987,
+      "latency_ms": 4308,
       "error": null
     },
     {
@@ -421,9 +426,9 @@
       },
       "requirements_evaluation": {
         "expected_count": 5,
-        "predicted_count": 4,
+        "predicted_count": 5,
         "matched_count": 1,
-        "precision": 0.25,
+        "precision": 0.2,
         "recall": 0.2,
         "unsupported_count": 0,
         "unsupported_rate": 0.0,
@@ -445,13 +450,18 @@
       "missing_info_evaluation": {
         "expected_count": 5,
         "predicted_count": 6,
-        "matched_count": 1,
-        "recall": 0.2,
+        "matched_count": 2,
+        "recall": 0.4,
         "matches": [
           {
+            "expected": "Ticket categories/taxonomy",
+            "predicted": "What are the specific ticket categories or taxonomy to route to?",
+            "similarity": 0.75
+          },
+          {
             "expected": "Integration with ticketing system",
-            "predicted": "Integration points with existing ticketing or CRM systems",
-            "similarity": 0.733
+            "predicted": "Which ticketing platform(s) must the system integrate with?",
+            "similarity": 0.562
           }
         ]
       },
@@ -461,7 +471,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 2299,
+      "latency_ms": 3569,
       "error": null
     },
     {
@@ -470,30 +480,32 @@
       "difficulty": "medium",
       "team_evaluation": {
         "expected": "AI / ML",
-        "predicted": "",
-        "confidence": 0.0,
-        "supporting_teams": [],
+        "predicted": "AI / ML",
+        "confidence": 0.75,
+        "supporting_teams": [
+          "Web Development"
+        ],
         "flagged_for_review": true,
-        "matched": false,
-        "notes": "Team mismatch: expected 'AI / ML', got ''"
+        "matched": true,
+        "notes": "Exact team match: 'AI / ML'"
       },
       "requirements_evaluation": {
         "expected_count": 5,
-        "predicted_count": 4,
+        "predicted_count": 5,
         "matched_count": 2,
-        "precision": 0.5,
+        "precision": 0.4,
         "recall": 0.4,
         "unsupported_count": 0,
         "unsupported_rate": 0.0,
         "matches": [
           {
             "expected": "Recommendation engine",
-            "predicted": "Develop a recommendation engine for the e\u2011commerce platform",
+            "predicted": "Develop a recommendation engine for the e-commerce platform",
             "similarity": 0.75
           },
           {
             "expected": "Personalized recommendations",
-            "predicted": "Provide personalized recommendations for each user",
+            "predicted": "Deliver personalized recommendations for each user",
             "similarity": 0.75
           }
         ],
@@ -508,9 +520,15 @@
       "missing_info_evaluation": {
         "expected_count": 5,
         "predicted_count": 6,
-        "matched_count": 0,
-        "recall": 0.0,
-        "matches": []
+        "matched_count": 1,
+        "recall": 0.2,
+        "matches": [
+          {
+            "expected": "Real-time vs batch recommendations",
+            "predicted": "Whether recommendations need to be generated in real\u2011time or batch mode",
+            "similarity": 0.6
+          }
+        ]
       },
       "security": {
         "sensitive_data_expected": false,
@@ -518,7 +536,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 1736,
+      "latency_ms": 3544,
       "error": null
     },
     {
@@ -527,18 +545,20 @@
       "difficulty": "medium",
       "team_evaluation": {
         "expected": "Automation / Data",
-        "predicted": "Web Development",
-        "confidence": 0.55,
-        "supporting_teams": [],
+        "predicted": "Automation / Data",
+        "confidence": 0.65,
+        "supporting_teams": [
+          "Web Development"
+        ],
         "flagged_for_review": true,
-        "matched": false,
-        "notes": "Team mismatch: expected 'Automation / Data', got 'Web Development'"
+        "matched": true,
+        "notes": "Exact team match: 'Automation / Data'"
       },
       "requirements_evaluation": {
         "expected_count": 5,
-        "predicted_count": 4,
+        "predicted_count": 5,
         "matched_count": 1,
-        "precision": 0.25,
+        "precision": 0.2,
         "recall": 0.2,
         "unsupported_count": 0,
         "unsupported_rate": 0.0,
@@ -560,15 +580,9 @@
       "missing_info_evaluation": {
         "expected_count": 5,
         "predicted_count": 6,
-        "matched_count": 1,
-        "recall": 0.2,
-        "matches": [
-          {
-            "expected": "Anomaly thresholds",
-            "predicted": "Definition and thresholds for what constitutes an \"anomaly\"",
-            "similarity": 0.75
-          }
-        ]
+        "matched_count": 0,
+        "recall": 0.0,
+        "matches": []
       },
       "security": {
         "sensitive_data_expected": false,
@@ -576,7 +590,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 2987,
+      "latency_ms": 2402,
       "error": null
     },
     {
@@ -585,22 +599,38 @@
       "difficulty": "medium",
       "team_evaluation": {
         "expected": "Automation / Data",
-        "predicted": "",
-        "confidence": 0.0,
+        "predicted": "Automation / Data",
+        "confidence": 1.0,
         "supporting_teams": [],
         "flagged_for_review": true,
-        "matched": false,
-        "notes": "Team mismatch: expected 'Automation / Data', got ''"
+        "matched": true,
+        "notes": "Exact team match: 'Automation / Data'"
       },
       "requirements_evaluation": {
         "expected_count": 9,
-        "predicted_count": 5,
-        "matched_count": 0,
-        "precision": 0.0,
-        "recall": 0.0,
-        "unsupported_count": 0,
-        "unsupported_rate": 0.0,
-        "matches": [],
+        "predicted_count": 9,
+        "matched_count": 3,
+        "precision": 0.3333,
+        "recall": 0.3333,
+        "unsupported_count": 3,
+        "unsupported_rate": 0.3333,
+        "matches": [
+          {
+            "expected": "Invoice number extraction",
+            "predicted": "Extract invoice number from each PDF",
+            "similarity": 0.59
+          },
+          {
+            "expected": "Customer info extraction",
+            "predicted": "Extract customer information from each PDF",
+            "similarity": 0.576
+          },
+          {
+            "expected": "Due date extraction",
+            "predicted": "Validate extracted invoice data",
+            "similarity": 0.56
+          }
+        ],
         "unmatched_expected": [
           "PDF ingestion (100+ daily)",
           "OCR/text extraction",
@@ -616,13 +646,18 @@
       "missing_info_evaluation": {
         "expected_count": 4,
         "predicted_count": 6,
-        "matched_count": 1,
-        "recall": 0.25,
+        "matched_count": 2,
+        "recall": 0.5,
         "matches": [
           {
             "expected": "Validation rules",
-            "predicted": "Specific validation rules for invoice data",
+            "predicted": "Specific validation rules for invoice data (e.g., amount format, due date constraints)",
             "similarity": 0.75
+          },
+          {
+            "expected": "Accounting system API details",
+            "predicted": "Which accounting system to integrate with and required integration method (API, database, file import, etc.)",
+            "similarity": 0.562
           }
         ]
       },
@@ -632,7 +667,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 3281,
+      "latency_ms": 3888,
       "error": null
     },
     {
@@ -642,7 +677,7 @@
       "team_evaluation": {
         "expected": "NEEDS_HUMAN_REVIEW",
         "predicted": "AI / ML",
-        "confidence": 0.65,
+        "confidence": 0.75,
         "supporting_teams": [],
         "flagged_for_review": true,
         "matched": true,
@@ -650,12 +685,12 @@
       },
       "requirements_evaluation": {
         "expected_count": 0,
-        "predicted_count": 1,
+        "predicted_count": 3,
         "matched_count": 0,
         "precision": 0.0,
         "recall": "N/A",
-        "unsupported_count": 0,
-        "unsupported_rate": 0.0,
+        "unsupported_count": 3,
+        "unsupported_rate": 1.0,
         "matches": [],
         "unmatched_expected": []
       },
@@ -667,7 +702,7 @@
         "matches": [
           {
             "expected": "Budget",
-            "predicted": "Budget and timeline constraints",
+            "predicted": "Budget and timeline expectations",
             "similarity": 0.75
           }
         ]
@@ -678,7 +713,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 1433,
+      "latency_ms": 5695,
       "error": null
     },
     {
@@ -687,16 +722,20 @@
       "difficulty": "hard",
       "team_evaluation": {
         "expected": "NEEDS_HUMAN_REVIEW",
-        "predicted": "AI / ML",
-        "confidence": 0.6,
-        "supporting_teams": [],
+        "predicted": "Automation / Data",
+        "confidence": 0.3,
+        "supporting_teams": [
+          "DevOps / Infrastructure",
+          "AI / ML",
+          "Data Engineering"
+        ],
         "flagged_for_review": true,
         "matched": true,
         "notes": "Correctly escalated for human review"
       },
       "requirements_evaluation": {
         "expected_count": 0,
-        "predicted_count": 4,
+        "predicted_count": 3,
         "matched_count": 0,
         "precision": 0.0,
         "recall": "N/A",
@@ -707,14 +746,19 @@
       },
       "missing_info_evaluation": {
         "expected_count": 6,
-        "predicted_count": 6,
-        "matched_count": 1,
-        "recall": 0.16666666666666666,
+        "predicted_count": 5,
+        "matched_count": 2,
+        "recall": 0.3333333333333333,
         "matches": [
           {
-            "expected": "Data availability and format",
-            "predicted": "What type, format, and volume of data is available?",
-            "similarity": 0.562
+            "expected": "Success metrics",
+            "predicted": "Specific performance metrics and success criteria",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Budget and timeline",
+            "predicted": "Budget limits and timeline expectations",
+            "similarity": 0.75
           }
         ]
       },
@@ -724,7 +768,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 3601,
+      "latency_ms": 4318,
       "error": null
     },
     {
@@ -760,18 +804,18 @@
         "recall": 0.5,
         "matches": [
           {
-            "expected": "Current technology stack",
-            "predicted": "Current technology stack and architecture of the website",
+            "expected": "Performance targets",
+            "predicted": "Desired performance improvement targets and acceptable response times",
             "similarity": 0.75
           },
           {
             "expected": "Budget",
-            "predicted": "Budget or resource constraints",
+            "predicted": "Timeline and budget constraints for the project",
             "similarity": 0.75
           },
           {
             "expected": "Data available",
-            "predicted": "Any existing data sources or datasets available for machine learning",
+            "predicted": "Available data sources, formats, and volume for machine learning",
             "similarity": 0.75
           }
         ]
@@ -782,7 +826,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 1497,
+      "latency_ms": 2317,
       "error": null
     },
     {
@@ -792,11 +836,14 @@
       "team_evaluation": {
         "expected": "CROSS_FUNCTIONAL",
         "predicted": "Mobile Development",
-        "confidence": 0.85,
-        "supporting_teams": [],
-        "flagged_for_review": false,
-        "matched": false,
-        "notes": "Expected cross-functional allocation, but single team 'Mobile Development' assigned with no supporting teams"
+        "confidence": 0.75,
+        "supporting_teams": [
+          "AI / ML",
+          "DevOps / Infrastructure"
+        ],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Identified cross-functional scope with primary 'Mobile Development' and supporting: ['AI / ML', 'DevOps / Infrastructure']"
       },
       "requirements_evaluation": {
         "expected_count": 6,
@@ -819,7 +866,7 @@
           },
           {
             "expected": "Cloud infrastructure",
-            "predicted": "Set up cloud infrastructure to support the app",
+            "predicted": "Set up cloud infrastructure for the app",
             "similarity": 0.75
           }
         ],
@@ -834,10 +881,16 @@
       },
       "missing_info_evaluation": {
         "expected_count": 5,
-        "predicted_count": 5,
-        "matched_count": 0,
-        "recall": 0.0,
-        "matches": []
+        "predicted_count": 6,
+        "matched_count": 1,
+        "recall": 0.2,
+        "matches": [
+          {
+            "expected": "Scalability requirements",
+            "predicted": "User authentication and security requirements",
+            "similarity": 0.58
+          }
+        ]
       },
       "security": {
         "sensitive_data_expected": false,
@@ -845,7 +898,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 3018,
+      "latency_ms": 2833,
       "error": null
     },
     {
@@ -854,21 +907,21 @@
       "difficulty": "hard",
       "team_evaluation": {
         "expected": "CROSS_FUNCTIONAL",
-        "predicted": "AI / ML",
-        "confidence": 0.4,
+        "predicted": "Web Development",
+        "confidence": 0.5,
         "supporting_teams": [
-          "Mobile Development",
-          "Web Development"
+          "AI / ML",
+          "Mobile Development"
         ],
         "flagged_for_review": true,
         "matched": true,
-        "notes": "Identified cross-functional scope with primary 'AI / ML' and supporting: ['Mobile Development', 'Web Development']"
+        "notes": "Identified cross-functional scope with primary 'Web Development' and supporting: ['AI / ML', 'Mobile Development']"
       },
       "requirements_evaluation": {
         "expected_count": 5,
-        "predicted_count": 4,
+        "predicted_count": 5,
         "matched_count": 3,
-        "precision": 0.75,
+        "precision": 0.6,
         "recall": 0.6,
         "unsupported_count": 0,
         "unsupported_rate": 0.0,
@@ -880,12 +933,12 @@
           },
           {
             "expected": "Web platform",
-            "predicted": "Develop a web platform that incorporates machine learning for fraud detection",
+            "predicted": "Develop a web platform",
             "similarity": 0.75
           },
           {
             "expected": "Payment processing",
-            "predicted": "Implement payment processing functionality",
+            "predicted": "Provide payment processing functionality",
             "similarity": 0.75
           }
         ],
@@ -900,13 +953,18 @@
       "missing_info_evaluation": {
         "expected_count": 5,
         "predicted_count": 6,
-        "matched_count": 1,
-        "recall": 0.2,
+        "matched_count": 2,
+        "recall": 0.4,
         "matches": [
           {
             "expected": "Timeline and phasing",
-            "predicted": "Timeline and budget constraints",
-            "similarity": 0.627
+            "predicted": "Project timeline and milestones",
+            "similarity": 0.588
+          },
+          {
+            "expected": "Fraud detection ML approach",
+            "predicted": "Desired machine learning approach, data sources, and performance criteria for fraud detection",
+            "similarity": 0.562
           }
         ]
       },
@@ -916,7 +974,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 2966,
+      "latency_ms": 3040,
       "error": null
     },
     {
@@ -929,11 +987,12 @@
         "confidence": 0.55,
         "supporting_teams": [
           "Web Development",
-          "AI / ML"
+          "AI / ML",
+          "Data Engineering"
         ],
         "flagged_for_review": true,
         "matched": true,
-        "notes": "Identified cross-functional scope with primary 'Mobile Development' and supporting: ['Web Development', 'AI / ML']"
+        "notes": "Identified cross-functional scope with primary 'Mobile Development' and supporting: ['Web Development', 'AI / ML', 'Data Engineering']"
       },
       "requirements_evaluation": {
         "expected_count": 7,
@@ -982,10 +1041,16 @@
       },
       "missing_info_evaluation": {
         "expected_count": 5,
-        "predicted_count": 6,
-        "matched_count": 0,
-        "recall": 0.0,
-        "matches": []
+        "predicted_count": 5,
+        "matched_count": 1,
+        "recall": 0.2,
+        "matches": [
+          {
+            "expected": "Security compliance requirements",
+            "predicted": "Security and compliance requirements",
+            "similarity": 0.941
+          }
+        ]
       },
       "security": {
         "sensitive_data_expected": false,
@@ -993,7 +1058,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 4234,
+      "latency_ms": 3442,
       "error": null
     },
     {
@@ -1033,7 +1098,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 2,
+      "latency_ms": 1,
       "error": "1 validation error for RawBrief\nbrief_text\n  String should have at least 10 characters [type=string_too_short, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.4/v/string_too_short"
     },
     {
@@ -1042,9 +1107,67 @@
       "difficulty": "very_hard",
       "team_evaluation": {
         "expected": "NEEDS_HUMAN_REVIEW",
-        "predicted": "",
-        "confidence": 0.0,
+        "predicted": "DevOps / Infrastructure",
+        "confidence": 0.55,
         "supporting_teams": [],
+        "flagged_for_review": true,
+        "matched": true,
+        "notes": "Correctly escalated for human review"
+      },
+      "requirements_evaluation": {
+        "expected_count": 0,
+        "predicted_count": 1,
+        "matched_count": 0,
+        "precision": 0.0,
+        "recall": "N/A",
+        "unsupported_count": 1,
+        "unsupported_rate": 1.0,
+        "matches": [],
+        "unmatched_expected": []
+      },
+      "missing_info_evaluation": {
+        "expected_count": 5,
+        "predicted_count": 5,
+        "matched_count": 3,
+        "recall": 0.6,
+        "matches": [
+          {
+            "expected": "Target platform",
+            "predicted": "Target platform (iOS, Android, web)",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Features",
+            "predicted": "Specific features and user stories",
+            "similarity": 0.75
+          },
+          {
+            "expected": "Budget",
+            "predicted": "Budget and timeline constraints",
+            "similarity": 0.75
+          }
+        ]
+      },
+      "security": {
+        "sensitive_data_expected": false,
+        "sensitive_data_detected": false,
+        "injection_attempt_expected": false,
+        "injection_attempt_detected": false
+      },
+      "latency_ms": 3186,
+      "error": null
+    },
+    {
+      "case_id": "TC-017",
+      "category": "edge_cases",
+      "difficulty": "very_hard",
+      "team_evaluation": {
+        "expected": "NEEDS_HUMAN_REVIEW",
+        "predicted": "Web Development",
+        "confidence": 0.6,
+        "supporting_teams": [
+          "Data Engineering"
+        ],
         "flagged_for_review": true,
         "matched": true,
         "notes": "Correctly escalated for human review"
@@ -1061,70 +1184,19 @@
         "unmatched_expected": []
       },
       "missing_info_evaluation": {
-        "expected_count": 5,
-        "predicted_count": 6,
-        "matched_count": 2,
-        "recall": 0.4,
-        "matches": [
-          {
-            "expected": "Target platform",
-            "predicted": "Target platform(s) (e.g., iOS, Android, web)",
-            "similarity": 0.75
-          },
-          {
-            "expected": "Features",
-            "predicted": "Key features and functionality",
-            "similarity": 0.75
-          }
-        ]
-      },
-      "security": {
-        "sensitive_data_expected": false,
-        "sensitive_data_detected": false,
-        "injection_attempt_expected": false,
-        "injection_attempt_detected": false
-      },
-      "latency_ms": 2319,
-      "error": null
-    },
-    {
-      "case_id": "TC-017",
-      "category": "edge_cases",
-      "difficulty": "very_hard",
-      "team_evaluation": {
-        "expected": "NEEDS_HUMAN_REVIEW",
-        "predicted": "Web Development",
-        "confidence": 0.7,
-        "supporting_teams": [],
-        "flagged_for_review": true,
-        "matched": true,
-        "notes": "Correctly escalated for human review"
-      },
-      "requirements_evaluation": {
-        "expected_count": 0,
-        "predicted_count": 2,
-        "matched_count": 0,
-        "precision": 0.0,
-        "recall": "N/A",
-        "unsupported_count": 1,
-        "unsupported_rate": 0.5,
-        "matches": [],
-        "unmatched_expected": []
-      },
-      "missing_info_evaluation": {
         "expected_count": 1,
-        "predicted_count": 5,
+        "predicted_count": 6,
         "matched_count": 0,
         "recall": 0.0,
         "matches": []
       },
       "security": {
         "sensitive_data_expected": true,
-        "sensitive_data_detected": false,
+        "sensitive_data_detected": true,
         "injection_attempt_expected": true,
-        "injection_attempt_detected": false
+        "injection_attempt_detected": true
       },
-      "latency_ms": 3103,
+      "latency_ms": 4452,
       "error": null
     },
     {
@@ -1134,7 +1206,7 @@
       "team_evaluation": {
         "expected": "NEEDS_HUMAN_REVIEW",
         "predicted": "Mobile Development",
-        "confidence": 0.45,
+        "confidence": 0.65,
         "supporting_teams": [
           "AI / ML"
         ],
@@ -1144,7 +1216,7 @@
       },
       "requirements_evaluation": {
         "expected_count": 0,
-        "predicted_count": 7,
+        "predicted_count": 3,
         "matched_count": 0,
         "precision": 0.0,
         "recall": "N/A",
@@ -1166,7 +1238,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 3961,
+      "latency_ms": 4300,
       "error": null
     },
     {
@@ -1175,10 +1247,10 @@
       "difficulty": "very_hard",
       "team_evaluation": {
         "expected": "NEEDS_HUMAN_REVIEW",
-        "predicted": "DevOps / Infrastructure",
-        "confidence": 0.55,
+        "predicted": "AI / ML",
+        "confidence": 0.8,
         "supporting_teams": [
-          "AI / ML"
+          "DevOps / Infrastructure"
         ],
         "flagged_for_review": true,
         "matched": true,
@@ -1197,16 +1269,10 @@
       },
       "missing_info_evaluation": {
         "expected_count": 5,
-        "predicted_count": 5,
-        "matched_count": 1,
-        "recall": 0.2,
-        "matches": [
-          {
-            "expected": "Success metrics",
-            "predicted": "Performance metrics and success criteria for the AI optimization",
-            "similarity": 0.75
-          }
-        ]
+        "predicted_count": 6,
+        "matched_count": 0,
+        "recall": 0.0,
+        "matches": []
       },
       "security": {
         "sensitive_data_expected": false,
@@ -1214,7 +1280,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 3759,
+      "latency_ms": 3510,
       "error": null
     },
     {
@@ -1254,7 +1320,7 @@
         "injection_attempt_expected": false,
         "injection_attempt_detected": false
       },
-      "latency_ms": 2730,
+      "latency_ms": 3708,
       "error": null
     }
   ]

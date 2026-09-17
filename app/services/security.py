@@ -18,9 +18,7 @@ KNOWN_SECRETS: List[str] = [
 # Regex patterns for sensitive credentials & API keys
 SENSITIVE_PATTERNS: List[re.Pattern] = [
     re.compile(r"\bsk-[a-zA-Z0-9]{10,}\b", re.IGNORECASE),
-    re.compile(r"(?i)(?:password\s*(?:is|:|=)\s*)([^\s,;]+)"),
-    re.compile(r"(?i)(?:api\s*key\s*(?:is|:|=)\s*)([^\s,;]+)"),
-    re.compile(r"(?i)(?:(?:admin|user|secret|token)\s*password\s*(?:is|:|=)\s*)([^\s,;]+)"),
+    re.compile(r"(?i)((?:admin\s+|user\s+|secret\s+|token\s+)?(?:password|api\s*key|secret|token)\s*(?:is|:|=)\s*)([^\s,;]+)"),
 ]
 
 # Regex patterns for SQL and prompt injection attempts
@@ -55,7 +53,7 @@ def scan_and_sanitize_brief(raw_text: str) -> Tuple[str, bool, bool]:
     for pat in SENSITIVE_PATTERNS:
         if pat.search(sanitized):
             sensitive_detected = True
-            if pat.groups > 0:
+            if pat.groups >= 2:
                 sanitized = pat.sub(r"\1[REDACTED]", sanitized)
             else:
                 sanitized = pat.sub("[REDACTED]", sanitized)
