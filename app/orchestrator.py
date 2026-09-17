@@ -27,6 +27,7 @@ from app.providers import (
 from app.services.extraction import ExtractionService
 from app.services.recommendation import recommend_team
 from app.services.checklist import generate_checklist, generate_clarification_checklist
+from app.services.security import scan_and_sanitize_brief
 from app.storage.db import get_db_connection, init_db
 
 logger = logging.getLogger(__name__)
@@ -66,17 +67,25 @@ class IntakeOrchestrator:
         Returns:
             PendingIntake ready for human review.
         """
-        # Coerce raw string to RawBrief if needed
-        if isinstance(brief, str):
-            brief = RawBrief(brief_text=brief, source="web_form")
+        # Extract initial raw text and source
+        raw_input = brief.brief_text if isinstance(brief, RawBrief) else str(brief)
+        source = brief.source if isinstance(brief, RawBrief) else "web_form"
+
+        # IN-MEMORY PRE-INGESTION SECURITY SCAN & SANITIZATION (Policy b - Sanitized-Only)
+        # Redaction occurs in memory before ANY persistence and before any request logging.
+        sanitized_text, sensitive_detected, injection_detected = scan_and_sanitize_brief(raw_input)
+
+        brief = RawBrief(brief_text=sanitized_text, source=source)
 
         logger.info(
-            "Step 1: Request Ingestion - Starting intake processing for brief (source=%s, length=%d)",
+            "Step 1: Request Ingestion - Starting intake processing for brief (source=%s, length=%d, security_flags=[sensitive=%s, injection=%s])",
             brief.source,
             len(brief.brief_text),
+            sensitive_detected,
+            injection_detected,
         )
 
-        # 1. Create and persist raw Request record (status: processing)
+        # 1. Create and persist raw Request record with sanitized text
         request = Request(raw_text=brief.brief_text, source=brief.source)
         self._store_request(request)
         logger.info("Step 1: Request Ingestion - Request persisted with ID %s (status=%s)", request.id, request.status)
@@ -276,6 +285,17 @@ class IntakeOrchestrator:
                     total_tasks=1,
                 )
 
+        # Check security flags and append to review notes if detected
+        if sensitive_detected or injection_detected:
+            requires_manual_review = True
+            sec_notes = []
+            if sensitive_detected:
+                sec_notes.append("Sensitive credentials or secrets were detected and redacted in-memory.")
+            if injection_detected:
+                sec_notes.append("Potential prompt injection pattern was detected in input brief.")
+            sec_note_str = " ".join(sec_notes)
+            review_notes = f"{review_notes} {sec_note_str}".strip() if review_notes else sec_note_str
+
         # 5. Assemble PendingIntake
         logger.info("Step 5: Intake Assembly - Assembling PendingIntake for request %s", request.id)
         pending = PendingIntake(
@@ -288,6 +308,8 @@ class IntakeOrchestrator:
             status="pending_review",
             requires_manual_review=requires_manual_review,
             review_notes=review_notes if requires_manual_review else None,
+            sensitive_data_detected=sensitive_detected,
+            injection_attempt_detected=injection_detected,
         )
 
         # 6. Persist pending intake and update request status

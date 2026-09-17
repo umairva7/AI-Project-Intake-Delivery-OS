@@ -28,6 +28,8 @@ IMPORTANT RULES:
 
 2. Do NOT invent technologies, features, databases, APIs, architectures, budgets, timelines, or other project details that are not stated.
 
+2b. Extract atomic, discrete requirements. If a brief mentions multiple distinct features, outputs, or deliverables in one sentence (for example, "display employee info, project assignments, and work hours"), split each into an individual requirement item rather than combining them into a single compound requirement.
+
 3. If a requirement is a reasonable interpretation of the brief but is not explicitly stated, you may include it with:
    "confirmed": false
 
@@ -62,17 +64,11 @@ IMPORTANT RULES:
 
 10. confidence must be a number between 0.0 and 1.0.
 
-11. Lower confidence when:
+11. Confidence reflects goal and requirement clarity, NOT completeness of business details. Standard actionable briefs should have confidence between 0.80 and 0.95 even if normal operational or business questions remain. Missing details belong in missing_information. Only lower confidence below 0.60 when the project goals are fundamentally unclear, contradictory, or unfeasible.
 
-* the brief is very short
-* requirements are vague
-* important information is missing
-* requirements contradict each other
-* the intended outcome is unclear
+12. If the brief is extremely vague, purely contradictory, placeholder text (e.g. Lorem ipsum), or lacks concrete functional specifications (for example, "Build me an app", "we need help with machine learning", "build something cool"), return an empty requirements array: "requirements": [] and list the needed clarifications in missing_information.
 
-12. If the brief is extremely vague or incoherent, return confidence below 0.5 and identify the important missing information.
-
-13. Do not use confidence to compensate for missing information. A response can be valid JSON while still having low confidence.
+13. Do not use confidence to compensate for missing information. A response can be valid JSON while still having low confidence if the brief itself was vague.
 
 14. Preserve the client's terminology and intent. Do not redesign or improve the requested solution.
 

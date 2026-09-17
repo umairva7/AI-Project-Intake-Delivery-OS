@@ -137,8 +137,8 @@ def test_mixed_ai_and_web_project():
 def test_ambiguous_project_flags_low_confidence():
     """Sparse / vague signals lead to confidence < 0.70 and requires_human_review=True"""
     ext = make_extraction(
-        project_name="Simple Automation",
-        summary="We need some general software to help with our daily workflow.",
+        project_name="Simple Integration",
+        summary="We need some general software to help with our daily tasks.",
         requirements=[
             Requirement(description="Connect with existing third-party API", priority="medium"),
         ],

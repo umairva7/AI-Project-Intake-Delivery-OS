@@ -525,6 +525,12 @@ class PendingIntake(BaseModel):
     review_notes: Optional[str] = Field(
         default=None, description="Why is manual review required?"
     )
+    sensitive_data_detected: bool = Field(
+        default=False, description="Whether raw input contained sensitive data or credentials"
+    )
+    injection_attempt_detected: bool = Field(
+        default=False, description="Whether raw input contained prompt or SQL injection attempts"
+    )
 
     @model_validator(mode="before")
     @classmethod

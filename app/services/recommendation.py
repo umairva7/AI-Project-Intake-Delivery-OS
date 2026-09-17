@@ -136,6 +136,31 @@ def recommend_team(
             requires_human_review=True,
         )
 
+    # 4b. Precedence & Tie-break: Enterprise Data Engineering vs File/Workflow Automation
+    # When enterprise data platform indicators (Snowflake, BigQuery, Databricks, Spark, Kafka, Data Warehouse, Lakehouse)
+    # are present alongside file/workflow automation signals, Data Engineering takes precedence as the primary team
+    # because enterprise data warehouse schema governance, security, and ingestion pipelines form the
+    # foundational architectural dependency. Automation / Data is preserved as a supporting team.
+    enterprise_platform_signals = {
+        "snowflake",
+        "bigquery",
+        "databricks",
+        "spark",
+        "kafka",
+        "data warehouse",
+        "lakehouse",
+        "data lake",
+    }
+    has_enterprise_platform = any(
+        _match_signal(sig, full_corpus) for sig in enterprise_platform_signals
+    )
+    de_score = team_scores.get("Data Engineering", 0)
+    auto_score = team_scores.get("Automation / Data", 0)
+
+    if has_enterprise_platform and de_score >= 3 and auto_score > 0:
+        if de_score <= auto_score:
+            team_scores["Data Engineering"] = auto_score + 1
+
     # 5. Rank teams descending by weighted score
     ranked: List[Tuple[str, int]] = sorted(
         team_scores.items(), key=lambda item: item[1], reverse=True
@@ -148,8 +173,8 @@ def recommend_team(
     supporting_teams: List[str] = []
     if len(ranked) > 1:
         for other_team, other_score in ranked[1:]:
-            # Material relevance: score at least 3 points and at least 40% of primary score
-            if other_score >= 3 and (other_score / primary_score) >= 0.40:
+            # Material relevance: score at least 3 points and at least 20% of primary score
+            if other_score >= 3 and (other_score / primary_score) >= 0.20:
                 supporting_teams.append(other_team)
 
     # 7. Heuristic Confidence Calculation (0.0 to 1.0)
