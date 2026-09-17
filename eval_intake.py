@@ -300,15 +300,18 @@ def evaluate_all(
         total_matched_reqs += matched_req_count
 
         # Case-level requirement precision & recall
-        if len(pred_req_texts) > 0:
-            case_req_prec = matched_req_count / len(pred_req_texts)
+        if len(exp_reqs) == 0 and len(pred_req_texts) == 0:
+            case_req_prec = "N/A"
+            case_req_rec = "N/A"
+        elif len(exp_reqs) == 0:
+            case_req_prec = 0.0
+            case_req_rec = "N/A"
+        elif len(pred_req_texts) == 0:
+            case_req_prec = "N/A"
+            case_req_rec = 0.0
         else:
-            case_req_prec = 1.0 if len(exp_reqs) == 0 else 0.0
-
-        if len(exp_reqs) > 0:
-            case_req_rec = matched_req_count / len(exp_reqs)
-        else:
-            case_req_rec = 1.0
+            case_req_prec = round(matched_req_count / len(pred_req_texts), 4)
+            case_req_rec = round(matched_req_count / len(exp_reqs), 4)
 
         case_unsupported_rate = (unconfirmed_in_case / len(pred_req_texts)) if pred_req_texts else 0.0
 
@@ -320,7 +323,7 @@ def evaluate_all(
         total_expected_missing += len(exp_missing)
         total_matched_missing += matched_missing_count
 
-        case_missing_rec = (matched_missing_count / len(exp_missing)) if exp_missing else 1.0
+        case_missing_rec = (matched_missing_count / len(exp_missing)) if exp_missing else "N/A"
 
         case_record = {
             "case_id": case_id,
@@ -339,8 +342,8 @@ def evaluate_all(
                 "expected_count": len(exp_reqs),
                 "predicted_count": len(pred_req_texts),
                 "matched_count": matched_req_count,
-                "precision": round(case_req_prec, 4),
-                "recall": round(case_req_rec, 4),
+                "precision": case_req_prec,
+                "recall": case_req_rec,
                 "unsupported_count": unconfirmed_in_case,
                 "unsupported_rate": round(case_unsupported_rate, 4),
                 "matches": req_matches,
@@ -350,7 +353,7 @@ def evaluate_all(
                 "expected_count": len(exp_missing),
                 "predicted_count": len(pred_missing),
                 "matched_count": matched_missing_count,
-                "recall": round(case_missing_rec, 4),
+                "recall": case_missing_rec,
                 "matches": missing_matches,
             },
             "security": {
@@ -373,9 +376,13 @@ def evaluate_all(
     unsupported_rate = (total_unsupported_reqs / total_predicted_reqs) if total_predicted_reqs > 0 else 0.0
     missing_info_rec = (total_matched_missing / total_expected_missing) if total_expected_missing > 0 else 0.0
 
-    macro_req_prec = sum(c["requirements_evaluation"]["precision"] for c in case_results) / total_cases
-    macro_req_rec = sum(c["requirements_evaluation"]["recall"] for c in case_results) / total_cases
-    macro_missing_rec = sum(c["missing_info_evaluation"]["recall"] for c in case_results) / total_cases
+    valid_case_precs = [c["requirements_evaluation"]["precision"] for c in case_results if isinstance(c["requirements_evaluation"]["precision"], (int, float))]
+    valid_case_recs = [c["requirements_evaluation"]["recall"] for c in case_results if isinstance(c["requirements_evaluation"]["recall"], (int, float))]
+    valid_missing_recs = [c["missing_info_evaluation"]["recall"] for c in case_results if isinstance(c["missing_info_evaluation"]["recall"], (int, float))]
+
+    macro_req_prec = (sum(valid_case_precs) / len(valid_case_precs)) if valid_case_precs else "N/A"
+    macro_req_rec = (sum(valid_case_recs) / len(valid_case_recs)) if valid_case_recs else "N/A"
+    macro_missing_rec = (sum(valid_missing_recs) / len(valid_missing_recs)) if valid_missing_recs else "N/A"
 
     avg_latency = sum(latencies) / len(latencies) if latencies else 0.0
     sorted_latencies = sorted(latencies)
@@ -395,9 +402,20 @@ def evaluate_all(
         cat_exp_miss = sum(c["missing_info_evaluation"]["expected_count"] for c in cat_cases)
         cat_match_miss = sum(c["missing_info_evaluation"]["matched_count"] for c in cat_cases)
 
-        cat_prec = (cat_match_reqs / cat_pred_reqs) if cat_pred_reqs > 0 else (1.0 if cat_exp_reqs == 0 else 0.0)
-        cat_rec = (cat_match_reqs / cat_exp_reqs) if cat_exp_reqs > 0 else 1.0
-        cat_miss_rec = (cat_match_miss / cat_exp_miss) if cat_exp_miss > 0 else 1.0
+        if cat_pred_reqs == 0 and cat_exp_reqs == 0:
+            cat_prec = "N/A"
+            cat_rec = "N/A"
+        elif cat_exp_reqs == 0:
+            cat_prec = round(cat_match_reqs / cat_pred_reqs, 4) if cat_pred_reqs > 0 else "N/A"
+            cat_rec = "N/A"
+        elif cat_pred_reqs == 0:
+            cat_prec = "N/A"
+            cat_rec = 0.0
+        else:
+            cat_prec = round(cat_match_reqs / cat_pred_reqs, 4)
+            cat_rec = round(cat_match_reqs / cat_exp_reqs, 4)
+
+        cat_miss_rec = round(cat_match_miss / cat_exp_miss, 4) if cat_exp_miss > 0 else "N/A"
         cat_lat = sum(c["latency_ms"] for c in cat_cases) / cat_total
         cat_flagged = sum(1 for c in cat_cases if c["team_evaluation"]["flagged_for_review"])
 
@@ -405,9 +423,9 @@ def evaluate_all(
             "total_cases": cat_total,
             "team_accuracy": round(cat_team_correct / cat_total, 4),
             "team_correct": cat_team_correct,
-            "requirement_precision": round(cat_prec, 4),
-            "requirement_recall": round(cat_rec, 4),
-            "missing_info_recall": round(cat_miss_rec, 4),
+            "requirement_precision": cat_prec,
+            "requirement_recall": cat_rec,
+            "missing_info_recall": cat_miss_rec,
             "flagged_for_review_rate": round(cat_flagged / cat_total, 4),
             "avg_latency_ms": round(cat_lat, 1),
         }
@@ -480,13 +498,21 @@ def print_summary_table(results: Dict[str, Any]):
     print("| Category | Cases | Team Accuracy | Req Precision | Req Recall | Missing Info Recall | Human Review | Avg Latency |")
     print("| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |")
 
+    def fmt_pct(val):
+        if val is None or val == "N/A":
+            return "N/A"
+        try:
+            return f"{float(val) * 100:.1f}%"
+        except (ValueError, TypeError):
+            return str(val)
+
     for cat_name, m in cat_metrics.items():
         print(
             f"| `{cat_name}` | {m['total_cases']} | "
             f"{m['team_accuracy'] * 100:.1f}% ({m['team_correct']}/{m['total_cases']}) | "
-            f"{m['requirement_precision'] * 100:.1f}% | "
-            f"{m['requirement_recall'] * 100:.1f}% | "
-            f"{m['missing_info_recall'] * 100:.1f}% | "
+            f"{fmt_pct(m['requirement_precision'])} | "
+            f"{fmt_pct(m['requirement_recall'])} | "
+            f"{fmt_pct(m['missing_info_recall'])} | "
             f"{m['flagged_for_review_rate'] * 100:.1f}% | "
             f"{m['avg_latency_ms']} ms |"
         )
