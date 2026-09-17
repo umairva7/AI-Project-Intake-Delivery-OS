@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "dataset_file": "evaluation_data.json",
+    "dataset_file": "evaluation/dataset.json",
     "predictions_file": "eval_predictions.json",
     "total_cases": 20,
     "fuzzy_threshold": 0.55

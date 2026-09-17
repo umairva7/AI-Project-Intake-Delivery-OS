@@ -1,0 +1,933 @@
+{
+  "TC-001": {
+    "requirements": [
+      {
+        "text": "React frontend for the employee dashboard",
+        "confidence": 0.92,
+        "confirmed": true,
+        "source_evidence": "We need a React frontend with a Python API for an internal employee dashboard."
+      },
+      {
+        "text": "Python API for the employee dashboard",
+        "confidence": 0.92,
+        "confirmed": true,
+        "source_evidence": "We need a React frontend with a Python API for an internal employee dashboard."
+      },
+      {
+        "text": "Display employee information on the dashboard",
+        "confidence": 0.92,
+        "confirmed": true,
+        "source_evidence": "The dashboard should display employee information, project assignments, and work hours."
+      },
+      {
+        "text": "Display project assignments on the dashboard",
+        "confidence": 0.92,
+        "confirmed": true,
+        "source_evidence": "The dashboard should display employee information, project assignments, and work hours."
+      },
+      {
+        "text": "Display work hours on the dashboard",
+        "confidence": 0.92,
+        "confirmed": true,
+        "source_evidence": "The dashboard should display employee information, project assignments, and work hours."
+      },
+      {
+        "text": "Connect to the existing PostgreSQL database",
+        "confidence": 0.92,
+        "confirmed": true,
+        "source_evidence": "We have an existing PostgreSQL database we can connect to."
+      }
+    ],
+    "recommended_team": "Web Development",
+    "team_confidence": 0.95,
+    "flagged_for_review": false,
+    "missing_information": [
+      "Authentication and authorization requirements for dashboard access",
+      "Hosting environment or platform for the React frontend and Python API",
+      "Details on required data fields and any data transformation",
+      "Testing and quality assurance expectations",
+      "Deployment and maintenance responsibilities",
+      "Any integration with other internal systems"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 3264,
+    "error": null
+  },
+  "TC-002": {
+    "requirements": [
+      {
+        "text": "Native iOS application",
+        "confidence": 0.92,
+        "confirmed": true,
+        "source_evidence": "We want native apps, not cross-platform."
+      },
+      {
+        "text": "Native Android application",
+        "confidence": 0.92,
+        "confirmed": true,
+        "source_evidence": "We want native apps, not cross-platform."
+      },
+      {
+        "text": "Workout logging feature",
+        "confidence": 0.92,
+        "confirmed": true,
+        "source_evidence": "workout logging"
+      },
+      {
+        "text": "Progress charts feature",
+        "confidence": 0.92,
+        "confirmed": true,
+        "source_evidence": "progress charts"
+      },
+      {
+        "text": "Social sharing feature",
+        "confidence": 0.92,
+        "confirmed": true,
+        "source_evidence": "social sharing"
+      },
+      {
+        "text": "Notifications feature",
+        "confidence": 0.92,
+        "confirmed": true,
+        "source_evidence": "notifications"
+      },
+      {
+        "text": "Ability to track personal fitness goals",
+        "confidence": 0.92,
+        "confirmed": true,
+        "source_evidence": "to track personal fitness goals"
+      }
+    ],
+    "recommended_team": "Mobile Development",
+    "team_confidence": 0.9,
+    "flagged_for_review": false,
+    "missing_information": [
+      "Details on user authentication and account management",
+      "Data storage approach and backend services",
+      "Integration with device sensors or health APIs",
+      "Design guidelines and branding requirements",
+      "Supported languages and localization needs"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 3337,
+    "error": null
+  },
+  "TC-003": {
+    "requirements": [
+      {
+        "text": "Manage blog posts (create, edit, delete)",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "managing blog posts"
+      },
+      {
+        "text": "Manage media assets",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "media"
+      },
+      {
+        "text": "Manage user roles",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "user roles"
+      },
+      {
+        "text": "Support multiple authors",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "multiple authors"
+      },
+      {
+        "text": "Provide revision history for content",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "revision history"
+      },
+      {
+        "text": "Include SEO optimization features",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "SEO optimization"
+      },
+      {
+        "text": "Implement frontend using Next.js",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "Technology: Next.js frontend"
+      },
+      {
+        "text": "Implement backend using Node.js",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "Node.js backend"
+      },
+      {
+        "text": "Use PostgreSQL for data storage",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "PostgreSQL"
+      }
+    ],
+    "recommended_team": "Web Development",
+    "team_confidence": 0.85,
+    "flagged_for_review": false,
+    "missing_information": [
+      "Authentication and authorization mechanisms for users",
+      "Specific SEO features required (e.g., meta tags, sitemap generation)",
+      "Media type support and storage limits",
+      "Detailed user role definitions and permissions",
+      "Hosting environment and deployment strategy",
+      "Budget constraints, if any"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 2216,
+    "error": null
+  },
+  "TC-004": {
+    "requirements": [
+      {
+        "text": "Support selling digital products",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "selling digital and physical products"
+      },
+      {
+        "text": "Support selling physical products",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "selling digital and physical products"
+      },
+      {
+        "text": "Implement a shopping cart",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "Shopping cart"
+      },
+      {
+        "text": "Integrate Stripe for payment processing",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "payment processing (Stripe)"
+      },
+      {
+        "text": "Provide inventory management functionality",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "inventory management"
+      },
+      {
+        "text": "Track order fulfillment",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "order fulfillment tracking"
+      }
+    ],
+    "recommended_team": "Web Development",
+    "team_confidence": 0.95,
+    "flagged_for_review": false,
+    "missing_information": [
+      "Exact launch date for the holiday season",
+      "Preferred hosting environment or platform",
+      "Design and UI/UX specifications",
+      "Method for delivering digital products (download, streaming, etc.)",
+      "Details of order fulfillment processes and carrier integrations",
+      "Compliance and security requirements (e.g., PCI DSS)"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 4068,
+    "error": null
+  },
+  "TC-005": {
+    "requirements": [
+      {
+        "text": "Classify customer support tickets using historical labeled data",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "classifies customer support tickets using historical labeled data"
+      },
+      {
+        "text": "Automatically route tickets by category",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "automatically routes them by category"
+      },
+      {
+        "text": "Escalate high\u2011priority tickets to human agents",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "High-priority tickets should escalate to human agents"
+      },
+      {
+        "text": "Handle an expected volume of 500 tickets per day",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "Expected volume: 500 tickets/day"
+      },
+      {
+        "text": "Utilize 2 years of historical ticket data for model training",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "We have 2 years of historical ticket data"
+      }
+    ],
+    "recommended_team": "AI / ML",
+    "team_confidence": 0.8,
+    "flagged_for_review": false,
+    "missing_information": [
+      "Specific categories or taxonomy for ticket classification",
+      "Criteria for determining high\u2011priority tickets",
+      "Target accuracy or performance metrics for the classification model",
+      "Integration details with existing ticketing system and human agent interface",
+      "Deployment environment preferences (cloud, on\u2011premise, etc.)",
+      "Project timeline and budget constraints"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 3648,
+    "error": null
+  },
+  "TC-006": {
+    "requirements": [
+      {
+        "text": "Develop a recommendation engine for the e\u2011commerce platform",
+        "confidence": 0.86,
+        "confirmed": true,
+        "source_evidence": "Build a recommendation engine for our e-commerce platform"
+      },
+      {
+        "text": "Generate product recommendations using users' browsing history",
+        "confidence": 0.86,
+        "confirmed": true,
+        "source_evidence": "Recommend products based on browsing history"
+      },
+      {
+        "text": "Generate product recommendations using users' purchase patterns",
+        "confidence": 0.86,
+        "confirmed": false,
+        "source_evidence": ""
+      },
+      {
+        "text": "Deliver personalized recommendations for each user",
+        "confidence": 0.86,
+        "confirmed": true,
+        "source_evidence": "We want personalized recommendations for each user"
+      },
+      {
+        "text": "Utilize 1 million historical transactions as training data for the recommendation engine",
+        "confidence": 0.86,
+        "confirmed": true,
+        "source_evidence": "We have 1 million historical transactions"
+      }
+    ],
+    "recommended_team": "AI / ML",
+    "team_confidence": 0.75,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Preferred recommendation algorithm or technique (e.g., collaborative filtering, content\u2011based, hybrid)",
+      "Performance targets such as accuracy, latency, or throughput",
+      "Integration points and required APIs with the existing e\u2011commerce platform",
+      "Deployment environment preferences (cloud provider, on\u2011premises, containers)",
+      "Timeline and budget constraints for development and deployment",
+      "Whether recommendations need to be generated in real\u2011time or batch mode"
+    ],
+    "supporting_teams": [
+      "Web Development"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 3464,
+    "error": null
+  },
+  "TC-007": {
+    "requirements": [
+      {
+        "text": "Collect sales data each morning from the three branch locations (CSV exports)",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "Every morning collect sales data from our three branch locations (CSV exports)"
+      },
+      {
+        "text": "Clean the collected sales data",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "clean it"
+      },
+      {
+        "text": "Send a summary dashboard to the operations team",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "send a summary dashboard to the operations team"
+      },
+      {
+        "text": "Flag any anomalies such as unusually high or low sales",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "flag any anomalies like unusually high or low sales"
+      }
+    ],
+    "recommended_team": "Automation / Data",
+    "team_confidence": 0.65,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Preferred format and visual style of the summary dashboard",
+      "Delivery method for the dashboard (e.g., email, web portal, Slack)",
+      "Specific criteria or thresholds for what constitutes an \"unusually high or low\" sales anomaly",
+      "How the cleaned data should be stored or retained, if at all",
+      "Authentication or security requirements for accessing the dashboard or data",
+      "Any existing infrastructure or platforms to integrate with (e.g., scheduling system, data storage)"
+    ],
+    "supporting_teams": [
+      "Web Development"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 2605,
+    "error": null
+  },
+  "TC-008": {
+    "requirements": [
+      {
+        "text": "Automate the processing of incoming invoice PDFs",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "Automate our invoice processing."
+      },
+      {
+        "text": "Handle at least 100 PDFs per day from customers",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "We receive 100+ PDFs per day from customers with various formats."
+      },
+      {
+        "text": "Support various PDF formats for invoices",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "We receive 100+ PDFs per day from customers with various formats."
+      },
+      {
+        "text": "Extract the invoice number from each PDF",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "Extract invoice number, amount, due date, and customer info."
+      },
+      {
+        "text": "Extract the invoice amount from each PDF",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "Extract invoice number, amount, due date, and customer info."
+      },
+      {
+        "text": "Extract the due date from each PDF",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "Extract invoice number, amount, due date, and customer info."
+      },
+      {
+        "text": "Extract the customer information from each PDF",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "Extract invoice number, amount, due date, and customer info."
+      },
+      {
+        "text": "Validate the extracted invoice data",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "Validate and categorize."
+      },
+      {
+        "text": "Categorize each invoice according to business rules",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "Validate and categorize."
+      },
+      {
+        "text": "Feed the processed invoice data into the accounting system",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "Feed into our accounting system."
+      }
+    ],
+    "recommended_team": "Automation / Data",
+    "team_confidence": 1.0,
+    "flagged_for_review": false,
+    "missing_information": [
+      "Which specific accounting system should the data be fed into?",
+      "What validation rules should be applied to the extracted data?",
+      "How should invoices be categorized (e.g., by vendor, expense type, etc.)?",
+      "Are there any performance or latency requirements beyond processing 100+ PDFs per day?",
+      "What format or API is required for delivering data to the accounting system?",
+      "Are there security, compliance, or data retention requirements for the invoice data?"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 4573,
+    "error": null
+  },
+  "TC-009": {
+    "requirements": [
+      {
+        "text": "Deploy an AI-powered chatbot to handle common customer inquiries",
+        "confidence": 0.46,
+        "confirmed": true,
+        "source_evidence": ""
+      }
+    ],
+    "recommended_team": "AI / ML",
+    "team_confidence": 0.6,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Specific customer service workflows to target",
+      "Preferred AI functionalities (e.g., sentiment analysis, routing)",
+      "Existing systems for integration (CRM, ticketing)",
+      "Budget and timeline constraints",
+      "Compliance and data privacy requirements"
+    ],
+    "supporting_teams": [
+      "Data Engineering"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 4171,
+    "error": null
+  },
+  "TC-010": {
+    "requirements": [
+      {
+        "text": "Create predictive models to optimize operational processes",
+        "confidence": 0.45,
+        "confirmed": true,
+        "source_evidence": ""
+      },
+      {
+        "text": "Integrate AI outputs with current data pipelines",
+        "confidence": 0.45,
+        "confirmed": true,
+        "source_evidence": ""
+      }
+    ],
+    "recommended_team": "DevOps / Infrastructure",
+    "team_confidence": 0.3,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Exact operational processes to improve",
+      "Types, formats, and volume of available data",
+      "Desired performance metrics and cost-saving targets",
+      "Budget and timeline constraints",
+      "Preferred deployment environment (cloud/on-prem)"
+    ],
+    "supporting_teams": [
+      "AI / ML"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 3933,
+    "error": null
+  },
+  "TC-011": {
+    "requirements": [
+      {
+        "text": "Develop and integrate ML models to predict and mitigate latency issues",
+        "confidence": 0.6,
+        "confirmed": true,
+        "source_evidence": ""
+      }
+    ],
+    "recommended_team": "AI / ML",
+    "team_confidence": 0.45,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Exact performance metrics and thresholds",
+      "Current website architecture and tech stack",
+      "Available data for training ML models",
+      "Budget and timeline constraints",
+      "Expected user volume and peak concurrent traffic"
+    ],
+    "supporting_teams": [
+      "Web Development"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 3548,
+    "error": null
+  },
+  "TC-012": {
+    "requirements": [
+      {
+        "text": "Develop iOS version of the mobile app",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "Build a mobile app (iOS and Android)"
+      },
+      {
+        "text": "Develop Android version of the mobile app",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "Build a mobile app (iOS and Android)"
+      },
+      {
+        "text": "Implement an AI recommendation engine",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "with an AI recommendation engine"
+      },
+      {
+        "text": "Implement real-time messaging functionality",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "real-time messaging"
+      },
+      {
+        "text": "Set up cloud infrastructure for the app",
+        "confidence": 0.88,
+        "confirmed": true,
+        "source_evidence": "cloud infrastructure setup"
+      }
+    ],
+    "recommended_team": "Mobile Development",
+    "team_confidence": 0.75,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Specific use cases and data sources for the AI recommendation engine",
+      "Details of messaging features (e.g., one\u2011to\u2011one, group chat, media support)",
+      "Preferred cloud provider or services to be used",
+      "User authentication and account management requirements",
+      "Exact MVP scope beyond the listed core features"
+    ],
+    "supporting_teams": [
+      "AI / ML",
+      "DevOps / Infrastructure"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 4007,
+    "error": null
+  },
+  "TC-013": {
+    "requirements": [
+      {
+        "text": "Develop a web platform",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "We need a web platform with machine learning for fraud detection, payment processing, and a mobile companion app."
+      },
+      {
+        "text": "Implement machine learning for fraud detection within the web platform",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "We need a web platform with machine learning for fraud detection, payment processing, and a mobile companion app."
+      },
+      {
+        "text": "Provide payment processing functionality",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "We need a web platform with machine learning for fraud detection, payment processing, and a mobile companion app."
+      },
+      {
+        "text": "Create a mobile companion app",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "We need a web platform with machine learning for fraud detection, payment processing, and a mobile companion app."
+      },
+      {
+        "text": "Integrate the solution with existing backend systems",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "Also integrate with our existing backend systems."
+      }
+    ],
+    "recommended_team": "Mobile Development",
+    "team_confidence": 0.55,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Specific payment processing provider or gateway to be used",
+      "Details of the existing backend systems and required integration points",
+      "Desired platforms for the mobile companion app (iOS, Android, or both)",
+      "Data sources and volume for training the fraud detection machine learning model",
+      "Performance, security, and compliance requirements",
+      "Timeline and budget constraints"
+    ],
+    "supporting_teams": [
+      "Web Development",
+      "AI / ML"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 3923,
+    "error": null
+  },
+  "TC-014": {
+    "requirements": [
+      {
+        "text": "Web application supporting 5,000+ concurrent users",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "web app for 5000+ concurrent users"
+      },
+      {
+        "text": "Machine learning\u2011powered analytics",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "machine learning-powered analytics"
+      },
+      {
+        "text": "Real\u2011time dashboard",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "real-time dashboard"
+      },
+      {
+        "text": "Mobile application",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "mobile app"
+      },
+      {
+        "text": "Integration with SAP or Oracle",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "integration with SAP/Oracle"
+      },
+      {
+        "text": "High availability",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": "High availability required"
+      }
+    ],
+    "recommended_team": "Mobile Development",
+    "team_confidence": 0.55,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Which mobile platforms (iOS, Android, both) are required?",
+      "Desired technology stack or programming languages for web and mobile components?",
+      "Specific performance SLAs for high availability (e.g., 99.9% uptime) and response times?",
+      "Details on data storage, security, authentication, and compliance requirements?",
+      "Scope of integration with SAP/Oracle (data domains, read/write, APIs)?"
+    ],
+    "supporting_teams": [
+      "Web Development",
+      "AI / ML",
+      "Data Engineering"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 3223,
+    "error": null
+  },
+  "TC-015": {
+    "requirements": [],
+    "recommended_team": "",
+    "team_confidence": 0.0,
+    "flagged_for_review": true,
+    "missing_information": [],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 1,
+    "error": "1 validation error for RawBrief\nbrief_text\n  String should have at least 10 characters [type=string_too_short, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.4/v/string_too_short"
+  },
+  "TC-016": {
+    "requirements": [
+      {
+        "text": "Define core functionality and user stories",
+        "confidence": 0.12,
+        "confirmed": false,
+        "source_evidence": ""
+      }
+    ],
+    "recommended_team": "Mobile Development",
+    "team_confidence": 0.7,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Target platform (iOS, Android, web)",
+      "Specific user requirements",
+      "Feature list",
+      "Design specifications",
+      "Timeline",
+      "Budget"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 3509,
+    "error": null
+  },
+  "TC-017": {
+    "requirements": [
+      {
+        "text": "Design and develop a responsive website",
+        "confidence": 0.68,
+        "confirmed": true,
+        "source_evidence": ""
+      },
+      {
+        "text": "Implement secure storage for admin password and API key",
+        "confidence": 0.68,
+        "confirmed": true,
+        "source_evidence": ""
+      },
+      {
+        "text": "Set up basic content management functionality",
+        "confidence": 0.68,
+        "confirmed": true,
+        "source_evidence": ""
+      }
+    ],
+    "recommended_team": "Web Development",
+    "team_confidence": 0.65,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Target audience and user personas",
+      "Specific design style or branding guidelines",
+      "Detailed feature list and pages required",
+      "Preferred technology stack",
+      "Hosting environment and domain details",
+      "Project timeline and budget"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": true,
+    "injection_attempt_detected": true,
+    "latency_ms": 4229,
+    "error": null
+  },
+  "TC-018": {
+    "requirements": [
+      {
+        "text": "Develop a mobile-friendly web application",
+        "confidence": 0.62,
+        "confirmed": true,
+        "source_evidence": ""
+      },
+      {
+        "text": "Integrate AI functionality",
+        "confidence": 0.62,
+        "confirmed": true,
+        "source_evidence": ""
+      },
+      {
+        "text": "Implement blockchain components",
+        "confidence": 0.62,
+        "confirmed": true,
+        "source_evidence": ""
+      },
+      {
+        "text": "Connect with Facebook API",
+        "confidence": 0.62,
+        "confirmed": true,
+        "source_evidence": ""
+      },
+      {
+        "text": "Deliver within an ASAP timeline",
+        "confidence": 0.62,
+        "confirmed": true,
+        "source_evidence": ""
+      },
+      {
+        "text": "Maintain a low budget",
+        "confidence": 0.62,
+        "confirmed": true,
+        "source_evidence": ""
+      }
+    ],
+    "recommended_team": "Web Development",
+    "team_confidence": 0.45,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Exact budget amount",
+      "Specific AI features required",
+      "Preferred blockchain platform",
+      "Detailed functional specifications",
+      "Target user devices and OS versions",
+      "Project deadline date"
+    ],
+    "supporting_teams": [
+      "Mobile Development",
+      "AI / ML"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 5026,
+    "error": null
+  },
+  "TC-019": {
+    "requirements": [
+      {
+        "text": "Use AI to optimize quantum computing implementations across blockchain-based IoT networks",
+        "confidence": 0.82,
+        "confirmed": true,
+        "source_evidence": "We need a system that uses AI to optimize quantum computing implementations across blockchain-based IoT networks to leverage synergistic paradigms."
+      },
+      {
+        "text": "Build the system using cutting\u2011edge neural networks",
+        "confidence": 0.82,
+        "confirmed": true,
+        "source_evidence": "It should be built using cutting-edge neural networks"
+      },
+      {
+        "text": "Deploy the system on edge devices using 5G infrastructure",
+        "confidence": 0.82,
+        "confirmed": true,
+        "source_evidence": "deployed on edge devices using 5G infrastructure"
+      },
+      {
+        "text": "Utilize the existing dataset provided by the client",
+        "confidence": 0.82,
+        "confirmed": true,
+        "source_evidence": "We already have a dataset."
+      }
+    ],
+    "recommended_team": "AI / ML",
+    "team_confidence": 0.55,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Specific quantum computing tasks or algorithms that need optimization",
+      "Detailed architecture and protocols of the blockchain\u2011based IoT network",
+      "Performance metrics and success criteria for the AI optimization",
+      "Hardware specifications and resource limits of the target edge devices",
+      "Expected user volume and peak concurrent traffic"
+    ],
+    "supporting_teams": [
+      "DevOps / Infrastructure"
+    ],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 3936,
+    "error": null
+  },
+  "TC-020": {
+    "requirements": [
+      {
+        "text": "Develop a comprehensive project plan covering all phases",
+        "confidence": 0.85,
+        "confirmed": true,
+        "source_evidence": ""
+      }
+    ],
+    "recommended_team": "",
+    "team_confidence": 0.0,
+    "flagged_for_review": true,
+    "missing_information": [
+      "Target audience",
+      "Budget",
+      "Timeline",
+      "Expected user volume and peak concurrent traffic",
+      "Authentication system and role-based access control requirements"
+    ],
+    "supporting_teams": [],
+    "sensitive_data_detected": false,
+    "injection_attempt_detected": false,
+    "latency_ms": 3758,
+    "error": null
+  }
+}

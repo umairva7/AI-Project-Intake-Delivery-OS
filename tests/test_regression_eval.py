@@ -18,13 +18,21 @@ def setup_test_db():
 
 
 def load_eval_case(case_id: str):
-    cases_path = Path(__file__).resolve().parent.parent / "test_cases" / "evaluation_data.json"
-    with open(cases_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    for c in data["evaluation_set"]["cases"]:
-        if c["case_id"] == case_id:
-            return c
-    raise ValueError(f"Case {case_id} not found in evaluation_data.json")
+    root = Path(__file__).resolve().parent.parent
+    candidates = [
+        root / "evaluation" / "dataset.json",
+        root / "test_cases" / "evaluation_data.json",
+        root / "evaluation_data.json",
+    ]
+    for path in candidates:
+        if path.exists():
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            cases = data.get("evaluation_set", {}).get("cases", data.get("cases", []))
+            for c in cases:
+                if c["case_id"] == case_id:
+                    return c
+    raise ValueError(f"Case {case_id} not found in evaluation dataset")
 
 
 def test_regression_tc004_web_development():

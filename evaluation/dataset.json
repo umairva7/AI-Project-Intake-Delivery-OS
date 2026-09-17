@@ -1,0 +1,447 @@
+{
+  "evaluation_set": {
+    "metadata": {
+      "total_cases": 20,
+      "created": "2026-09-14",
+      "categories": {
+        "clear_requests": 4,
+        "ai_ml_requests": 2,
+        "automation_requests": 2,
+        "ambiguous_requests": 3,
+        "multi_team_requests": 3,
+        "edge_cases": 6
+      }
+    },
+    "cases": [
+      {
+        "case_id": "TC-001",
+        "category": "clear_requests",
+        "difficulty": "easy",
+        "input": "We need a React frontend with a Python API for an internal employee dashboard. The dashboard should display employee information, project assignments, and work hours. We have an existing PostgreSQL database we can connect to. Timeline: 6 weeks. Budget: $50,000.",
+        "expected_team": "Web Development",
+        "expected_requirements": [
+          "React frontend",
+          "Python API",
+          "Employee information display",
+          "Project assignments display",
+          "Work hours tracking",
+          "PostgreSQL database integration"
+        ],
+        "expected_missing_information": [
+          "Number of expected users",
+          "Performance requirements (response time)",
+          "Authentication/authorization details",
+          "Hosting/deployment environment"
+        ],
+        "expected_confidence": "high",
+        "notes": "Straightforward web development project with clear scope, timeline, and budget."
+      },
+      {
+        "case_id": "TC-002",
+        "category": "clear_requests",
+        "difficulty": "easy",
+        "input": "Mobile app for iOS and Android to track personal fitness goals. Features: workout logging, progress charts, social sharing, notifications. We want native apps, not cross-platform. 8 weeks, $75,000.",
+        "expected_team": "Mobile Development",
+        "expected_requirements": [
+          "iOS native app",
+          "Android native app",
+          "Workout logging",
+          "Progress charts",
+          "Social sharing",
+          "Notifications"
+        ],
+        "expected_missing_information": [
+          "Backend infrastructure requirements",
+          "Data storage requirements",
+          "Third-party integrations needed",
+          "Push notification service",
+          "Analytics requirements"
+        ],
+        "expected_confidence": "high",
+        "notes": "Clear mobile project with native platform specification."
+      },
+      {
+        "case_id": "TC-003",
+        "category": "clear_requests",
+        "difficulty": "easy",
+        "input": "Build a content management system (CMS) for managing blog posts, media, and user roles. Must support multiple authors, revision history, and SEO optimization. Technology: Next.js frontend, Node.js backend, PostgreSQL. 4 weeks.",
+        "expected_team": "Web Development",
+        "expected_requirements": [
+          "CMS for blog posts",
+          "Media management",
+          "User roles management",
+          "Multiple author support",
+          "Revision history",
+          "SEO optimization",
+          "Next.js frontend",
+          "Node.js backend",
+          "PostgreSQL database"
+        ],
+        "expected_missing_information": [
+          "Expected number of blog posts per month",
+          "Media storage limits",
+          "Performance targets",
+          "Deployment environment"
+        ],
+        "expected_confidence": "high",
+        "notes": "Clear tech stack specified. Well-defined scope."
+      },
+      {
+        "case_id": "TC-004",
+        "category": "clear_requests",
+        "difficulty": "easy",
+        "input": "E-commerce platform for selling digital and physical products. Shopping cart, payment processing (Stripe), inventory management, order fulfillment tracking. 3 months, need it live for holiday season.",
+        "expected_team": "Web Development",
+        "expected_requirements": [
+          "E-commerce platform",
+          "Digital product delivery",
+          "Physical product catalog",
+          "Shopping cart",
+          "Payment processing (Stripe)",
+          "Inventory management",
+          "Order fulfillment tracking"
+        ],
+        "expected_missing_information": [
+          "Expected traffic/concurrent users",
+          "Product catalog size",
+          "Shipping partner integrations",
+          "Tax/compliance requirements",
+          "Analytics requirements"
+        ],
+        "expected_confidence": "high",
+        "notes": "Clear timeline pressure. High business urgency."
+      },
+      {
+        "case_id": "TC-005",
+        "category": "ai_ml_requests",
+        "difficulty": "medium",
+        "input": "We need a system that classifies customer support tickets using historical labeled data and automatically routes them by category. High-priority tickets should escalate to human agents. We have 2 years of historical ticket data. Expected volume: 500 tickets/day.",
+        "expected_team": "AI / ML",
+        "expected_requirements": [
+          "Ticket classification",
+          "Auto-routing based on category",
+          "Priority escalation",
+          "Human agent handoff",
+          "Historical data ingestion (2 years of tickets)"
+        ],
+        "expected_missing_information": [
+          "Ticket categories/taxonomy",
+          "Training data format",
+          "Acceptable accuracy threshold",
+          "Escalation criteria",
+          "Integration with ticketing system"
+        ],
+        "expected_confidence": "high",
+        "notes": "Clear ML use case with existing training data."
+      },
+      {
+        "case_id": "TC-006",
+        "category": "ai_ml_requests",
+        "difficulty": "medium",
+        "input": "Build a recommendation engine for our e-commerce platform. Recommend products based on browsing history and purchase patterns. We want personalized recommendations for each user. We have 1 million historical transactions.",
+        "expected_team": "AI / ML",
+        "expected_requirements": [
+          "Recommendation engine",
+          "Browsing history analysis",
+          "Purchase pattern analysis",
+          "Personalized recommendations",
+          "Historical transaction ingestion (1M transactions)"
+        ],
+        "expected_missing_information": [
+          "Real-time vs batch recommendations",
+          "Recommendation freshness requirements",
+          "A/B testing setup",
+          "Performance targets (latency)",
+          "Cold-start user handling"
+        ],
+        "expected_confidence": "high",
+        "notes": "Standard recommendation problem with data available."
+      },
+      {
+        "case_id": "TC-007",
+        "category": "automation_requests",
+        "difficulty": "medium",
+        "input": "Every morning collect sales data from our three branch locations (CSV exports), clean it, and send a summary dashboard to the operations team. Also flag any anomalies like unusually high or low sales. We need this running by next Monday.",
+        "expected_team": "Automation / Data",
+        "expected_requirements": [
+          "Daily data collection from 3 branch CSVs",
+          "Data cleaning/transformation",
+          "Summary dashboard generation",
+          "Anomaly detection",
+          "Email delivery to operations team"
+        ],
+        "expected_missing_information": [
+          "Data format/schema",
+          "Delivery time preference",
+          "Anomaly thresholds",
+          "Dashboard tool preference",
+          "Error handling/retry policy"
+        ],
+        "expected_confidence": "high",
+        "notes": "Clear automation workflow. Short timeline."
+      },
+      {
+        "case_id": "TC-008",
+        "category": "automation_requests",
+        "difficulty": "medium",
+        "input": "Automate our invoice processing. We receive 100+ PDFs per day from customers with various formats. Extract invoice number, amount, due date, and customer info. Validate and categorize. Feed into our accounting system.",
+        "expected_team": "Automation / Data",
+        "expected_requirements": [
+          "PDF ingestion (100+ daily)",
+          "OCR/text extraction",
+          "Invoice number extraction",
+          "Amount extraction",
+          "Due date extraction",
+          "Customer info extraction",
+          "Validation",
+          "Accounting system integration",
+          "Multi-format handling"
+        ],
+        "expected_missing_information": [
+          "Invoice format variations",
+          "Validation rules",
+          "Error handling process",
+          "Accounting system API details"
+        ],
+        "expected_confidence": "high",
+        "notes": "High-volume document automation with variable formats."
+      },
+      {
+        "case_id": "TC-009",
+        "category": "ambiguous_requests",
+        "difficulty": "hard",
+        "input": "We need something to improve our customer service using AI.",
+        "expected_team": "NEEDS_HUMAN_REVIEW",
+        "expected_requirements": [],
+        "expected_missing_information": [
+          "Specific problem being solved",
+          "Current customer service workflow",
+          "Target improvement metrics",
+          "Budget",
+          "Timeline",
+          "Technology preferences"
+        ],
+        "expected_confidence": "low",
+        "notes": "Dangerously vague. System should escalate for clarification. Do not invent requirements."
+      },
+      {
+        "case_id": "TC-010",
+        "category": "ambiguous_requests",
+        "difficulty": "hard",
+        "input": "Build an AI system for our operations. It should make things faster and save money. We have some data.",
+        "expected_team": "NEEDS_HUMAN_REVIEW",
+        "expected_requirements": [],
+        "expected_missing_information": [
+          "Specific operational bottleneck",
+          "Current process details",
+          "Data availability and format",
+          "Success metrics",
+          "Budget and timeline",
+          "Stakeholders involved"
+        ],
+        "expected_confidence": "very_low",
+        "notes": "Completely ambiguous. Multiple possible interpretations. Human review required before proceeding."
+      },
+      {
+        "case_id": "TC-011",
+        "category": "ambiguous_requests",
+        "difficulty": "hard",
+        "input": "We need help with machine learning. Our website is getting slow.",
+        "expected_team": "NEEDS_HUMAN_REVIEW",
+        "expected_requirements": [],
+        "expected_missing_information": [
+          "Root cause of slowness (ML not obvious)",
+          "Current technology stack",
+          "Performance targets",
+          "Budget",
+          "Actual use case for ML",
+          "Data available"
+        ],
+        "expected_confidence": "very_low",
+        "notes": "Vague and potentially misdiagnosed problem. Website slowness may not be ML problem. Clarification required."
+      },
+      {
+        "case_id": "TC-012",
+        "category": "multi_team_requests",
+        "difficulty": "hard",
+        "input": "Build a mobile app (iOS and Android) with an AI recommendation engine, real-time messaging, and cloud infrastructure setup. We want to launch MVP in 8 weeks but we're flexible. Budget is $200,000.",
+        "expected_team": "CROSS_FUNCTIONAL",
+        "expected_requirements": [
+          "iOS native app",
+          "Android native app",
+          "AI recommendation engine",
+          "Real-time messaging",
+          "Cloud infrastructure",
+          "MVP features"
+        ],
+        "expected_missing_information": [
+          "Feature priority ranking",
+          "User base size",
+          "Scalability requirements",
+          "Recommendation algorithm preferences",
+          "Messaging protocol preferences"
+        ],
+        "expected_confidence": "medium",
+        "supporting_teams": [
+          "Mobile Development",
+          "AI / ML",
+          "DevOps / Infrastructure"
+        ],
+        "notes": "Multi-team project. Requires coordination. Recommend cross-functional approach or phase by priority."
+      },
+      {
+        "case_id": "TC-013",
+        "category": "multi_team_requests",
+        "difficulty": "hard",
+        "input": "We need a web platform with machine learning for fraud detection, payment processing, and a mobile companion app. Also integrate with our existing backend systems.",
+        "expected_team": "CROSS_FUNCTIONAL",
+        "expected_requirements": [
+          "Web platform",
+          "Fraud detection (ML)",
+          "Payment processing",
+          "Mobile companion app",
+          "Legacy system integration"
+        ],
+        "expected_missing_information": [
+          "Current system architecture",
+          "Integration points with legacy systems",
+          "Fraud detection ML approach",
+          "Payment processor preference",
+          "Timeline and phasing"
+        ],
+        "expected_confidence": "medium",
+        "supporting_teams": [
+          "Web Development",
+          "AI / ML",
+          "Mobile Development",
+          "Backend / Infrastructure"
+        ],
+        "notes": "Complex multi-team project. Legacy integration adds complexity. Recommend phased approach."
+      },
+      {
+        "case_id": "TC-014",
+        "category": "multi_team_requests",
+        "difficulty": "hard",
+        "input": "Enterprise platform: web app for 5000+ concurrent users, machine learning-powered analytics, real-time dashboard, mobile app, and integration with SAP/Oracle. High availability required. 6 months, $500K budget.",
+        "expected_team": "CROSS_FUNCTIONAL",
+        "expected_requirements": [
+          "Enterprise web application",
+          "High availability (5000+ concurrent)",
+          "ML-powered analytics",
+          "Real-time dashboard",
+          "Mobile app",
+          "SAP/Oracle integration",
+          "Enterprise security requirements"
+        ],
+        "expected_missing_information": [
+          "SLA requirements",
+          "Disaster recovery plan",
+          "Security compliance requirements",
+          "Existing infrastructure",
+          "Team structure and skill gaps"
+        ],
+        "expected_confidence": "medium",
+        "supporting_teams": [
+          "Backend / Infrastructure",
+          "AI / ML",
+          "Frontend / Web",
+          "Mobile Development",
+          "DevOps / Site Reliability"
+        ],
+        "notes": "Enterprise-scale project. Multiple teams required. Recommend establishing governance structure."
+      },
+      {
+        "case_id": "TC-015",
+        "category": "edge_cases",
+        "difficulty": "very_hard",
+        "input": "",
+        "expected_team": "NEEDS_HUMAN_REVIEW",
+        "expected_requirements": [],
+        "expected_missing_information": [
+          "No input provided"
+        ],
+        "expected_confidence": "none",
+        "notes": "Empty input. Should not crash. Display user-friendly message requesting project details."
+      },
+      {
+        "case_id": "TC-016",
+        "category": "edge_cases",
+        "difficulty": "very_hard",
+        "input": "Build me an app",
+        "expected_team": "NEEDS_HUMAN_REVIEW",
+        "expected_requirements": [],
+        "expected_missing_information": [
+          "App type/purpose",
+          "Target platform",
+          "Features",
+          "Budget",
+          "Timeline"
+        ],
+        "expected_confidence": "very_low",
+        "notes": "Minimal input. Insufficient information. Should escalate and request details."
+      },
+      {
+        "case_id": "TC-017",
+        "category": "edge_cases",
+        "difficulty": "very_hard",
+        "input": "'; DROP TABLE projects; -- We need a website. Also our admin password is P@ssw0rd123 and the API key is sk-123456789abcdef. Build something cool.",
+        "expected_team": "NEEDS_HUMAN_REVIEW",
+        "expected_requirements": [],
+        "expected_missing_information": [
+          "Actual project requirements"
+        ],
+        "expected_confidence": "very_low",
+        "sensitive_data_detected": true,
+        "injection_attempt_detected": true,
+        "notes": "Prompt injection + sensitive data (password and API key). System should: 1) Reject/escape the injection, 2) Flag sensitive data, 3) Request re-submission without sensitive info, 4) Do NOT extract or log the secrets."
+      },
+      {
+        "case_id": "TC-018",
+        "category": "edge_cases",
+        "difficulty": "very_hard",
+        "input": "We need a web app. Actually, we need an AI system. Wait, we need mobile. We need blockchain. Actually just integrate with Facebook. No wait, build it on blockchain. Also we need AI. Timeline: ASAP. Budget: cheap.",
+        "expected_team": "NEEDS_HUMAN_REVIEW",
+        "expected_requirements": [],
+        "expected_missing_information": [
+          "Actual project goals",
+          "Priority among contradictory requirements",
+          "Technical direction",
+          "Realistic budget and timeline"
+        ],
+        "expected_confidence": "very_low",
+        "notes": "Highly contradictory and scattered requirements. Unclear priorities. Should escalate for stakeholder alignment meeting."
+      },
+      {
+        "case_id": "TC-019",
+        "category": "edge_cases",
+        "difficulty": "very_hard",
+        "input": "We need a system that uses AI to optimize quantum computing implementations across blockchain-based IoT networks to leverage synergistic paradigms. It should be built using cutting-edge neural networks and deployed on edge devices using 5G infrastructure. Budget: flexible. Timeline: Q4 2026. We already have a dataset.",
+        "expected_team": "NEEDS_HUMAN_REVIEW",
+        "expected_requirements": [],
+        "expected_missing_information": [
+          "Business problem being solved",
+          "Actual use case beyond buzzwords",
+          "Dataset details",
+          "Real constraints and requirements",
+          "Success metrics"
+        ],
+        "expected_confidence": "very_low",
+        "hallucination_risk": "very_high",
+        "notes": "Buzzword-heavy, incoherent request. High risk of system inventing requirements. Do not extract specific tech stack as confirmed. Require business problem clarification first."
+      },
+      {
+        "case_id": "TC-020",
+        "category": "edge_cases",
+        "difficulty": "very_hard",
+        "input": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        "expected_team": "NEEDS_HUMAN_REVIEW",
+        "expected_requirements": [],
+        "expected_missing_information": [
+          "Actual project content (input is Lorem Ipsum placeholder text)"
+        ],
+        "expected_confidence": "none",
+        "notes": "Placeholder/test text, not an actual project brief. System should detect that this is not real content and escalate with a message requesting actual project description."
+      }
+    ]
+  }
+}
