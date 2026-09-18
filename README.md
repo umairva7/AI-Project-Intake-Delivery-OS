@@ -415,7 +415,7 @@ AI Project Intake/
 * **Advisory Team Recommendation**: The deterministic team recommendation is strictly advisory based on keyword signals. Complex edge cases with contradictory goals require human coordinator routing.
 * **Network & Provider Dependency**: Cloud inference via Groq requires outbound internet access and has a mean latency of ~3.5 seconds ($p95 = 5.0\text{s}$). Offline execution via Ollama requires local GPU/CPU compute.
 
----
+---https://ai-project-intake-delivery-os.vercel.app/
 
 ## 14. Documentation Links
 
